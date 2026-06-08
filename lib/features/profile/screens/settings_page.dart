@@ -1,5 +1,4 @@
 // lib/features/profile/screens/settings_page.dart
-// ⭐ WORKING VERSION with simple notification fix
 
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';

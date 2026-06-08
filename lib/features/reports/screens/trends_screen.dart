@@ -3,7 +3,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/chat_api.dart';
 
 class TrendsScreen extends StatefulWidget {
   final String userId;
@@ -18,7 +18,7 @@ class TrendsScreen extends StatefulWidget {
 }
 
 class _TrendsScreenState extends State<TrendsScreen> {
-  final ApiService _apiService = ApiService();
+  final ChatApi _apiService = ChatApi();
   List<Map<String, dynamic>> _summaries = [];
   String _selectedMetric = 'calories';
   bool _isLoading = true;

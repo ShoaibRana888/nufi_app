@@ -1,12 +1,12 @@
 // lib/data/repositories/supplement_repository.dart
 import 'package:flutter/foundation.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/supplement_api.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
 
 class SupplementRepository {
   static final Random _random = Random();
-  static final ApiService _apiService = ApiService();
+  static final SupplementApi _apiService = SupplementApi();
 
   static String _generateId() {
     return DateTime.now().millisecondsSinceEpoch.toString() + 

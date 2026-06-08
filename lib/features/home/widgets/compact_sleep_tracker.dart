@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/sleep_logging_page.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/sleep_api.dart';
 import 'package:intl/intl.dart';
 
 class CompactSleepTracker extends StatefulWidget {
@@ -20,7 +20,7 @@ class CompactSleepTracker extends StatefulWidget {
 
 class _CompactSleepTrackerState extends State<CompactSleepTracker> 
     with SingleTickerProviderStateMixin {
-  final ApiService _apiService = ApiService();
+  final SleepApi _apiService = SleepApi();
   double _lastNightHours = 0;
   String _sleepQuality = '';
   bool _isLoading = true;
@@ -196,9 +196,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
                 value: progress * _progressAnimation.value,
                 strokeWidth: 8,
                 backgroundColor: Colors.white.withOpacity(0.2),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  progress >= 1.0 ? Colors.greenAccent : Colors.white,
-                ),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
             // Center content
@@ -318,7 +316,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.greenAccent.withOpacity(0.3),
+                                color: Colors.white.withOpacity(0.3),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Row(
@@ -326,14 +324,14 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
                                 children: [
                                   Icon(
                                     Icons.check_circle,
-                                    color: Colors.greenAccent,
+                                    color: Colors.white,
                                     size: 14,
                                   ),
                                   SizedBox(width: 4),
                                   Text(
                                     'Goal Met',
                                     style: TextStyle(
-                                      color: Colors.greenAccent,
+                                      color: Colors.white,
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -473,9 +471,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
                             child: LinearProgressIndicator(
                               value: progress,
                               backgroundColor: Colors.white.withOpacity(0.2),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                goalMet ? Colors.greenAccent : Colors.white,
-                              ),
+                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                               minHeight: 8,
                             ),
                           ),

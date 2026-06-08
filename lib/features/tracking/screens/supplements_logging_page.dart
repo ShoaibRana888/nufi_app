@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/services/data_manager.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:user_onboarding/data/repositories/supplement_repository.dart';
 import 'package:user_onboarding/features/tracking/screens/supplement_history_page.dart';
@@ -25,7 +24,6 @@ class SupplementLoggingPage extends StatefulWidget {
 
 class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
   final DataManager _dataManager = DataManager();
-  final ApiService _apiService = ApiService();
   final Random _random = Random();
   
   List<Map<String, dynamic>> _userSupplements = [];
@@ -1059,7 +1057,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
 
   Widget _buildTodaysSummary(int taken, int total) {
     final progress = total > 0 ? taken / total : 0.0;
-    final dateStr = DateFormat('EEEE, MMM d').format(DateTime.now());
+    final dateStr = DateFormat('EEEE, MMM d').format(_selectedDate);
     
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1332,7 +1330,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
         supplementName: supplementName,
         taken: newStatus,
         dosage: supplement['dosage'],
-        timeTaken: newStatus ? DateFormat('HH:mm').format(DateTime.now()) : null,
+        timeTaken: newStatus ? DateTime.now().toIso8601String() : null,
       );
       
       // Save to local storage

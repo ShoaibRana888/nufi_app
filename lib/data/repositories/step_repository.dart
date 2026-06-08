@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/models/step_entry.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/step_api.dart';
 import 'package:intl/intl.dart';
 
 class StepRepository {
@@ -15,7 +15,7 @@ class StepRepository {
     
     try {
       // Try API first
-      final apiEntry = await ApiService().getStepsByDate(userId, dateStr);
+      final apiEntry = await StepApi().getStepsByDate(userId, dateStr);
       if (apiEntry != null) {
         await _saveToLocal(apiEntry);
         return apiEntry;
@@ -46,7 +46,7 @@ class StepRepository {
     DateTime endDate,
   ) async {
     try {
-      final apiEntries = await ApiService().getStepsInRange(userId, startDate, endDate);
+      final apiEntries = await StepApi().getStepsInRange(userId, startDate, endDate);
       if (apiEntries.isNotEmpty) {
         for (final entry in apiEntries) {
           await _saveToLocal(entry);
@@ -77,7 +77,7 @@ class StepRepository {
 
   static Future<void> saveStepEntry(StepEntry entry) async {
     try {
-      await ApiService().saveStepEntry(entry);
+      await StepApi().saveStepEntry(entry);
     } catch (e) {
       print('Error saving step entry to API: $e');
     }
@@ -93,7 +93,7 @@ class StepRepository {
 
   static Future<List<StepEntry>> getAllStepEntries(String userId) async {
     try {
-      final apiEntries = await ApiService().getAllSteps(userId);
+      final apiEntries = await StepApi().getAllSteps(userId);
       if (apiEntries.isNotEmpty) {
         // Save to local storage
         for (final entry in apiEntries) {
@@ -133,7 +133,7 @@ class StepRepository {
 
   static Future<void> deleteStepEntry(String userId, DateTime date) async {
     try {
-      await ApiService().deleteStepEntry(userId, date);
+      await StepApi().deleteStepEntry(userId, date);
     } catch (e) {
       print('Error deleting step entry from API: $e');
     }

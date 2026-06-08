@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
 import 'package:user_onboarding/features/tracking/screens/supplements_logging_page.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -23,7 +22,6 @@ class CompactSupplementsTracker extends StatefulWidget {
 }
 
 class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
-  final ApiService _apiService = ApiService();
   List<Map<String, dynamic>> _supplements = [];
   Map<String, bool> _todaysTaken = {};
   bool _isLoading = true;
@@ -186,9 +184,7 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: allTaken
-                            ? Colors.green.withOpacity(0.3)
-                            : Colors.white.withOpacity(0.2),
+                        color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -233,9 +229,7 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
                     LinearProgressIndicator(
                       value: progress,
                       backgroundColor: Colors.white.withOpacity(0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        allTaken ? Colors.green : Colors.white,
-                      ),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                       minHeight: 6,
                     ),
                   ],
@@ -258,7 +252,7 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
                         ),
                         decoration: BoxDecoration(
                           color: taken
-                              ? Colors.green.withOpacity(0.3)
+                              ? Colors.white.withOpacity(0.3)
                               : Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),

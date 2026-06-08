@@ -2,7 +2,7 @@
 import 'package:uuid/uuid.dart';
 import 'package:user_onboarding/data/models/weight_entry.dart';
 import 'package:user_onboarding/data/services/database_service.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/weight_api.dart';
 
 class WeightRepository {
   static final Uuid _uuid = Uuid();
@@ -10,7 +10,7 @@ class WeightRepository {
   static Future<String> saveWeightEntry(WeightEntry weightEntry) async {
     try {
       // Use API service instead of database
-      final apiService = ApiService();
+      final apiService = WeightApi();
       return await apiService.saveWeightEntry(weightEntry);
     } catch (e) {
       print('[WeightRepository] Failed to save weight entry: $e');
@@ -21,7 +21,7 @@ class WeightRepository {
   static Future<List<WeightEntry>> getWeightHistory(String userId, {int limit = 50}) async {
     try {
       // Use API service instead of database
-      final apiService = ApiService();
+      final apiService = WeightApi();
       return await apiService.getWeightHistory(userId, limit: limit);
     } catch (e) {
       print('[WeightRepository] Failed to get weight history: $e');
@@ -32,7 +32,7 @@ class WeightRepository {
   static Future<WeightEntry?> getLatestWeight(String userId) async {
     try {
       // Use API service instead of database
-      final apiService = ApiService();
+      final apiService = WeightApi();
       return await apiService.getLatestWeight(userId);
     } catch (e) {
       print('[WeightRepository] Failed to get latest weight: $e');

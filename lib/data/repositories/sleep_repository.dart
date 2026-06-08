@@ -1,5 +1,5 @@
 import 'package:user_onboarding/data/models/sleep_entry.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/sleep_api.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 
 class SleepRepository {
   final _uuid = const Uuid();
-  final ApiService _apiService = ApiService();
+  final SleepApi _apiService = SleepApi();
   static const String _sleepEntriesKey = 'sleep_entries';
 
   // Create sleep entry using API

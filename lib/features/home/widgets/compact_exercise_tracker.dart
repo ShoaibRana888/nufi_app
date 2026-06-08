@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/exercise_logging_page.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/exercise_api.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 
@@ -20,7 +20,7 @@ class CompactExerciseTracker extends StatefulWidget {
 }
 
 class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
-  final ApiService _apiService = ApiService();
+  final ExerciseApi _apiService = ExerciseApi();
   int _todayMinutes = 0;
   int _todayExercises = 0;
   int _weeklyExercises = 0;

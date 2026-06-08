@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_history_page.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_logging_page.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/meal_api.dart';
+import 'package:user_onboarding/data/services/api/exercise_api.dart';
 import 'package:intl/intl.dart';
 
 class DailyGoalsCard extends StatefulWidget {
@@ -39,7 +40,9 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
   };
   
   bool _isLoadingProgress = false;
-  final ApiService _apiService = ApiService();
+  double _caloriesBurned = 0;
+  final MealApi _apiService = MealApi();
+  final ExerciseApi _exerciseApi = ExerciseApi();
   
   @override
   void initState() {
@@ -56,6 +59,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
       _loadUserData();
       _calculateDailyGoals();
       _loadTodayProgress();
+      _loadExerciseData();
     }
   }
   
@@ -232,6 +236,32 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
         return Colors.green;
       default:
         return Colors.purple;
+    }
+  }
+
+  Future<void> _loadExerciseData() async {
+    if (widget.userProfile.id == null) return;
+    
+    try {
+      final dateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final exercises = await _exerciseApi.getExerciseLogs(
+        widget.userProfile.id!,
+        startDate: dateStr,
+        endDate: dateStr,
+      );
+      
+      double totalBurned = 0;
+      for (var ex in exercises) {
+        totalBurned += (ex['calories_burned'] ?? 0).toDouble();
+      }
+      
+      if (mounted) {
+        setState(() {
+          _caloriesBurned = totalBurned;
+        });
+      }
+    } catch (e) {
+      print('Error loading exercise data: $e');
     }
   }
   
@@ -681,4 +711,5 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
     
     return '${proteinPct}P/${carbsPct}C/${fatPct}F';
   }
+
 }

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/chat_api.dart';
 import 'package:user_onboarding/features/reports/screens/weekly_summary_screen.dart';
 
 class WeeklyStatsCard extends StatefulWidget {
@@ -20,7 +20,7 @@ class WeeklyStatsCard extends StatefulWidget {
 }
 
 class _WeeklyStatsCardState extends State<WeeklyStatsCard> {
-  final ApiService _apiService = ApiService();
+  final ChatApi _apiService = ChatApi();
   Map<String, dynamic>? _weeklyData;
   bool _isLoading = true;
   

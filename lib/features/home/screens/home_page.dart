@@ -8,7 +8,7 @@ import 'package:user_onboarding/features/chat/screens/chat_page.dart';
 import 'package:user_onboarding/features/profile/screens/profile_page.dart';
 import 'package:user_onboarding/providers/user_provider.dart';
 import 'package:user_onboarding/utils/profile_update_notifier.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/chat_api.dart';
 import 'package:user_onboarding/features/notifications/widgets/notification_badge.dart';
 import 'package:user_onboarding/data/services/notification_service.dart';
 
@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> _ensureDailyContext() async {
     try {
       // This ensures context is fresh for the day
-      await ApiService().checkAndResetDailyContext(widget.userProfile.id!);
+      await ChatApi().checkAndResetDailyContext(widget.userProfile.id!);
     } catch (e) {
       print('[HomePage] Daily context check failed: $e');
     }

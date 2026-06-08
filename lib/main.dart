@@ -37,7 +37,7 @@ Future<void> main() async {
     // Initialize timezone
     print('🌍 Initializing timezones...');
     tz.initializeTimeZones();
-    
+
     // Initialize Firebase with options
     print('🔥 Initializing Firebase...');
     await Firebase.initializeApp(

@@ -1,9 +1,9 @@
 // lib/data/services/chat_service.dart
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/chat_api.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 
 class ChatService {
-  static final ApiService _apiService = ApiService();
+  static final ChatApi _apiService = ChatApi();
   static Map<String, dynamic>? _cachedContext;
   static DateTime? _lastContextFetch;
 

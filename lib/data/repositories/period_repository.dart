@@ -1,19 +1,24 @@
 // lib/data/repositories/period_repository.dart
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:user_onboarding/data/models/period_entry.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/period_api.dart';
 import 'package:user_onboarding/data/services/database_service.dart';
 
 class PeriodRepository {
-  static final ApiService _apiService = ApiService();
+  static final PeriodApi _apiService = PeriodApi();
 
   static Future<String> savePeriodEntry(PeriodEntry entry) async {
+    final id = entry.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+
+    // Primary path: API (source of truth for logging).
     try {
-      if (kIsWeb) {
-        return await _apiService.savePeriodEntry(entry);
-      } else {
-        if (DatabaseService.isInitialized) {
-          final id = entry.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+      return await _apiService.savePeriodEntry(entry);
+    } catch (apiError) {
+      print('⚠️ API period save failed, attempting offline DB fallback: $apiError');
+
+      // Offline fallback: direct DB.
+      if (!kIsWeb && DatabaseService.isInitialized) {
+        try {
           await DatabaseService.insertPeriod(r'''
             INSERT INTO period_tracking (id, user_id, start_date, end_date, flow_intensity, symptoms, mood, notes)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -34,57 +39,61 @@ class PeriodRepository {
             entry.notes,
           ]);
           return id;
-        } else {
-          return await _apiService.savePeriodEntry(entry);
+        } catch (dbError) {
+          print('❌ Offline DB fallback also failed: $dbError');
         }
       }
-    } catch (e) {
-      print('Error saving period entry: $e');
+
+      // Both paths failed — surface the error so the UI can react.
       rethrow;
     }
   }
 
   static Future<bool> deletePeriodEntry(String periodId) async {
+    // Primary path: API.
     try {
-      if (kIsWeb) {
-        return await _apiService.deletePeriodEntry(periodId);
-      } else {
-        if (DatabaseService.isInitialized) {
+      return await _apiService.deletePeriodEntry(periodId);
+    } catch (apiError) {
+      print('⚠️ API period delete failed, attempting offline DB fallback: $apiError');
+
+      // Offline fallback: direct DB.
+      if (!kIsWeb && DatabaseService.isInitialized) {
+        try {
           await DatabaseService.execute(
             'DELETE FROM period_tracking WHERE id = @id',
             {'id': periodId}
           );
           return true;
-        } else {
-          return await _apiService.deletePeriodEntry(periodId);
+        } catch (dbError) {
+          print('❌ Offline DB fallback also failed: $dbError');
         }
       }
-    } catch (e) {
-      print('Error deleting period entry: $e');
       return false;
     }
   }
 
   static Future<List<PeriodEntry>> getPeriodHistory(String userId, {int limit = 12}) async {
+    // Primary path: API.
     try {
-      if (kIsWeb) {
-        return await _apiService.getPeriodHistory(userId, limit: limit);
-      } else {
-        if (DatabaseService.isInitialized) {
+      return await _apiService.getPeriodHistory(userId, limit: limit);
+    } catch (apiError) {
+      print('⚠️ API period history failed, attempting offline DB fallback: $apiError');
+
+      // Offline fallback: direct DB.
+      if (!kIsWeb && DatabaseService.isInitialized) {
+        try {
           final results = await DatabaseService.queryPeriods(r'''
-            SELECT * FROM period_tracking 
-            WHERE user_id = $1 
-            ORDER BY start_date DESC 
+            SELECT * FROM period_tracking
+            WHERE user_id = $1
+            ORDER BY start_date DESC
             LIMIT $2
           ''', [userId, limit]);
-          
+
           return results.map((row) => PeriodEntry.fromMap(row)).toList();
-        } else {
-          return await _apiService.getPeriodHistory(userId, limit: limit);
+        } catch (dbError) {
+          print('Error fetching period history from DB: $dbError');
         }
       }
-    } catch (e) {
-      print('Error fetching period history: $e');
       return [];
     }
   }

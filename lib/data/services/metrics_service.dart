@@ -1,13 +1,15 @@
 // lib/data/services/metrics_service.dart
 import 'package:user_onboarding/data/repositories/water_repository.dart';
 import 'package:user_onboarding/data/repositories/step_repository.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/meal_api.dart';
+import 'package:user_onboarding/data/services/api/exercise_api.dart';
 import 'package:user_onboarding/data/models/water_entry.dart';
 import 'package:user_onboarding/data/models/step_entry.dart';
 import 'package:intl/intl.dart';
 
 class MetricsService {
-  final ApiService _apiService = ApiService();
+  final MealApi _apiService = MealApi();
+  final ExerciseApi _exerciseApi = ExerciseApi();
   
   Future<Map<String, dynamic>> getTodayMetrics(String userId) async {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -36,7 +38,7 @@ class MetricsService {
       }
       
       // Get exercise data using EXISTING API method
-      final exercises = await _apiService.getExerciseHistory(userId, date: today);
+      final exercises = await _exerciseApi.getExerciseHistory(userId, date: today);
       for (var exercise in exercises) {
         metrics['activeMinutes'] += (exercise['duration_minutes'] ?? 0) as int;
         metrics['caloriesBurned'] += (exercise['calories_burned'] ?? 0) as int;

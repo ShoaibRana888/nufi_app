@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/repositories/step_repository.dart';
@@ -17,7 +16,10 @@ import 'package:user_onboarding/features/tracking/screens/steps_logging_page.dar
 import 'package:user_onboarding/features/tracking/screens/weight_logging_page.dart';
 import 'package:user_onboarding/features/tracking/screens/supplements_logging_page.dart';
 import 'package:user_onboarding/features/tracking/screens/activity_logging_menu.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/meal_api.dart';
+import 'package:user_onboarding/data/services/api/water_api.dart';
+import 'package:user_onboarding/data/services/api/supplement_api.dart';
+import 'package:user_onboarding/data/services/api/exercise_api.dart';
 
 
 class TodayReportScreen extends StatefulWidget {
@@ -116,49 +118,28 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
 
   Future<TrackingStatus> _getMealStatus(SharedPreferences prefs, String date) async {
     try {
-      final apiService = ApiService();
+      final apiService = MealApi();
       final userId = widget.userProfile.id ?? '';
-      
+
       final dailySummary = await apiService.getDailySummary(
         userId,
         date: date,
       );
-      
-      if (dailySummary != null && dailySummary['success'] == true) {
-        final mealsData = dailySummary['meals'] as Map<String, dynamic>? ?? {};
-        final mealCount = mealsData['count'] ?? 0;
-        final calories = mealsData['calories'] ?? 0;
-        
-        // Get user's meal goal from profile
-        final mealGoal = widget.userProfile.dailyMealsCount ?? 3;
-        
-        return TrackingStatus(
-          category: 'Meals',
-          icon: Icons.restaurant,
-          color: Colors.green,
-          completed: mealCount,
-          total: mealGoal,  // Use user's meal goal
-          details: {
-            'Calories': calories.toInt(),
-            'Status': mealCount >= mealGoal ? 'Complete' : 'In Progress',
-          },
-          unit: 'meals',
-          isComplete: mealCount >= mealGoal,
-          excludeFromProgress: false,
-        );
-      }
-      
-      // Fallback to cached data
-      final mealCount = prefs.getInt('meal_count_$date') ?? 0;
-      final calories = prefs.getDouble('meal_calories_$date') ?? 0;
+
+      // getDailySummary returns: { 'totals': { 'calories': .. }, 'meals_count': N }
+      final mealCount = (dailySummary['meals_count'] as num?)?.toInt() ?? 0;
+      final totals = dailySummary['totals'] as Map<String, dynamic>? ?? {};
+      final calories = (totals['calories'] as num?)?.toDouble() ?? 0.0;
+
+      // Get user's meal goal from profile
       final mealGoal = widget.userProfile.dailyMealsCount ?? 3;
-      
+
       return TrackingStatus(
         category: 'Meals',
         icon: Icons.restaurant,
         color: Colors.green,
         completed: mealCount,
-        total: mealGoal,
+        total: mealGoal,  // Use user's meal goal
         details: {
           'Calories': calories.toInt(),
           'Status': mealCount >= mealGoal ? 'Complete' : 'In Progress',
@@ -167,7 +148,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
         isComplete: mealCount >= mealGoal,
         excludeFromProgress: false,
       );
-      
+
     } catch (e) {
       print('Error getting meal status: $e');
       return _getEmptyMealStatus();
@@ -176,10 +157,10 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   
   Future<TrackingStatus> _getWaterStatus(SharedPreferences prefs, String date) async {
     try {
-      final apiService = ApiService();
+      final waterApi = WaterApi();
       final userId = widget.userProfile.id ?? '';
-      
-      final waterData = await apiService.getTodaysWater(userId);
+
+      final waterData = await waterApi.getTodaysWater(userId);
       
       final glasses = (waterData['glasses'] as num? ?? 0).toInt();
       final totalMl = (waterData['total_ml'] as num? ?? 0.0).toDouble();
@@ -286,19 +267,35 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   
   Future<TrackingStatus> _getExerciseStatus(SharedPreferences prefs, String date) async {
     try {
-      final exerciseKey = 'exercise_logs_${widget.userProfile.id}_$date';
-      final exerciseData = prefs.getString(exerciseKey);
-      
+      // Exercise logs live on the backend (same source as the dashboard tracker),
+      // not in SharedPreferences. Fetch today's logs from the API.
+      final exercises = await ExerciseApi().getExerciseLogs(
+        widget.userProfile.id ?? '',
+        startDate: date,
+        endDate: date,
+      );
+
       // Get user's workout goal from profile
       final goalMinutes = widget.userProfile.workoutDuration ?? 30;
-      
-      if (exerciseData != null) {
-        final exercises = jsonDecode(exerciseData) as List;
-        final totalMinutes = exercises.fold<int>(
-          0,
-          (sum, exercise) => sum + ((exercise['duration'] as int?) ?? 0)
-        );
-        
+
+      // Only count exercises actually dated today.
+      final todays = exercises.where((ex) {
+        final exDate = (ex['exercise_date'] ?? ex['created_at'])?.toString();
+        return exDate != null && exDate.startsWith(date);
+      }).toList();
+
+      if (todays.isNotEmpty) {
+        int totalMinutes = 0;
+        for (final ex in todays) {
+          if (ex['duration_minutes'] != null) {
+            totalMinutes += (ex['duration_minutes'] as num?)?.toInt() ?? 0;
+          } else {
+            // Strength sets: estimate ~2 minutes per set (matches dashboard tracker).
+            final sets = (ex['sets'] as num?)?.toInt() ?? 0;
+            if (sets > 0) totalMinutes += sets * 2;
+          }
+        }
+
         return TrackingStatus(
           category: 'Exercise',
           icon: Icons.fitness_center,
@@ -308,7 +305,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
           details: {
             'Duration': '$totalMinutes min',
             'Target': '$goalMinutes min',
-            'Sessions': exercises.length,
+            'Sessions': todays.length,
             'Status': totalMinutes >= goalMinutes ? 'Complete' : 'In Progress',
           },
           unit: 'min',
@@ -486,9 +483,9 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
 
   Future<TrackingStatus> _getSupplementStatus(SharedPreferences prefs, String date) async {
     try {
-      final apiService = ApiService();
+      final apiService = SupplementApi();
       final userId = widget.userProfile.id ?? '';
-      
+
       // Get user's supplement preferences
       final supplementData = await apiService.getSupplementStatus(userId, date: date);
       

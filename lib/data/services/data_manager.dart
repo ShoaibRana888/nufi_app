@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/repositories/user_repository.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/auth_api.dart';
+import 'package:user_onboarding/data/services/api/weight_api.dart';
 import 'package:user_onboarding/data/services/connectivity_service.dart';
 import 'package:user_onboarding/data/services/database_service.dart';
 import 'package:user_onboarding/data/services/exercise_data_service.dart';
@@ -17,7 +18,8 @@ import 'package:user_onboarding/utils/profile_update_notifier.dart';
 class DataManager {
   static final DataManager _instance = DataManager._internal();
   final ConnectivityService _connectivityService = ConnectivityService();
-  final ApiService _apiService = ApiService();
+  final AuthApi _apiService = AuthApi();
+  final WeightApi _weightApi = WeightApi();
 
   // Local storage keys
   static const String userIdKey = 'user_id';
@@ -262,7 +264,7 @@ class DataManager {
         if (kIsWeb) {
           // For web, use API service
           try {
-            final result = await _apiService.setStartingWeight(userId, startingWeight);
+            final result = await _weightApi.setStartingWeight(userId, startingWeight);
             if (result) {
               _log('Starting weight set successfully via API');
               return true;
@@ -302,7 +304,7 @@ class DataManager {
           // For web, use API service
           try {
             _log('Using API service to save weight entry');
-            final result = await _apiService.saveWeightEntry(weightEntry);
+            final result = await _weightApi.saveWeightEntry(weightEntry);
             _log('Weight entry saved via API with ID: $result');
             return result;
           } catch (e) {
@@ -347,7 +349,7 @@ class DataManager {
       
       // ALWAYS use API service now (works for both web and mobile)
       try {
-        final result = await _apiService.getWeightHistory(userId, limit: limit);
+        final result = await _weightApi.getWeightHistory(userId, limit: limit);
         _log('Weight history loaded via API: ${result.length} entries');
         return result;
       } catch (e) {
@@ -370,7 +372,7 @@ class DataManager {
       if (isConnected) {
         if (kIsWeb) {
           try {
-            final result = await _apiService.getLatestWeight(userId);
+            final result = await _weightApi.getLatestWeight(userId);
             _log('Latest weight loaded via API');
             return result;
           } catch (e) {
@@ -418,7 +420,7 @@ class DataManager {
       if (isConnected) {
         try {
           if (kIsWeb) {
-            await _apiService.updateUserWeight(userId, newWeight);
+            await _weightApi.updateUserWeight(userId, newWeight);
             _log('User weight updated via API');
           } else {
             // For native apps, update via database
@@ -503,7 +505,7 @@ class DataManager {
         if (kIsWeb) {
           // For web, use API service (you'll need to implement this in ApiService)
           try {
-            await _apiService.deleteWeightEntry(entryId);
+            await _weightApi.deleteWeightEntry(entryId);
             _log('Weight entry deleted via API');
             return true;
           } catch (e) {

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/chat_api.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/reports/screens/trends_screen.dart';
 
@@ -20,7 +20,7 @@ class WeeklySummaryScreen extends StatefulWidget {
 }
 
 class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
-  final ApiService _apiService = ApiService();
+  final ChatApi _apiService = ChatApi();
   Map<String, dynamic>? _currentWeekData;
   List<Map<String, dynamic>> _recentWeeks = [];
   bool _isLoading = true;

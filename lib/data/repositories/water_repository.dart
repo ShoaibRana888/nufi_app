@@ -1,14 +1,14 @@
 // lib/data/repositories/water_repository.dart
 import 'package:flutter/foundation.dart';
 import 'package:user_onboarding/data/models/water_entry.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/water_api.dart';
 import 'package:user_onboarding/data/services/database_service.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
 
 class WaterRepository {
   static final Random _random = Random();
-  static final ApiService _apiService = ApiService();
+  static final WaterApi _apiService = WaterApi();
 
   static String _generateId() {
     return DateTime.now().millisecondsSinceEpoch.toString() + 
@@ -137,21 +137,27 @@ class WaterRepository {
   // }
 
   static Future<String> saveWaterEntry(WaterEntry waterEntry) async {
+    final id = waterEntry.id ?? _generateId();
+    final entry = waterEntry.copyWith(id: id);
+
+    // Primary path: send through the API so the log is persisted on the
+    // backend. This is the source of truth for activity tracking.
     try {
-      final id = waterEntry.id ?? _generateId();
-      
-      if (kIsWeb) {
-        final entryId = await _apiService.saveWaterEntry(waterEntry.copyWith(id: id));
-        print('✅ Water entry saved via API with ID: $entryId');
-        return entryId;
-      } else {
-        if (DatabaseService.isInitialized) {
+      final entryId = await _apiService.saveWaterEntry(entry);
+      print('✅ Water entry saved via API with ID: $entryId');
+      return entryId;
+    } catch (apiError) {
+      print('⚠️ API water save failed, attempting offline DB fallback: $apiError');
+
+      // Offline fallback: write to the direct DB connection if available.
+      if (!kIsWeb && DatabaseService.isInitialized) {
+        try {
           await DatabaseService.executeWater(r'''
-            INSERT INTO daily_water 
+            INSERT INTO daily_water
             (id, user_id, date, glasses_consumed, total_ml, target_ml, notes, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            ON CONFLICT (user_id, (date::date)) 
-            DO UPDATE SET 
+            ON CONFLICT (user_id, (date::date))
+            DO UPDATE SET
               glasses_consumed = EXCLUDED.glasses_consumed,
               total_ml = EXCLUDED.total_ml,
               target_ml = EXCLUDED.target_ml,
@@ -159,80 +165,86 @@ class WaterRepository {
               updated_at = CURRENT_TIMESTAMP
           ''', [
             id,
-            waterEntry.userId,
-            waterEntry.date.toIso8601String(),
-            waterEntry.glassesConsumed,
-            waterEntry.totalMl,
-            waterEntry.targetMl,
-            waterEntry.notes,
+            entry.userId,
+            entry.date.toIso8601String(),
+            entry.glassesConsumed,
+            entry.totalMl,
+            entry.targetMl,
+            entry.notes,
           ]);
-          print('✅ Water entry saved to local database with ID: $id');
+          print('✅ Water entry saved to local DB (offline fallback) with ID: $id');
           return id;
+        } catch (dbError) {
+          print('❌ Offline DB fallback also failed: $dbError');
         }
       }
-    } catch (e) {
-      print('❌ Error saving water entry: $e');
+
+      // Both paths failed — surface the error so the UI can react.
       rethrow;
     }
-    return '';
   }
 
   
 
   static Future<List<WaterEntry>> getWaterHistory(String userId, {int limit = 30}) async {
+    // Primary path: API.
     try {
-      if (kIsWeb) {
-        return await _apiService.getWaterHistory(userId, limit: limit);
-      } else {
-        if (DatabaseService.isInitialized) {
+      return await _apiService.getWaterHistory(userId, limit: limit);
+    } catch (apiError) {
+      print('⚠️ API water history failed, attempting offline DB fallback: $apiError');
+
+      // Offline fallback: direct DB.
+      if (!kIsWeb && DatabaseService.isInitialized) {
+        try {
           final results = await DatabaseService.queryWater(r'''
-            SELECT * FROM daily_water 
-            WHERE user_id = $1 
-            ORDER BY date DESC 
+            SELECT * FROM daily_water
+            WHERE user_id = $1
+            ORDER BY date DESC
             LIMIT $2
           ''', [userId, limit]);
-    
+
           return results.map((row) => WaterEntry.fromMap(row)).toList();
+        } catch (dbError) {
+          print('Error getting water history from DB: $dbError');
         }
-        return [];
       }
-    } catch (e) {
-      print('Error getting water history: $e');
       return [];
     }
   }
 
   static Future<WaterEntry?> getWaterEntryByDate(String userId, DateTime date) async {
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+    // Primary path: API.
     try {
-      final dateStr = DateFormat('yyyy-MM-dd').format(date);
-      
-      if (kIsWeb) {
-        // Use API service for web
-        final waterData = await _apiService.getWaterByDate(userId, dateStr);
-        
-        if (waterData['success'] == true && waterData['entry'] != null) {
-          return WaterEntry.fromMap(waterData['entry']);
-        }
-        return null;
-      } else {
-        // Use direct database for mobile
-        if (DatabaseService.isInitialized) {
-          final results = await DatabaseService.queryWater(r'''
-            SELECT * FROM daily_water 
-            WHERE user_id = $1 AND date::date = $2::date
-            LIMIT 1
-          ''', [userId, dateStr]);
-          
-          if (results.isNotEmpty) {
-            return WaterEntry.fromMap(results.first);
-          }
-        }
-        return null;
+      final waterData = await _apiService.getWaterByDate(userId, dateStr);
+
+      if (waterData['success'] == true && waterData['entry'] != null) {
+        return WaterEntry.fromMap(waterData['entry']);
       }
-    } catch (e) {
-      print('Error getting water entry by date: $e');
+      // success == false here means no entry logged for this date.
       return null;
+    } catch (apiError) {
+      print('⚠️ API water-by-date failed, attempting offline DB fallback: $apiError');
     }
+
+    // Offline fallback: direct DB.
+    if (!kIsWeb && DatabaseService.isInitialized) {
+      try {
+        final results = await DatabaseService.queryWater(r'''
+          SELECT * FROM daily_water
+          WHERE user_id = $1 AND date::date = $2::date
+          LIMIT 1
+        ''', [userId, dateStr]);
+
+        if (results.isNotEmpty) {
+          return WaterEntry.fromMap(results.first);
+        }
+      } catch (dbError) {
+        print('Error getting water entry by date from DB: $dbError');
+      }
+    }
+    return null;
   }
 
   static Future<WaterEntry?> getTodayWaterEntry(String userId) async {

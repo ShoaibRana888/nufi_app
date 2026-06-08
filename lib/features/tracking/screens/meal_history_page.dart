@@ -1,7 +1,7 @@
 // lib/features/tracking/screens/meal_history_page.dart
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/meal_api.dart';
 import 'package:intl/intl.dart';
 
 class MealHistoryPage extends StatefulWidget {
@@ -17,7 +17,7 @@ class MealHistoryPage extends StatefulWidget {
 }
 
 class _MealHistoryPageState extends State<MealHistoryPage> {
-  final ApiService _apiService = ApiService();
+  final MealApi _apiService = MealApi();
   List<Map<String, dynamic>> _meals = [];
   Map<String, dynamic> _dailyTotals = {};
   DateTime _selectedDate = DateTime.now();

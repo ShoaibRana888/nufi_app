@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/meal_api.dart';
+import 'package:user_onboarding/data/services/api/exercise_api.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_history_page.dart';
 import 'package:user_onboarding/features/tracking/widgets/voice_input_widget.dart';
+import 'package:user_onboarding/features/tracking/screens/meal_suggestions_sheet.dart';
 
 class EnhancedMealLoggingPage extends StatefulWidget {
   final UserProfile userProfile;
@@ -21,7 +23,8 @@ class EnhancedMealLoggingPage extends StatefulWidget {
 }
 
 class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
-  final ApiService _apiService = ApiService();
+  final MealApi _apiService = MealApi();
+  final ExerciseApi _exerciseApi = ExerciseApi();
   
   // Controllers
   final _multiLineController = TextEditingController();
@@ -38,6 +41,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
   bool _useMultiLineEntry = false;
   int _dailyMealGoal = 3;
   double _dailyCalorieGoal = 2000;
+  double _caloriesBurned = 0;
   Map<String, double> _macroGoals = {
     'protein': 150.0,
     'carbs': 225.0,
@@ -52,6 +56,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
   bool _showCalendar = false;
   bool _showRecentMeals = false;
   bool _showPresets = false;
+  
   
   // Common meal combos for quick selection
   final List<Map<String, dynamic>> _mealCombos = [
@@ -83,6 +88,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
     _loadTodaysMeals();
     _loadPresets();
     _loadRecentMeals();
+    _loadExerciseData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateDailyGoals();
       if (mounted) setState(() {});
@@ -202,7 +208,10 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
       
       setState(() {
         _todaysMeals = meals;
+        _selectedDate = date; 
       });
+      
+      await _loadExerciseData();
     } catch (e) {
       print('Error loading meals: $e');
     }
@@ -283,6 +292,32 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
         ],
       ),
     ) ?? false;
+  }
+
+  Future<void> _loadExerciseData() async {
+    if (widget.userProfile.id == null) return;
+    
+    try {
+      final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final exercises = await _exerciseApi.getExerciseLogs(
+        widget.userProfile.id!,
+        startDate: dateStr,
+        endDate: dateStr,
+      );
+      
+      double totalBurned = 0;
+      for (var ex in exercises) {
+        totalBurned += (ex['calories_burned'] ?? 0).toDouble();
+      }
+      
+      if (mounted) {
+        setState(() {
+          _caloriesBurned = totalBurned;
+        });
+      }
+    } catch (e) {
+      print('Error loading exercise data: $e');
+    }
   }
 
   void _calculateDailyGoals() {
@@ -404,6 +439,11 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.lightbulb_outline),
+            onPressed: _showMealSuggestions,
+            tooltip: 'Get meal suggestions',
+          ),
           IconButton(
             icon: Icon(_showCalendar ? Icons.close : Icons.calendar_month),
             onPressed: () {
@@ -2217,9 +2257,40 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
       totalFat += (meal['fat_g'] ?? meal['fat'] ?? 0).toDouble();
     }
     
+    // Calculate remaining with exercise adjustment
+    final remainingCalories = _dailyCalorieGoal - totalCalories + _caloriesBurned;
+    
     return Column(
       children: [
         _buildProgressBar('Calories', totalCalories, _dailyCalorieGoal, Colors.orange),
+        
+        // Show exercise bonus if any
+        if (_caloriesBurned > 0) ...[
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.local_fire_department, size: 16, color: Colors.green.shade700),
+                const SizedBox(width: 4),
+                Text(
+                  '+${_caloriesBurned.round()} cal from exercise • ${remainingCalories.round()} remaining',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.green.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        
         const SizedBox(height: 8),
         Row(
           children: [
@@ -2353,6 +2424,23 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
                 '${(_nutritionData!['fat_g'] ?? _nutritionData!['fat'] ?? 0).round()}', 'g'),
             ],
           ),
+          
+          // Micronutrient Highlights Section
+          if (_hasMicronutrients()) ...[
+            const SizedBox(height: 12),
+            const Divider(),
+            const Text(
+              'Micronutrient Highlights',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _buildMicronutrientChips(),
+            ),
+          ],
+          
           if (_nutritionData!['data_source'] != null) ...[
             const SizedBox(height: 8),
             Text(
@@ -2361,6 +2449,70 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  bool _hasMicronutrients() {
+    if (_nutritionData == null) return false;
+    
+    final microKeys = [
+      'vitamin_c_mg', 'vitamin_a_mcg', 'vitamin_d_mcg',
+      'iron_mg', 'calcium_mg', 'potassium_mg', 'magnesium_mg', 'zinc_mg'
+    ];
+    
+    for (final key in microKeys) {
+      final value = _nutritionData![key];
+      if (value != null && value is num && value > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  List<Widget> _buildMicronutrientChips() {
+    final List<Widget> chips = [];
+    
+    final micronutrients = [
+      {'key': 'vitamin_c_mg', 'label': 'Vit C', 'unit': 'mg', 'threshold': 5},
+      {'key': 'vitamin_a_mcg', 'label': 'Vit A', 'unit': 'mcg', 'threshold': 50},
+      {'key': 'vitamin_d_mcg', 'label': 'Vit D', 'unit': 'mcg', 'threshold': 1},
+      {'key': 'iron_mg', 'label': 'Iron', 'unit': 'mg', 'threshold': 1},
+      {'key': 'calcium_mg', 'label': 'Calcium', 'unit': 'mg', 'threshold': 30},
+      {'key': 'potassium_mg', 'label': 'Potassium', 'unit': 'mg', 'threshold': 100},
+      {'key': 'magnesium_mg', 'label': 'Magnesium', 'unit': 'mg', 'threshold': 10},
+      {'key': 'zinc_mg', 'label': 'Zinc', 'unit': 'mg', 'threshold': 0.5},
+      {'key': 'fiber_g', 'label': 'Fiber', 'unit': 'g', 'threshold': 1},
+    ];
+    
+    for (final micro in micronutrients) {
+      final value = _nutritionData![micro['key']];
+      if (value != null && value is num && value > (micro['threshold'] as num)) {
+        chips.add(_buildMicroChip(
+          micro['label'] as String,
+          '${value.round()}${micro['unit']}',
+        ));
+      }
+    }
+    
+    return chips;
+  }
+
+  Widget _buildMicroChip(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.purple.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.purple.shade200),
+      ),
+      child: Text(
+        '$label: $value',
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.purple.shade700,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
@@ -2462,6 +2614,36 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
         );
       }
     }
+  }
+
+  void _showMealSuggestions() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MealSuggestionsSheet(
+        userId: widget.userProfile.id!,
+        mealType: _selectedMealType.toLowerCase(),
+        onSuggestionSelected: (suggestion) {
+          Navigator.pop(context);
+          
+          // Pre-fill the form with suggestion
+          setState(() {
+            _useMultiLineEntry = true;
+            _multiLineController.text = suggestion['food_item'];
+            
+            // Optionally pre-fill nutrition data
+            _nutritionData = {
+              'food_item': suggestion['food_item'],
+              'calories': suggestion['calories'],
+              'protein_g': suggestion['protein_g'],
+              'carbs_g': suggestion['carbs_g'],
+              'fat_g': suggestion['fat_g'],
+            };
+          });
+        },
+      ),
+    );
   }
 
 }

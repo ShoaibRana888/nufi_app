@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/weight_entry.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/auth_api.dart';
 import 'package:user_onboarding/data/services/data_manager.dart';
 import 'package:user_onboarding/features/profile/screens/edit_profile_page.dart';
 import 'package:user_onboarding/features/profile/screens/settings_page.dart';
@@ -25,7 +25,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStateMixin {
   late UserProfile currentProfile;
   late TabController _tabController;
-  final ApiService _apiService = ApiService();
+  final AuthApi _apiService = AuthApi();
   final DataManager _dataManager = DataManager();
   bool isLoading = false;
   

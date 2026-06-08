@@ -1,16 +1,22 @@
 // lib/features/profile/screens/notification_settings_page.dart
+// FINAL VERSION - Read-only meal count, no redundancy, single source of truth
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/models/notification_preferences.dart';
+import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/services/notification_service.dart';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class NotificationSettingsPage extends StatefulWidget {
   final String userId;
+  final UserProfile? userProfile;
 
   const NotificationSettingsPage({
     Key? key,
     required this.userId,
+    this.userProfile,
   }) : super(key: key);
 
   @override
@@ -18,34 +24,82 @@ class NotificationSettingsPage extends StatefulWidget {
 }
 
 class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
+  static const String backendUrl = 'https://health-ai-backend-i28b.onrender.com';
+  
   late NotificationPreferences _prefs;
+  UserProfile? _userProfile;
   bool _isLoading = true;
   bool _isSaving = false;
+  int _scheduledCount = 0;
 
   @override
   void initState() {
     super.initState();
+    _userProfile = widget.userProfile;
+    _loadUserProfile();
     _loadPreferences();
+    _loadScheduledCount();
+  }
+
+  Future<void> _loadUserProfile() async {
+    if (_userProfile != null) return;
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final profileJson = prefs.getString('user_profile');
+      
+      if (profileJson != null) {
+        _userProfile = UserProfile.fromMap(jsonDecode(profileJson));
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error loading user profile: $e');
+    }
   }
 
   Future<void> _loadPreferences() async {
     setState(() => _isLoading = true);
     
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final prefsJson = prefs.getString('notification_prefs_${widget.userId}');
+      final response = await http.get(
+        Uri.parse('$backendUrl/notification-preferences/${widget.userId}'),
+      ).timeout(const Duration(seconds: 10));
       
-      if (prefsJson != null) {
-        _prefs = NotificationPreferences.fromJson(jsonDecode(prefsJson));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _prefs = NotificationPreferences.fromJson(data['preferences']);
       } else {
-        _prefs = NotificationPreferences();
+        await _loadFromLocalStorage();
       }
     } catch (e) {
-      print('Error loading notification preferences: $e');
-      _prefs = NotificationPreferences();
+      print('Error loading from backend: $e, falling back to local storage');
+      await _loadFromLocalStorage();
     }
     
     setState(() => _isLoading = false);
+  }
+
+  Future<void> _loadFromLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final prefsJson = prefs.getString('notification_prefs_${widget.userId}');
+    
+    if (prefsJson != null) {
+      _prefs = NotificationPreferences.fromJson(jsonDecode(prefsJson));
+    } else {
+      _prefs = NotificationPreferences();
+    }
+  }
+
+  Future<void> _loadScheduledCount() async {
+    try {
+      final notificationService = NotificationService();
+      final pending = await notificationService.getPendingNotifications();
+      setState(() {
+        _scheduledCount = pending.length;
+      });
+    } catch (e) {
+      print('Error loading scheduled count: $e');
+    }
   }
 
   Future<void> _savePreferences() async {
@@ -58,18 +112,38 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         jsonEncode(_prefs.toJson()),
       );
       
-      // Reschedule notifications with new preferences
+      try {
+        await http.post(
+          Uri.parse('$backendUrl/notification-preferences/save'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'user_id': widget.userId,
+            ..._prefs.toJson(),
+          }),
+        ).timeout(const Duration(seconds: 10));
+        print('✅ Preferences saved to backend');
+      } catch (e) {
+        print('⚠️ Could not save to backend: $e (but saved locally)');
+      }
+      
       if (_prefs.enabled) {
         await _rescheduleNotifications();
       } else {
         await NotificationService().cancelAllNotifications();
       }
       
+      await _loadScheduledCount();
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Notification settings saved!'),
+          SnackBar(
+            content: Text('✅ Settings saved! $_scheduledCount notifications scheduled'),
             backgroundColor: Colors.green,
+            action: SnackBarAction(
+              label: 'VIEW',
+              textColor: Colors.white,
+              onPressed: _viewScheduledNotifications,
+            ),
           ),
         );
       }
@@ -93,26 +167,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       final notificationService = NotificationService();
       await notificationService.cancelAllNotifications();
       
-      // Get user profile for scheduling
       final prefs = await SharedPreferences.getInstance();
       final profileJson = prefs.getString('user_profile');
       
       if (profileJson != null) {
         final userProfileMap = jsonDecode(profileJson);
-        
-        // ✅ IMPORTANT: Ensure daily_meals_count is in the map
-        print('📋 Profile before scheduling: ${userProfileMap.keys.toList()}');
-        print('📊 daily_meals_count: ${userProfileMap['daily_meals_count']}');
-        print('📊 dailyMealsCount: ${userProfileMap['dailyMealsCount']}');
-        
         await notificationService.scheduleAllNotifications(widget.userId, userProfileMap);
-        
-        // Update last scheduled timestamp
-        await prefs.setString(
-          'notifications_last_scheduled_${widget.userId}',
-          DateTime.now().toIso8601String(),
-        );
-        
         print('✅ Notifications rescheduled with new preferences');
       }
     } catch (e) {
@@ -151,21 +211,33 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Scheduled Notifications (${pending.length})'),
-        content: SingleChildScrollView(
+        content: SizedBox(
+          width: double.maxFinite,
           child: pending.isEmpty
               ? const Text('No notifications scheduled')
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: pending.map((notif) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text(
-                        '${notif.id}: ${notif.title}',
-                        style: const TextStyle(fontSize: 12),
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: pending.length,
+                  itemBuilder: (context, index) {
+                    final notif = pending[index];
+                    return ListTile(
+                      dense: true,
+                      leading: CircleAvatar(
+                        radius: 16,
+                        child: Text('${notif.id}'),
+                      ),
+                      title: Text(
+                        notif.title ?? 'Notification',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      subtitle: Text(
+                        notif.body ?? '',
+                        style: const TextStyle(fontSize: 11),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     );
-                  }).toList(),
+                  },
                 ),
         ),
         actions: [
@@ -176,6 +248,138 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _resetToDefaults() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset to Defaults?'),
+        content: const Text('This will reset all notification settings to their default values.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed == true) {
+      setState(() {
+        _prefs = NotificationPreferences();
+      });
+      await _savePreferences();
+    }
+  }
+
+  String _getUserContextInfo() {
+    if (_userProfile == null) return '';
+    
+    final List<String> info = [];
+    
+    final mealCount = _userProfile!.dailyMealsCount ?? 3;
+    info.add('$mealCount meals/day');
+    
+    final waterGoal = _userProfile!.waterIntakeGlasses ?? 8;
+    info.add('$waterGoal glasses water');
+    
+    if (_userProfile!.wakeupTime != null && _userProfile!.wakeupTime!.isNotEmpty) {
+      info.add('Wake: ${_userProfile!.wakeupTime}');
+    }
+    
+    return info.join(' • ');
+  }
+
+  bool _isFeatureApplicable(String feature) {
+    if (_userProfile == null) return true;
+    
+    switch (feature) {
+      case 'exercise':
+        final workouts = _userProfile!.preferredWorkouts ?? [];
+        return workouts.isNotEmpty;
+      
+      case 'supplement':
+        final conditions = _userProfile!.medicalConditions ?? [];
+        return conditions.isNotEmpty;
+      
+      case 'weight':
+        final goal = _userProfile!.weightGoal ?? '';
+        return goal.isNotEmpty && goal != 'maintain';
+      
+      default:
+        return true;
+    }
+  }
+
+  /// ⭐ Get smart meal label based on user's meal count
+  String _getMealLabel(int mealIndex) {
+    final mealCount = _userProfile?.dailyMealsCount ?? 3;
+    
+    if (mealCount == 1) {
+      return 'Meal Time';
+    } else if (mealCount == 2) {
+      return mealIndex == 0 ? 'First Meal Time' : 'Second Meal Time';
+    } else if (mealCount == 3) {
+      // Use traditional names for 3 meals
+      return ['Breakfast Time', 'Lunch Time', 'Dinner Time'][mealIndex];
+    } else {
+      // For 4+ meals, use meal numbers
+      return 'Meal ${mealIndex + 1} Time';
+    }
+  }
+
+  /// ⭐ Get meal time preference based on index
+  TimeOfDay _getMealTime(int mealIndex) {
+    switch (mealIndex) {
+      case 0:
+        return TimeOfDay(hour: _prefs.breakfastHour, minute: _prefs.breakfastMinute);
+      case 1:
+        return TimeOfDay(hour: _prefs.lunchHour, minute: _prefs.lunchMinute);
+      case 2:
+        return TimeOfDay(hour: _prefs.dinnerHour, minute: _prefs.dinnerMinute);
+      default:
+        return TimeOfDay(hour: 8, minute: 0);
+    }
+  }
+
+  /// ⭐ Update meal time preference
+  void _updateMealTime(int mealIndex, TimeOfDay time) {
+    setState(() {
+      switch (mealIndex) {
+        case 0:
+          _prefs.breakfastHour = time.hour;
+          _prefs.breakfastMinute = time.minute;
+          break;
+        case 1:
+          _prefs.lunchHour = time.hour;
+          _prefs.lunchMinute = time.minute;
+          break;
+        case 2:
+          _prefs.dinnerHour = time.hour;
+          _prefs.dinnerMinute = time.minute;
+          break;
+      }
+    });
+  }
+
+  /// ⭐ Navigate to profile settings to edit meal count
+  void _navigateToProfileSettings() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please update meal count in your Profile Settings'),
+        backgroundColor: Colors.blue,
+        duration: Duration(seconds: 2),
+      ),
+    );
+    
+    // TODO: Navigate to profile settings page if you have the route
+    // Navigator.pushNamed(context, '/profile-settings');
   }
 
   @override
@@ -191,12 +395,19 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       );
     }
 
+    final userMealCount = _userProfile?.dailyMealsCount ?? 3;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notification Settings'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.restore),
+            onPressed: _resetToDefaults,
+            tooltip: 'Reset to defaults',
+          ),
           IconButton(
             icon: _isSaving
                 ? const SizedBox(
@@ -209,12 +420,84 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   )
                 : const Icon(Icons.save),
             onPressed: _isSaving ? null : _savePreferences,
+            tooltip: 'Save changes',
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // User Profile Context Card
+          if (_userProfile != null && _getUserContextInfo().isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.person, color: Colors.blue, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Your Profile',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _getUserContextInfo(),
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Notifications will be personalized based on your profile',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+
+          // Status Card
+          if (_scheduledCount > 0)
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.green.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.green),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      '$_scheduledCount notifications scheduled',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _viewScheduledNotifications,
+                    child: const Text('VIEW'),
+                  ),
+                ],
+              ),
+            ),
+
           // Master Toggle
           _buildSection(
             'Enable Notifications',
@@ -241,44 +524,65 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           _buildSection(
             'Notification Types',
             [
-              _buildSwitchTile(
+              _buildSwitchTileWithContext(
                 '🍽️ Meal Reminders',
                 'Get reminded to log your meals',
+                'You eat $userMealCount meal${userMealCount > 1 ? 's' : ''}/day',
                 _prefs.mealReminders,
                 _prefs.enabled,
                 (value) => setState(() => _prefs.mealReminders = value),
               ),
-              _buildSwitchTile(
+              
+              _buildSwitchTileWithContext(
                 '💪 Exercise Reminders',
                 'Stay motivated to workout',
+                !_isFeatureApplicable('exercise')
+                  ? 'No workouts in profile - will be skipped'
+                  : null,
                 _prefs.exerciseReminders,
                 _prefs.enabled,
                 (value) => setState(() => _prefs.exerciseReminders = value),
               ),
-              _buildSwitchTile(
+              
+              _buildSwitchTileWithContext(
                 '💧 Water Reminders',
                 'Stay hydrated throughout the day',
+                _userProfile != null
+                  ? 'Goal: ${_userProfile!.waterIntakeGlasses ?? 8} glasses/day'
+                  : null,
                 _prefs.waterReminders,
                 _prefs.enabled,
                 (value) => setState(() => _prefs.waterReminders = value),
               ),
-              _buildSwitchTile(
+              
+              _buildSwitchTileWithContext(
                 '😴 Sleep Reminders',
                 'Track your sleep quality',
+                _userProfile != null && _userProfile!.wakeupTime != null
+                  ? 'Reminder at ${_userProfile!.wakeupTime}'
+                  : null,
                 _prefs.sleepReminders,
                 _prefs.enabled,
                 (value) => setState(() => _prefs.sleepReminders = value),
               ),
-              _buildSwitchTile(
+              
+              _buildSwitchTileWithContext(
                 '💊 Supplement Reminders',
                 'Remember to take supplements',
+                !_isFeatureApplicable('supplement')
+                  ? 'No medical conditions - will be skipped'
+                  : null,
                 _prefs.supplementReminders,
                 _prefs.enabled,
                 (value) => setState(() => _prefs.supplementReminders = value),
               ),
-              _buildSwitchTile(
+              
+              _buildSwitchTileWithContext(
                 '⚖️ Weight Check Reminders',
                 'Weekly weigh-in reminder',
+                !_isFeatureApplicable('weight')
+                  ? 'No weight goal - will be skipped'
+                  : 'Goal: ${_userProfile?.weightGoal ?? ""}',
                 _prefs.weightReminders,
                 _prefs.enabled,
                 (value) => setState(() => _prefs.weightReminders = value),
@@ -288,47 +592,68 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
           const SizedBox(height: 16),
 
-          // Custom Meal Times
+          // ⭐ Meal Times - Read-only count with link to edit
           if (_prefs.enabled && _prefs.mealReminders)
             _buildSection(
               'Meal Reminder Times',
               [
-                _buildTimePicker(
-                  'Breakfast Time',
-                  TimeOfDay(hour: _prefs.breakfastHour, minute: _prefs.breakfastMinute),
-                  (time) {
-                    setState(() {
-                      _prefs.breakfastHour = time.hour;
-                      _prefs.breakfastMinute = time.minute;
-                    });
-                  },
+                // Info banner with link to profile
+                Container(
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'You eat $userMealCount meal${userMealCount > 1 ? 's' : ''} per day. Only $userMealCount reminder${userMealCount > 1 ? 's' : ''} will be scheduled.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: _navigateToProfileSettings,
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: 16, color: Colors.blue[700]),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Edit meal count in Profile Settings',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.blue[700],
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                _buildTimePicker(
-                  'Lunch Time',
-                  TimeOfDay(hour: _prefs.lunchHour, minute: _prefs.lunchMinute),
-                  (time) {
-                    setState(() {
-                      _prefs.lunchHour = time.hour;
-                      _prefs.lunchMinute = time.minute;
-                    });
-                  },
-                ),
-                _buildTimePicker(
-                  'Dinner Time',
-                  TimeOfDay(hour: _prefs.dinnerHour, minute: _prefs.dinnerMinute),
-                  (time) {
-                    setState(() {
-                      _prefs.dinnerHour = time.hour;
-                      _prefs.dinnerMinute = time.minute;
-                    });
-                  },
+                
+                // Show only the meal time pickers user needs
+                ...List.generate(
+                  userMealCount,
+                  (index) => _buildTimePicker(
+                    _getMealLabel(index),
+                    _getMealTime(index),
+                    (time) => _updateMealTime(index, time),
+                  ),
                 ),
               ],
             ),
 
           const SizedBox(height: 16),
 
-          // Custom Exercise Time
+          // Exercise Time
           if (_prefs.enabled && _prefs.exerciseReminders)
             _buildSection(
               'Exercise Reminder Time',
@@ -348,14 +673,14 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
           const SizedBox(height: 16),
 
-          // Water Reminder Frequency
+          // Water Frequency
           if (_prefs.enabled && _prefs.waterReminders)
             _buildSection(
               'Water Reminder Frequency',
               [
                 ListTile(
                   title: const Text('Remind me every'),
-                  subtitle: Text('${_prefs.waterReminderFrequency} hours'),
+                  subtitle: Text('${_prefs.waterReminderFrequency} hour${_prefs.waterReminderFrequency > 1 ? 's' : ''}'),
                   trailing: DropdownButton<int>(
                     value: _prefs.waterReminderFrequency,
                     items: [1, 2, 3, 4, 6].map((hours) {
@@ -376,7 +701,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
           const SizedBox(height: 24),
 
-          // Test Notification Button
+          // Test Button
           ElevatedButton.icon(
             onPressed: _sendTestNotification,
             icon: const Icon(Icons.notifications_active),
@@ -390,11 +715,11 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
           const SizedBox(height: 12),
 
-          // View Scheduled Notifications Button
+          // View Scheduled Button
           OutlinedButton.icon(
             onPressed: _viewScheduledNotifications,
             icon: const Icon(Icons.list),
-            label: const Text('View Scheduled Notifications'),
+            label: Text('View $_scheduledCount Scheduled Notifications'),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.blue,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -419,7 +744,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     Icon(Icons.info_outline, color: Colors.blue, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      'About Notifications',
+                      'Smart Notifications',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -429,9 +754,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Notifications help you stay on track with your health goals. '
-                  'You can customize when you receive reminders for each activity. '
-                  'Don\'t forget to save your changes!',
+                  'Notifications are automatically personalized based on your profile. '
+                  'Only relevant reminders matching your lifestyle will be scheduled. '
+                  'Update your profile to change meal count or other settings.',
                   style: TextStyle(fontSize: 14, color: Colors.black87),
                 ),
               ],
@@ -468,16 +793,35 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     );
   }
 
-  Widget _buildSwitchTile(
+  Widget _buildSwitchTileWithContext(
     String title,
     String subtitle,
+    String? contextInfo,
     bool value,
     bool enabled,
     Function(bool) onChanged,
   ) {
     return SwitchListTile(
       title: Text(title),
-      subtitle: Text(subtitle),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(subtitle),
+          if (contextInfo != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              contextInfo,
+              style: TextStyle(
+                fontSize: 12,
+                color: contextInfo.contains('will be skipped') 
+                  ? Colors.orange 
+                  : Colors.blue,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ],
+      ),
       value: value,
       onChanged: enabled ? onChanged : null,
       activeColor: Colors.blue,

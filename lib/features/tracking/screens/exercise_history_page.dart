@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/exercise_api.dart';
 
 class EnhancedExerciseHistoryPage extends StatefulWidget {
   final UserProfile userProfile;
@@ -16,7 +16,7 @@ class EnhancedExerciseHistoryPage extends StatefulWidget {
 
 class _EnhancedExerciseHistoryPageState extends State<EnhancedExerciseHistoryPage> 
     with SingleTickerProviderStateMixin {
-  final ApiService _apiService = ApiService();
+  final ExerciseApi _apiService = ExerciseApi();
   
   List<Map<String, dynamic>> _exercises = [];
   Map<String, dynamic> _weeklyStats = {};

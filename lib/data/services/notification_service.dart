@@ -13,6 +13,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_logging_page.dart';
 import 'package:user_onboarding/features/tracking/screens/activity_logging_menu.dart';
 import 'package:user_onboarding/features/notifications/screens/notifications_screen.dart';
+import 'package:user_onboarding/data/models/notification_preferences.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 
 class NotificationService {
@@ -31,6 +32,7 @@ class NotificationService {
   static const int mealNotificationIdBase = 1000; 
   static const int exerciseNotificationId = 2000;
   static const int waterNotificationId1 = 3000;
+  static const int waterNotificationIdBase = 3000;
   static const int waterNotificationId2 = 3001;
   static const int sleepNotificationId = 4000;
   static const int supplementNotificationId = 5000;
@@ -174,21 +176,325 @@ class NotificationService {
     }
   }
 
-  // ⭐ MINIMAL SCHEDULE - Only essential parameters, no complex styling
   Future<void> scheduleAllNotifications(String userId, Map<String, dynamic> userProfile) async {
     print('📱 [SCHEDULE] Starting for user: $userId');
+    print('👤 [SCHEDULE] User profile data: ${userProfile.keys.toList()}');
+    
+    // Load user preferences
+    final prefs = await SharedPreferences.getInstance();
+    final prefsJson = prefs.getString('notification_prefs_$userId');
+    
+    NotificationPreferences notifPrefs;
+    if (prefsJson != null) {
+      notifPrefs = NotificationPreferences.fromJson(jsonDecode(prefsJson));
+    } else {
+      notifPrefs = NotificationPreferences(); // Default preferences
+    }
+    
+    // If notifications are disabled globally, cancel all and return
+    if (!notifPrefs.enabled) {
+      print('🔕 Notifications disabled by user');
+      await cancelAllNotifications();
+      return;
+    }
     
     await cancelAllNotifications();
     
-    await scheduleMealNotifications(userId, userProfile);
-    await scheduleExerciseNotification(userId);
-    await scheduleWaterNotifications(userId);
-    await scheduleSleepNotification(userId, userProfile);
-    await scheduleSupplementNotification(userId);
+    // ⭐ Schedule based on user preferences AND user profile data
+    if (notifPrefs.mealReminders) {
+      await scheduleMealNotificationsWithUserData(userId, userProfile, notifPrefs);
+    }
+    
+    if (notifPrefs.exerciseReminders) {
+      // Check if user has workout preferences
+      final preferredWorkouts = userProfile['preferred_workouts'] ?? userProfile['preferredWorkouts'];
+      if (preferredWorkouts != null && (preferredWorkouts as List).isNotEmpty) {
+        await scheduleExerciseNotificationWithPrefs(userId, notifPrefs);
+      } else {
+        print('⚠️ [EXERCISE] Skipped - user has no preferred workouts');
+      }
+    }
+    
+    if (notifPrefs.waterReminders) {
+      await scheduleWaterNotificationsWithUserData(userId, userProfile, notifPrefs);
+    }
+    
+    if (notifPrefs.sleepReminders) {
+      await scheduleSleepNotificationWithUserData(userId, userProfile);
+    }
+    
+    if (notifPrefs.supplementReminders) {
+      // Only schedule if user has medical conditions or takes supplements
+      final medicalConditions = userProfile['medical_conditions'] ?? userProfile['medicalConditions'] ?? [];
+      if ((medicalConditions as List).isNotEmpty) {
+        await scheduleSupplementNotification(userId);
+      } else {
+        print('⚠️ [SUPPLEMENT] Skipped - user has no medical conditions');
+      }
+    }
+    
+    if (notifPrefs.weightReminders) {
+      // Only if user has weight goal
+      final weightGoal = userProfile['weight_goal'] ?? userProfile['weightGoal'];
+      if (weightGoal != null && weightGoal.toString().isNotEmpty && weightGoal != 'maintain') {
+        await scheduleWeightReminderNotification(userId);
+      } else {
+        print('⚠️ [WEIGHT] Skipped - user has no active weight goal');
+      }
+    }
     
     final pending = await getPendingNotifications();
     print('✅ [SCHEDULE] Complete! ${pending.length} notifications scheduled');
   }
+
+  /// Schedule meal notifications using user's custom times
+  Future<void> scheduleMealNotificationsWithUserData(
+    String userId, 
+    Map<String, dynamic> userProfile,
+    NotificationPreferences prefs,
+  ) async {
+    // Get user's actual daily meals count
+    final dailyMealsCount = userProfile['daily_meals_count'] ?? 
+                            userProfile['dailyMealsCount'] ?? 
+                            3;
+    
+    print('🍽️ [MEALS] User eats $dailyMealsCount meals per day');
+    
+    if (dailyMealsCount == 1) {
+      // One meal a day (OMAD)
+      await _scheduleNotification(
+        id: mealNotificationIdBase + 0,
+        title: '🍽️ Meal Reminder',
+        body: 'Time to log your daily meal!',
+        hour: prefs.lunchHour, // Use lunch time for single meal
+        minute: prefs.lunchMinute,
+        userId: userId,
+      );
+      print('✅ [MEALS] Scheduled 1 meal notification');
+      
+    } else if (dailyMealsCount == 2) {
+      // Two meals a day (16:8 intermittent fasting common)
+      await _scheduleNotification(
+        id: mealNotificationIdBase + 0,
+        title: '🍳 First Meal Reminder',
+        body: 'Time to log your first meal!',
+        hour: prefs.lunchHour, // Use lunch time for first meal
+        minute: prefs.lunchMinute,
+        userId: userId,
+      );
+      
+      await _scheduleNotification(
+        id: mealNotificationIdBase + 1,
+        title: '🌙 Second Meal Reminder',
+        body: 'Time to log your second meal!',
+        hour: prefs.dinnerHour,
+        minute: prefs.dinnerMinute,
+        userId: userId,
+      );
+      print('✅ [MEALS] Scheduled 2 meal notifications');
+      
+    } else if (dailyMealsCount == 3) {
+      // Standard 3 meals
+      await _scheduleNotification(
+        id: mealNotificationIdBase + 0,
+        title: '🍳 Breakfast Reminder',
+        body: 'Time to log your breakfast!',
+        hour: prefs.breakfastHour,
+        minute: prefs.breakfastMinute,
+        userId: userId,
+      );
+      
+      await _scheduleNotification(
+        id: mealNotificationIdBase + 1,
+        title: '🍽️ Lunch Reminder',
+        body: 'Time to log your lunch!',
+        hour: prefs.lunchHour,
+        minute: prefs.lunchMinute,
+        userId: userId,
+      );
+      
+      await _scheduleNotification(
+        id: mealNotificationIdBase + 2,
+        title: '🌙 Dinner Reminder',
+        body: 'Time to log your dinner!',
+        hour: prefs.dinnerHour,
+        minute: prefs.dinnerMinute,
+        userId: userId,
+      );
+      print('✅ [MEALS] Scheduled 3 meal notifications');
+      
+    } else if (dailyMealsCount >= 4) {
+      // 4+ meals (small frequent meals)
+      final mealTimes = [
+        {'name': 'Breakfast', 'hour': prefs.breakfastHour, 'minute': prefs.breakfastMinute},
+        {'name': 'Morning Snack', 'hour': 10, 'minute': 30},
+        {'name': 'Lunch', 'hour': prefs.lunchHour, 'minute': prefs.lunchMinute},
+        {'name': 'Afternoon Snack', 'hour': 15, 'minute': 30},
+        {'name': 'Dinner', 'hour': prefs.dinnerHour, 'minute': prefs.dinnerMinute},
+        {'name': 'Evening Snack', 'hour': 20, 'minute': 30},
+      ];
+      
+      // Schedule only the number of meals the user wants
+      for (int i = 0; i < dailyMealsCount && i < mealTimes.length; i++) {
+        await _scheduleNotification(
+          id: mealNotificationIdBase + i,
+          title: '🍽️ ${mealTimes[i]['name']} Reminder',
+          body: 'Time to log your meal!',
+          hour: mealTimes[i]['hour'] as int,
+          minute: mealTimes[i]['minute'] as int,
+          userId: userId,
+        );
+      }
+      print('✅ [MEALS] Scheduled $dailyMealsCount meal notifications');
+    }
+  }
+  
+  /// Schedule exercise notification using user's custom time
+  Future<void> scheduleExerciseNotificationWithPrefs(
+    String userId,
+    NotificationPreferences prefs,
+  ) async {
+    await _scheduleNotification(
+      id: exerciseNotificationId,
+      title: '💪 Exercise Reminder',
+      body: 'Don\'t forget to log your workout!',
+      hour: prefs.exerciseHour,
+      minute: prefs.exerciseMinute,
+      userId: userId,
+    );
+    
+    print('✅ [EXERCISE] Scheduled at ${prefs.exerciseHour}:${prefs.exerciseMinute}');
+  }
+  
+  /// Schedule water notifications based on user's frequency preference
+  Future<void> scheduleWaterNotificationsWithUserData(
+    String userId,
+    Map<String, dynamic> userProfile,
+    NotificationPreferences prefs,
+  ) async {
+    // Get user's water goal
+    final waterGoalGlasses = userProfile['water_intake_glasses'] ?? 
+                            userProfile['waterIntakeGlasses'] ?? 
+                            8;
+    
+    print('💧 [WATER] User goal: $waterGoalGlasses glasses/day');
+    print('💧 [WATER] Reminder frequency: every ${prefs.waterReminderFrequency} hours');
+    
+    // Schedule water reminders throughout the day
+    // Start at 8 AM, end at 10 PM (awake hours)
+    int notificationId = waterNotificationIdBase;
+    int hour = 8;
+    int reminderCount = 0;
+    
+    while (hour <= 22) {
+      await _scheduleNotification(
+        id: notificationId++,
+        title: '💧 Hydration Check',
+        body: waterGoalGlasses >= 10 
+          ? 'Stay hydrated! Goal: $waterGoalGlasses glasses'
+          : 'Remember to log your water intake!',
+        hour: hour,
+        minute: 0,
+        userId: userId,
+      );
+      
+      hour += prefs.waterReminderFrequency;
+      reminderCount++;
+    }
+    
+    print('✅ [WATER] Scheduled $reminderCount water reminders');
+  }
+  
+  /// Schedule weekly weight reminder (Mondays at 8 AM)
+  Future<void> scheduleWeightReminderNotification(String userId) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      8, // 8 AM
+      0,
+    );
+    
+    // Find next Monday
+    while (scheduledDate.weekday != DateTime.monday || scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+    
+    await _notificationsPlugin.zonedSchedule(
+      weightNotificationId,
+      '⚖️ Weekly Weigh-In',
+      'Time for your weekly weight check!',
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'health_reminders',
+          'Health Reminders',
+          channelDescription: 'Health reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          enableVibration: true,
+          showWhen: true,
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      payload: jsonEncode({
+        'type': 'weight',
+        'userId': userId,
+      }),
+    );
+    
+    _logNotificationToDatabase(
+      userId: userId,
+      title: '⚖️ Weekly Weigh-In',
+      body: 'Time for your weekly weight check!',
+      type: 'weight',
+    );
+    
+    print('✅ [WEIGHT] Scheduled for Mondays at 8:00 AM');
+  }
+
+  Future<void> scheduleSleepNotificationWithUserData(
+    String userId, 
+    Map<String, dynamic> userProfile,
+  ) async {
+    // Get user's wake time to schedule sleep log reminder
+    final wakeupTime = userProfile['wakeup_time'] ?? 
+                      userProfile['wakeupTime'] ?? 
+                      '06:00';
+    
+    // Parse wake time
+    final timeParts = wakeupTime.toString().split(':');
+    final wakeHour = int.tryParse(timeParts[0]) ?? 6;
+    final wakeMinute = timeParts.length > 1 ? int.tryParse(timeParts[1]) ?? 0 : 0;
+    
+    // Schedule sleep log reminder 30 minutes after wake time
+    final reminderHour = (wakeHour + (wakeMinute >= 30 ? 1 : 0)) % 24;
+    final reminderMinute = (wakeMinute + 30) % 60;
+    
+    await _scheduleNotification(
+      id: sleepNotificationId,
+      title: '😴 Sleep Log Reminder',
+      body: 'How was your sleep last night? Log it now!',
+      hour: reminderHour,
+      minute: reminderMinute,
+      userId: userId,
+    );
+    
+    print('✅ [SLEEP] Scheduled at $reminderHour:${reminderMinute.toString().padLeft(2, '0')} (30min after wake time)');
+  }
+
 
   Future<void> scheduleMealNotifications(String userId, Map<String, dynamic> userProfile) async {
     print('🍽️ [MEALS] Scheduling notifications');

@@ -1,7 +1,7 @@
 // lib/features/chat/screens/chat_page.dart
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/chat_api.dart';
 import 'package:user_onboarding/data/services/chat_service.dart';
 import 'package:intl/intl.dart';
 import 'package:user_onboarding/features/reports/screens/weekly_summary_screen.dart';
@@ -21,7 +21,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final ApiService _apiService = ApiService();
+  final ChatApi _apiService = ChatApi();
   
   List<Map<String, dynamic>> _messages = [];
   bool _isTyping = false;

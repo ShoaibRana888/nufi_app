@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:user_onboarding/providers/user_provider.dart';
@@ -21,7 +20,6 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  final _apiService = ApiService();
 
   // Basic Info Controllers
   late TextEditingController _heightController;

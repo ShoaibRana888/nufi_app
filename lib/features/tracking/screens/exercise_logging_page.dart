@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/exercise_api.dart';
 import 'package:user_onboarding/features/tracking/screens/exercise_history_page.dart';
 
 
@@ -17,7 +17,7 @@ class EnhancedExerciseLoggingPage extends StatefulWidget {
 }
 
 class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPage> {
-  final ApiService _apiService = ApiService();
+  final ExerciseApi _apiService = ExerciseApi();
   final TextEditingController _customExerciseController = TextEditingController();
   
   // Current flow state
@@ -764,9 +764,10 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
           ),
           const SizedBox(height: 24),
           
-          Expanded(
-            child: ListView(
-              children: [
+          ListView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
                 // Standard exercises
                 ...exercises.map((exercise) => _buildExerciseCard(exercise, false)),
                 
@@ -786,7 +787,6 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                 ],
               ],
             ),
-          ),
         ],
       ),
     );
@@ -1000,15 +1000,15 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
           
           const SizedBox(height: 16),
           
-          Expanded(
-            child: ListView.builder(
-              itemCount: _selectedExercises.length,
-              itemBuilder: (context, index) {
-                final exerciseName = _selectedExercises[index];
-                final exercise = _getExerciseByName(exerciseName);
-                return _buildExerciseLogCard(exercise);
-              },
-            ),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _selectedExercises.length,
+            itemBuilder: (context, index) {
+              final exerciseName = _selectedExercises[index];
+              final exercise = _getExerciseByName(exerciseName);
+              return _buildExerciseLogCard(exercise);
+            },
           ),
         ],
       ),
@@ -1539,7 +1539,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
           'exercise_type': exerciseType,
           'muscle_group': _selectedMuscleGroup.toLowerCase(),
           'calories_burned': calories,
-          'exercise_date': _selectedDate.toIso8601String(),
+          'exercise_date': DateFormat('yyyy-MM-dd').format(_selectedDate),
           'duration_minutes': duration.round(),
           'notes': 'Quick logged from previous workout',
         };
@@ -1894,7 +1894,7 @@ double _calculateTotalCalories() {
           'exercise_type': exercise.type,
           'muscle_group': _selectedMuscleGroup.toLowerCase(),
           'calories_burned': calories,
-          'exercise_date': _selectedDate.toIso8601String(),
+          'exercise_date': DateFormat('yyyy-MM-dd').format(_selectedDate),
           'duration_minutes': duration.round(), // Add calculated duration
           'notes': '',
         };

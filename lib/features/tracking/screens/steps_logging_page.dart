@@ -8,7 +8,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:user_onboarding/data/repositories/step_repository.dart';
 import 'package:user_onboarding/features/home/widgets/daily_step_tracker.dart';
 import 'package:user_onboarding/features/tracking/screens/step_history_page.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
+import 'package:user_onboarding/data/services/api/auth_api.dart';
 
 class StepsLoggingPage extends StatefulWidget {
   final UserProfile userProfile;
@@ -93,7 +93,7 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
                 });
                 
                 try {
-                  final apiService = ApiService();
+                  final apiService = AuthApi();
                   
                   // ✅ Update both dailyStepGoal field AND formData
                   final updatedFormData = Map<String, dynamic>.from(widget.userProfile.formData);

@@ -5,7 +5,6 @@ import 'package:user_onboarding/data/models/period_entry.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/repositories/period_repository.dart';
 import 'package:user_onboarding/data/managers/user_manager.dart';
-import 'package:user_onboarding/data/services/api_service.dart';
 
 class PeriodCalendarPage extends StatefulWidget {
   const PeriodCalendarPage({Key? key}) : super(key: key);
@@ -24,7 +23,6 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
   PeriodEntry? _currentPeriod;
   bool _isLoading = true;
   
-  final ApiService _apiService = ApiService();
   
   Map<DateTime, List<String>> _events = {};
   Set<DateTime> _periodDays = {};

@@ -10,6 +10,7 @@ import 'package:user_onboarding/features/tracking/screens/weight_logging_page.da
 import 'package:user_onboarding/features/tracking/screens/steps_logging_page.dart';
 import 'package:user_onboarding/features/tracking/screens/supplements_logging_page.dart';
 import 'package:user_onboarding/features/reports/screens/weekly_summary_screen.dart';
+import 'package:user_onboarding/features/reports/screens/today_report_screen.dart';
 
 class ActivityDrawer extends StatelessWidget {
   final UserProfile userProfile;
@@ -97,6 +98,15 @@ class ActivityDrawer extends StatelessWidget {
                     Colors.pink,
                     () => _navigateToPage(context, PeriodCalendarPage()),
                   ),
+
+                _buildActivityTile(
+                  context,
+                  "Today's Report",
+                  'View your daily activity summary',
+                  Icons.analytics,
+                  Colors.blue,
+                  () => _navigateToPage(context, TodayReportScreen(userProfile: userProfile)),
+                ),
 
                 _buildActivityTile(
                   context,
