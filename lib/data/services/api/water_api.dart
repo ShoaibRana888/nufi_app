@@ -36,8 +36,6 @@ class WaterApi {
           date: waterEntry.date
         );
 
-        await _chat.rebuildChatContext(waterEntry.userId);
-
         return entryId;
       } else {
         throw Exception('Failed to save water entry');

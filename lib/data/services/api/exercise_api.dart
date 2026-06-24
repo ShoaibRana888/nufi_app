@@ -38,8 +38,6 @@ class ExerciseApi {
           responseData['exercise'] ?? exerciseData
         );
 
-        await _chat.rebuildChatContext(exerciseData['user_id']);
-
         return responseData;
       } else {
         throw Exception('Failed to log exercise');

@@ -33,8 +33,6 @@ class SleepApi {
           responseData['entry'] ?? sleepData
         );
 
-        await _chat.rebuildChatContext(sleepData['user_id']);
-
         return responseData;
       } else {
         throw Exception('Failed to save sleep entry');

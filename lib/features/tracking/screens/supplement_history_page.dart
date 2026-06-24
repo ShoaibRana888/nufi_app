@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/repositories/supplement_repository.dart';
+import 'package:user_onboarding/data/services/api/sharing_api.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 
@@ -19,6 +20,7 @@ class SupplementHistoryPage extends StatefulWidget {
 }
 
 class _SupplementHistoryPageState extends State<SupplementHistoryPage> {
+  final SharingApi _sharingApi = SharingApi();
   List<Map<String, dynamic>> _historyData = [];
   List<String> _userSupplements = [];
   bool _isLoading = true;
@@ -371,6 +373,39 @@ class _SupplementHistoryPageState extends State<SupplementHistoryPage> {
                       color: completionRate == 1.0 ? Colors.green : Colors.orange,
                       size: 20,
                     ),
+                    Builder(
+                      builder: (context) {
+                        final isShared = !entries.any((e) => e['shared_with_chat'] == false);
+                        return PopupMenuButton<String>(
+                          icon: Icon(
+                            isShared ? Icons.more_vert : Icons.visibility_off,
+                            size: 18,
+                            color: isShared ? null : Colors.grey[500],
+                          ),
+                          onSelected: (v) {
+                            if (v == 'sharing') _toggleSupplementDateSharing(date, !isShared);
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'sharing',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isShared ? Icons.visibility_off : Icons.visibility,
+                                    color: Colors.purple,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(isShared
+                                      ? 'Hide day from coach'
+                                      : 'Share day with coach'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -392,6 +427,49 @@ class _SupplementHistoryPageState extends State<SupplementHistoryPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Toggle whether all supplements logged on [date] are shared with the coach.
+  Future<void> _toggleSupplementDateSharing(String date, bool newShared) async {
+    // Optimistically update every entry for that date.
+    final previous = <Map<String, dynamic>, dynamic>{};
+    setState(() {
+      for (final e in _historyData) {
+        if (e['date'] == date) {
+          previous[e] = e['shared_with_chat'];
+          e['shared_with_chat'] = newShared;
+        }
+      }
+    });
+
+    final ok = await _sharingApi.setSupplementSharing(
+      userId: widget.userProfile.id!,
+      date: DateTime.parse(date),
+      shared: newShared,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      setState(() {
+        previous.forEach((e, val) => e['shared_with_chat'] = val);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not update sharing. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(newShared
+            ? 'Supplements shared with coach'
+            : 'Supplements hidden from coach'),
+        backgroundColor: Colors.purple,
+        duration: const Duration(seconds: 1),
       ),
     );
   }

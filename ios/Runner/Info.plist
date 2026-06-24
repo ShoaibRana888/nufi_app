@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -24,11 +26,55 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSHealthShareUsageDescription</key>
+	<string>We need access to your health data to provide personalized fitness insights.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>We need permission to update your health data with your fitness activities.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone to allow voice commands for logging meals and exercises.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>We need access to your motion data to track your daily steps and physical activity.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>We need speech recognition for voice input</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>We need permission to send you reminders for meals, workouts, and hydration.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -42,45 +88,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-
-	<!-- Microphone Permission for Speech-to-Text -->
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to your microphone to allow voice commands for logging meals and exercises.</string>
-	
-	<!-- Motion & Fitness Permission for Step Tracking -->
-	<key>NSMotionUsageDescription</key>
-	<string>We need access to your motion data to track your daily steps and physical activity.</string>
-	
-	<!-- Health Kit Permission (if you decide to use it later) -->
-	<key>NSHealthShareUsageDescription</key>
-	<string>We need access to your health data to provide personalized fitness insights.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>We need permission to update your health data with your fitness activities.</string>
-	
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>We need speech recognition for voice input</string>
-
-	<!-- Notification Permission -->
-	<key>NSUserNotificationsUsageDescription</key>
-	<string>We need permission to send you reminders for meals, workouts, and hydration.</string>
-	
-	<!-- Background Modes for Notifications -->
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
-	
-	<!-- Allow network access -->
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
-
 </dict>
 </plist>

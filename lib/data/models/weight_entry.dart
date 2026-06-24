@@ -8,6 +8,7 @@ class WeightEntry {
   final double? bodyFatPercentage;
   final double? muscleMassKg;
   final DateTime createdAt;
+  final bool sharedWithChat;
 
   WeightEntry({
     this.id,
@@ -18,6 +19,7 @@ class WeightEntry {
     this.bodyFatPercentage,
     this.muscleMassKg,
     DateTime? createdAt,
+    this.sharedWithChat = true,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
@@ -30,6 +32,7 @@ class WeightEntry {
       'body_fat_percentage': bodyFatPercentage,
       'muscle_mass_kg': muscleMassKg,
       'created_at': createdAt.toIso8601String(),
+      'shared_with_chat': sharedWithChat,
     };
   }
 
@@ -42,9 +45,10 @@ class WeightEntry {
       notes: map['notes'],
       bodyFatPercentage: map['body_fat_percentage']?.toDouble(),
       muscleMassKg: map['muscle_mass_kg']?.toDouble(),
-      createdAt: map['created_at'] != null 
+      createdAt: map['created_at'] != null
       ? DateTime.parse(map['created_at']).toLocal()
       : DateTime.now(),
+      sharedWithChat: map['shared_with_chat'] != false,
     );
   }
 
@@ -57,6 +61,7 @@ class WeightEntry {
     double? bodyFatPercentage,
     double? muscleMassKg,
     DateTime? createdAt,
+    bool? sharedWithChat,
   }) {
     return WeightEntry(
       id: id ?? this.id,
@@ -67,6 +72,7 @@ class WeightEntry {
       bodyFatPercentage: bodyFatPercentage ?? this.bodyFatPercentage,
       muscleMassKg: muscleMassKg ?? this.muscleMassKg,
       createdAt: createdAt ?? this.createdAt,
+      sharedWithChat: sharedWithChat ?? this.sharedWithChat,
     );
   }
 }

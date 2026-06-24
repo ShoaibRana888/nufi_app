@@ -43,8 +43,6 @@ class WeightApi {
           date: weightEntry.date
         );
 
-        await _chat.rebuildChatContext(weightEntry.userId);
-
         return entryId;
       } else {
         throw Exception('Failed to save weight entry');

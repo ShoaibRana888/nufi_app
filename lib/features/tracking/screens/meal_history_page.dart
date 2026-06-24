@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/services/api/meal_api.dart';
+import 'package:user_onboarding/data/services/api/sharing_api.dart';
 import 'package:intl/intl.dart';
 
 class MealHistoryPage extends StatefulWidget {
@@ -18,6 +19,7 @@ class MealHistoryPage extends StatefulWidget {
 
 class _MealHistoryPageState extends State<MealHistoryPage> {
   final MealApi _apiService = MealApi();
+  final SharingApi _sharingApi = SharingApi();
   List<Map<String, dynamic>> _meals = [];
   Map<String, dynamic> _dailyTotals = {};
   DateTime _selectedDate = DateTime.now();
@@ -294,6 +296,16 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
           
           // ADD THIS: Action buttons
           const SizedBox(width: 8),
+          // Hidden-from-coach indicator
+          if (meal['shared_with_chat'] == false) ...[
+            const SizedBox(width: 6),
+            Tooltip(
+              message: 'Hidden from AI coach',
+              child: Icon(Icons.visibility_off, size: 18, color: Colors.grey[500]),
+            ),
+          ],
+          // ADD THIS: Action buttons
+          const SizedBox(width: 8),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.grey),
             onSelected: (value) {
@@ -301,30 +313,49 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
                 _editMeal(meal);
               } else if (value == 'delete') {
                 _confirmDeleteMeal(meal);
+              } else if (value == 'sharing') {
+                _toggleMealSharing(meal);
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit, color: Colors.blue, size: 18),
-                    SizedBox(width: 8),
-                    Text('Edit'),
-                  ],
+            itemBuilder: (context) {
+              final isShared = meal['shared_with_chat'] != false;
+              return [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: Colors.blue, size: 18),
+                      SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, color: Colors.red, size: 18),
-                    SizedBox(width: 8),
-                    Text('Delete'),
-                  ],
+                PopupMenuItem(
+                  value: 'sharing',
+                  child: Row(
+                    children: [
+                      Icon(
+                        isShared ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.purple,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(isShared ? 'Hide from coach' : 'Share with coach'),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: Colors.red, size: 18),
+                      SizedBox(width: 8),
+                      Text('Delete'),
+                    ],
+                  ),
+                ),
+              ];
+            },
           ),
         ],
       ),
@@ -578,6 +609,43 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
     if (confirmed == true) {
       await _deleteMeal(meal);
     }
+  }
+
+  // Toggle whether this meal is shared with the AI coach
+  Future<void> _toggleMealSharing(Map<String, dynamic> meal) async {
+    final wasShared = meal['shared_with_chat'] != false;
+    final newShared = !wasShared;
+
+    // Optimistic UI update
+    setState(() => meal['shared_with_chat'] = newShared);
+
+    final ok = await _sharingApi.setEntrySharing(
+      userId: widget.userProfile.id!,
+      activityType: 'meal',
+      itemId: meal['id'].toString(),
+      shared: newShared,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      // Revert on failure
+      setState(() => meal['shared_with_chat'] = wasShared);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not update sharing. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(newShared ? 'Meal shared with coach' : 'Meal hidden from coach'),
+        backgroundColor: Colors.purple,
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   // Delete meal

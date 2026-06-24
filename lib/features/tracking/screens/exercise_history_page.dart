@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/services/api/exercise_api.dart';
+import 'package:user_onboarding/data/services/api/sharing_api.dart';
 
 class EnhancedExerciseHistoryPage extends StatefulWidget {
   final UserProfile userProfile;
@@ -17,7 +18,8 @@ class EnhancedExerciseHistoryPage extends StatefulWidget {
 class _EnhancedExerciseHistoryPageState extends State<EnhancedExerciseHistoryPage> 
     with SingleTickerProviderStateMixin {
   final ExerciseApi _apiService = ExerciseApi();
-  
+  final SharingApi _sharingApi = SharingApi();
+
   List<Map<String, dynamic>> _exercises = [];
   Map<String, dynamic> _weeklyStats = {};
   bool _isLoading = false;
@@ -712,6 +714,22 @@ class _EnhancedExerciseHistoryPageState extends State<EnhancedExerciseHistoryPag
                 // TODO: Implement edit functionality
               },
             ),
+            Builder(
+              builder: (context) {
+                final isShared = exercise['shared_with_chat'] != false;
+                return ListTile(
+                  leading: Icon(
+                    isShared ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.purple,
+                  ),
+                  title: Text(isShared ? 'Hide from coach' : 'Share with coach'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _toggleExerciseSharing(exercise);
+                  },
+                );
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
               title: const Text('Delete Exercise'),
@@ -722,6 +740,38 @@ class _EnhancedExerciseHistoryPageState extends State<EnhancedExerciseHistoryPag
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _toggleExerciseSharing(Map<String, dynamic> exercise) async {
+    final wasShared = exercise['shared_with_chat'] != false;
+    final newShared = !wasShared;
+    setState(() => exercise['shared_with_chat'] = newShared);
+
+    final ok = await _sharingApi.setEntrySharing(
+      userId: widget.userProfile.id!,
+      activityType: 'exercise',
+      itemId: exercise['id'].toString(),
+      shared: newShared,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => exercise['shared_with_chat'] = wasShared);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not update sharing. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(newShared ? 'Exercise shared with coach' : 'Exercise hidden from coach'),
+        backgroundColor: Colors.purple,
+        duration: const Duration(seconds: 1),
       ),
     );
   }

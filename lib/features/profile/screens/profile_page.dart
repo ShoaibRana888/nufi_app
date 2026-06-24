@@ -1178,12 +1178,15 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: color ?? Colors.black,
+            Flexible(
+              child: Text(
+                value,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: color ?? Colors.black,
+                ),
               ),
             ),
           ],
@@ -1252,39 +1255,43 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Activity Level',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Activity Level',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 11,
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 11,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  formattedLevel,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+            const SizedBox(width: 8),
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 8),
+            // Constrain the (often long) level text so it wraps right-aligned
+            // instead of overflowing on ~411dp-wide phones.
+            Flexible(
+              child: Text(
+                formattedLevel,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
-              ],
+              ),
             ),
           ],
         ),

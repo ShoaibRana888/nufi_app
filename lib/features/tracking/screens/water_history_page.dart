@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/water_entry.dart';
 import 'package:user_onboarding/data/repositories/water_repository.dart';
+import 'package:user_onboarding/data/services/api/sharing_api.dart';
 import 'package:intl/intl.dart';
 
 class WaterHistoryPage extends StatefulWidget {
@@ -15,6 +16,7 @@ class WaterHistoryPage extends StatefulWidget {
 }
 
 class _WaterHistoryPageState extends State<WaterHistoryPage> {
+  final SharingApi _sharingApi = SharingApi();
   List<WaterEntry> _entries = [];
   bool _isLoading = true;
 
@@ -313,8 +315,73 @@ class _WaterHistoryPageState extends State<WaterHistoryPage> {
                 color: Colors.green,
                 size: 20,
               ),
+            if (!entry.sharedWithChat)
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Tooltip(
+                  message: 'Hidden from AI coach',
+                  child: Icon(Icons.visibility_off, size: 16, color: Colors.grey[500]),
+                ),
+              ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, size: 18),
+              onSelected: (v) {
+                if (v == 'sharing') _toggleWaterSharing(entry);
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'sharing',
+                  child: Row(
+                    children: [
+                      Icon(
+                        entry.sharedWithChat ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.purple,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(entry.sharedWithChat ? 'Hide from coach' : 'Share with coach'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _toggleWaterSharing(WaterEntry entry) async {
+    final idx = _entries.indexOf(entry);
+    if (idx == -1) return;
+    final wasShared = entry.sharedWithChat;
+    final newShared = !wasShared;
+
+    setState(() => _entries[idx] = entry.copyWith(sharedWithChat: newShared));
+
+    final ok = await _sharingApi.setDateSharing(
+      userId: widget.userProfile.id!,
+      activityType: 'water',
+      date: entry.date,
+      shared: newShared,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => _entries[idx] = entry.copyWith(sharedWithChat: wasShared));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not update sharing. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(newShared ? 'Water shared with coach' : 'Water hidden from coach'),
+        backgroundColor: Colors.purple,
+        duration: const Duration(seconds: 1),
       ),
     );
   }

@@ -12,6 +12,7 @@ class StepEntry {
   final DateTime? lastSynced;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final bool sharedWithChat;
 
   StepEntry({
     this.id,
@@ -26,6 +27,7 @@ class StepEntry {
     this.lastSynced,
     this.createdAt,
     this.updatedAt,
+    this.sharedWithChat = true,
   });
 
   StepEntry copyWith({
@@ -41,6 +43,7 @@ class StepEntry {
     DateTime? lastSynced,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? sharedWithChat,
   }) {
     return StepEntry(
       id: id ?? this.id,
@@ -55,6 +58,7 @@ class StepEntry {
       lastSynced: lastSynced ?? this.lastSynced,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      sharedWithChat: sharedWithChat ?? this.sharedWithChat,
     );
   }
 
@@ -69,9 +73,10 @@ class StepEntry {
       'distance_km': distanceKm,          
       'active_minutes': activeMinutes,   
       'source_type': sourceType,          
-      'last_synced': lastSynced?.toIso8601String(),  
+      'last_synced': lastSynced?.toIso8601String(),
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
+      'shared_with_chat': sharedWithChat,
     };
   }
 
@@ -100,8 +105,9 @@ class StepEntry {
             ? DateTime.tryParse(map['created_at']?.toString() ?? map['createdAt']?.toString() ?? '')?.toLocal() 
             : null,
         updatedAt: map['updated_at'] != null || map['updatedAt'] != null
-            ? DateTime.tryParse(map['updated_at']?.toString() ?? map['updatedAt']?.toString() ?? '')?.toLocal() 
+            ? DateTime.tryParse(map['updated_at']?.toString() ?? map['updatedAt']?.toString() ?? '')?.toLocal()
             : null,
+        sharedWithChat: map['shared_with_chat'] != false,
       );
     } catch (e) {
       print('Error parsing StepEntry from map: $e');

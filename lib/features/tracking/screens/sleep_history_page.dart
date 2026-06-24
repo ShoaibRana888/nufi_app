@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/sleep_entry.dart';
 import 'package:user_onboarding/data/repositories/sleep_repository.dart';
+import 'package:user_onboarding/data/services/api/sharing_api.dart';
 
 class SleepHistoryPage extends StatefulWidget {
   final UserProfile userProfile;
@@ -16,6 +17,7 @@ class SleepHistoryPage extends StatefulWidget {
 
 class _SleepHistoryPageState extends State<SleepHistoryPage> {
   final SleepRepository _sleepRepository = SleepRepository();
+  final SharingApi _sharingApi = SharingApi();
   List<SleepEntry> _sleepEntries = [];
   Map<String, dynamic> _stats = {};
   bool _isLoading = true;
@@ -189,6 +191,41 @@ class _SleepHistoryPageState extends State<SleepHistoryPage> {
     );
   }
 
+  Future<void> _toggleSleepSharing(SleepEntry entry) async {
+    final idx = _sleepEntries.indexOf(entry);
+    if (idx == -1 || entry.id == null) return;
+    final wasShared = entry.sharedWithChat;
+    final newShared = !wasShared;
+
+    setState(() => _sleepEntries[idx] = entry.copyWith(sharedWithChat: newShared));
+
+    final ok = await _sharingApi.setEntrySharing(
+      userId: widget.userProfile.id!,
+      activityType: 'sleep',
+      itemId: entry.id!,
+      shared: newShared,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => _sleepEntries[idx] = entry.copyWith(sharedWithChat: wasShared));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not update sharing. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(newShared ? 'Sleep shared with coach' : 'Sleep hidden from coach'),
+        backgroundColor: Colors.purple,
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
   Widget _buildSleepEntryCard(SleepEntry entry) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -207,20 +244,54 @@ class _SleepHistoryPageState extends State<SleepHistoryPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getQualityColor(entry.qualityScore).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    _getQualityLabel(entry.qualityScore),
-                    style: TextStyle(
-                      color: _getQualityColor(entry.qualityScore),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                Row(
+                  children: [
+                    if (!entry.sharedWithChat)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Tooltip(
+                          message: 'Hidden from AI coach',
+                          child: Icon(Icons.visibility_off, size: 16, color: Colors.grey[500]),
+                        ),
+                      ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getQualityColor(entry.qualityScore).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _getQualityLabel(entry.qualityScore),
+                        style: TextStyle(
+                          color: _getQualityColor(entry.qualityScore),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, size: 18),
+                      onSelected: (v) {
+                        if (v == 'sharing') _toggleSleepSharing(entry);
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'sharing',
+                          child: Row(
+                            children: [
+                              Icon(
+                                entry.sharedWithChat ? Icons.visibility_off : Icons.visibility,
+                                color: Colors.purple,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(entry.sharedWithChat ? 'Hide from coach' : 'Share with coach'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),

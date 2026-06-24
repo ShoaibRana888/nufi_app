@@ -153,8 +153,9 @@ class ActivityDrawer extends StatelessWidget {
   }
 
   Widget _buildDrawerHeader() {
+    // No fixed height: the header sizes to its content plus the top safe-area
+    // inset, so it never overflows on notched / tall-status-bar devices.
     return Container(
-      height: 200,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -163,11 +164,12 @@ class ActivityDrawer extends StatelessWidget {
         ),
       ),
       child: SafeArea(
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
             children: [
               CircleAvatar(
                 radius: 30,

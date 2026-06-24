@@ -11,6 +11,7 @@ class SleepEntry {
   final List<String> sleepIssues;
   final String? notes;
   final DateTime createdAt;
+  final bool sharedWithChat;
 
   @override
   String toString() {
@@ -29,6 +30,7 @@ class SleepEntry {
     this.sleepIssues = const [],
     this.notes,
     required this.createdAt,
+    this.sharedWithChat = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -44,6 +46,7 @@ class SleepEntry {
       'sleep_issues': sleepIssues,
       'notes': notes,
       'created_at': createdAt.toIso8601String(),
+      'shared_with_chat': sharedWithChat,
     };
   }
 
@@ -116,6 +119,7 @@ class SleepEntry {
       deepSleepHours: (map['deep_sleep_hours'] ?? map['deepSleepHours'] ?? 0).toDouble(),
       sleepIssues: sleepIssuesList,
       notes: map['notes']?.toString(),
+      sharedWithChat: map['shared_with_chat'] != false,
       createdAt: map['created_at'] != null || map['createdAt'] != null
           ? (map['created_at'] ?? map['createdAt']) is String 
               ? DateTime.parse(map['created_at'] ?? map['createdAt']).toLocal()  // ← Added .toLocal()
@@ -136,6 +140,7 @@ class SleepEntry {
     List<String>? sleepIssues,
     String? notes,
     DateTime? createdAt,
+    bool? sharedWithChat,
   }) {
     return SleepEntry(
       id: id ?? this.id,
@@ -149,6 +154,7 @@ class SleepEntry {
       sleepIssues: sleepIssues ?? this.sleepIssues,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
+      sharedWithChat: sharedWithChat ?? this.sharedWithChat,
     );
   }
 }

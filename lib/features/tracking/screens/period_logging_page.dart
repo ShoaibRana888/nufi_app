@@ -5,6 +5,7 @@ import 'package:user_onboarding/data/models/period_entry.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/repositories/period_repository.dart';
 import 'package:user_onboarding/data/managers/user_manager.dart';
+import 'package:user_onboarding/data/services/api/sharing_api.dart';
 
 class PeriodCalendarPage extends StatefulWidget {
   const PeriodCalendarPage({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
   
+  final SharingApi _sharingApi = SharingApi();
   UserProfile? _userProfile;
   List<PeriodEntry> _periodHistory = [];
   PeriodEntry? _currentPeriod;
@@ -63,6 +65,38 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
     } catch (e) {
       print('Error loading period data: $e');
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _togglePeriodSharing(PeriodEntry entry) async {
+    if (entry.id == null || _userProfile?.id == null) return;
+    final newShared = !entry.sharedWithChat;
+
+    final ok = await _sharingApi.setEntrySharing(
+      userId: _userProfile!.id!,
+      activityType: 'period',
+      itemId: entry.id!,
+      shared: newShared,
+    );
+
+    if (!mounted) return;
+    if (ok) {
+      await _loadData();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(newShared ? 'Period shared with coach' : 'Period hidden from coach'),
+          backgroundColor: Colors.purple,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not update sharing. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -535,7 +569,18 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                           }
                         },
                       ),
-                    
+
+                    if (periodEntry != null)
+                      _buildActionButton(
+                        periodEntry.sharedWithChat ? 'Hide from coach' : 'Share with coach',
+                        periodEntry.sharedWithChat ? Icons.visibility_off : Icons.visibility,
+                        Colors.purple,
+                        () async {
+                          await _togglePeriodSharing(periodEntry);
+                          if (mounted) Navigator.pop(context);
+                        },
+                      ),
+
                     const SizedBox(height: 16),
                   ],
                   // Cycle insights

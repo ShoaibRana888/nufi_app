@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/step_entry.dart';
 import 'package:user_onboarding/data/repositories/step_repository.dart';
+import 'package:user_onboarding/data/services/api/sharing_api.dart';
 
 class StepHistoryPage extends StatefulWidget {
   final UserProfile userProfile;
@@ -15,6 +16,7 @@ class StepHistoryPage extends StatefulWidget {
 }
 
 class _StepHistoryPageState extends State<StepHistoryPage> {
+  final SharingApi _sharingApi = SharingApi();
   List<StepEntry> _allEntries = [];
   List<StepEntry> _filteredEntries = [];
   bool _isLoading = true;
@@ -211,6 +213,49 @@ class _StepHistoryPageState extends State<StepHistoryPage> {
     );
   }
 
+  Future<void> _toggleStepSharing(StepEntry entry) async {
+    final wasShared = entry.sharedWithChat;
+    final newShared = !wasShared;
+
+    // Steps are a per-day aggregate, so match by date across both lists.
+    void apply(bool shared) {
+      setState(() {
+        for (final list in [_allEntries, _filteredEntries]) {
+          final i = list.indexWhere((e) => DateUtils.isSameDay(e.date, entry.date));
+          if (i != -1) list[i] = list[i].copyWith(sharedWithChat: shared);
+        }
+      });
+    }
+
+    apply(newShared);
+
+    final ok = await _sharingApi.setDateSharing(
+      userId: widget.userProfile.id!,
+      activityType: 'steps',
+      date: entry.date,
+      shared: newShared,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      apply(wasShared);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not update sharing. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(newShared ? 'Steps shared with coach' : 'Steps hidden from coach'),
+        backgroundColor: Colors.purple,
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
   Widget _buildHistoryCard(StepEntry entry) {
     final progress = entry.goal > 0 ? (entry.steps / entry.goal).clamp(0.0, 1.0) : 0.0;
     final isGoalAchieved = entry.steps >= entry.goal;
@@ -267,18 +312,48 @@ class _StepHistoryPageState extends State<StepHistoryPage> {
                         color: Colors.green,
                         size: 20,
                       ),
+                    if (!entry.sharedWithChat)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Tooltip(
+                          message: 'Hidden from AI coach',
+                          child: Icon(Icons.visibility_off, size: 16, color: Colors.grey[500]),
+                        ),
+                      ),
                     const SizedBox(width: 8),
                     Chip(
                       label: Text(entry.sourceType.toUpperCase()),
-                      backgroundColor: entry.sourceType == 'health_app' 
-                          ? Colors.blue.shade100 
+                      backgroundColor: entry.sourceType == 'health_app'
+                          ? Colors.blue.shade100
                           : Colors.orange.shade100,
                       labelStyle: TextStyle(
                         fontSize: 10,
-                        color: entry.sourceType == 'health_app' 
-                            ? Colors.blue.shade700 
+                        color: entry.sourceType == 'health_app'
+                            ? Colors.blue.shade700
                             : Colors.orange.shade700,
                       ),
+                    ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, size: 18),
+                      onSelected: (v) {
+                        if (v == 'sharing') _toggleStepSharing(entry);
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'sharing',
+                          child: Row(
+                            children: [
+                              Icon(
+                                entry.sharedWithChat ? Icons.visibility_off : Icons.visibility,
+                                color: Colors.purple,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(entry.sharedWithChat ? 'Hide from coach' : 'Share with coach'),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

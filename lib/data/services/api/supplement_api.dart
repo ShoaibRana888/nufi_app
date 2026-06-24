@@ -176,8 +176,6 @@ class SupplementApi {
           logData
         );
 
-        await _chat.rebuildChatContext(logData['user_id']);
-
         return responseData;
       } else {
         throw Exception('Failed to save supplement entry');

@@ -8,6 +8,7 @@ import 'package:user_onboarding/providers/user_provider.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/weight_entry.dart';
 import 'package:user_onboarding/data/services/data_manager.dart';
+import 'package:user_onboarding/data/services/api/sharing_api.dart';
 import 'package:user_onboarding/utils/profile_update_notifier.dart';
 
 class WeightLoggingPage extends StatefulWidget {
@@ -23,8 +24,8 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   final DataManager _dataManager = DataManager();
+  final SharingApi _sharingApi = SharingApi();
 
-  
   UserProfile? _currentUserProfile;
   List<WeightEntry> _weightHistory = [];
   bool _isLoading = true;
@@ -1010,7 +1011,69 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
             icon: const Icon(Icons.delete_outline, color: Colors.red),
             onPressed: () => _confirmDeleteEntry(entry),
           ),
+          PopupMenuButton<String>(
+            icon: Icon(
+              entry.sharedWithChat ? Icons.more_vert : Icons.visibility_off,
+              color: entry.sharedWithChat ? null : Colors.grey[500],
+            ),
+            tooltip: entry.sharedWithChat ? 'Sharing options' : 'Hidden from AI coach',
+            onSelected: (v) {
+              if (v == 'sharing') _toggleWeightSharing(entry);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'sharing',
+                child: Row(
+                  children: [
+                    Icon(
+                      entry.sharedWithChat ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.purple,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(entry.sharedWithChat ? 'Hide from coach' : 'Share with coach'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _toggleWeightSharing(WeightEntry entry) async {
+    if (entry.id == null) return;
+    final idx = _weightHistory.indexOf(entry);
+    if (idx == -1) return;
+    final wasShared = entry.sharedWithChat;
+    final newShared = !wasShared;
+
+    setState(() => _weightHistory[idx] = entry.copyWith(sharedWithChat: newShared));
+
+    final ok = await _sharingApi.setEntrySharing(
+      userId: _currentUserProfile?.id ?? widget.userProfile.id!,
+      activityType: 'weight',
+      itemId: entry.id!,
+      shared: newShared,
+    );
+
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => _weightHistory[idx] = entry.copyWith(sharedWithChat: wasShared));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not update sharing. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(newShared ? 'Weight shared with coach' : 'Weight hidden from coach'),
+        backgroundColor: Colors.purple,
+        duration: const Duration(seconds: 1),
       ),
     );
   }

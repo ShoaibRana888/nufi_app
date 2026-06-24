@@ -1,10 +1,17 @@
 // lib/features/chat/screens/chat_page.dart
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/chat/screens/chat_context_debug_page.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/services/api/chat_api.dart';
 import 'package:user_onboarding/data/services/chat_service.dart';
 import 'package:intl/intl.dart';
 import 'package:user_onboarding/features/reports/screens/weekly_summary_screen.dart';
+
+/// DEBUG / TESTING ONLY — shows the "Chat Context" inspector entry point (bug
+/// icon) in the chat app bar. Set to `false` (or delete this flag, the guarded
+/// block in the app bar, and chat_context_debug_page.dart) before shipping to
+/// production.
+const bool kShowContextDebug = true;
 
 class ChatPage extends StatefulWidget {
   final UserProfile userProfile;
@@ -39,7 +46,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    ChatService.rebuildContext(widget.userProfile.id!).then((_) {
+    // Load the user's personalized framework (used by the "My Framework" menu).
+    _loadFramework();
+    // Only reset/rebuild context when a new day has started; the server keeps
+    // today's context up to date incrementally as activities are logged.
+    _apiService.checkAndResetDailyContext(widget.userProfile.id!).then((_) {
       _loadChatHistory();
       _loadChatContext();
       _checkWeeklyContext();
@@ -174,6 +185,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       }
     } catch (e) {
       print('Error checking weekly context: $e');
+    }
+  }
+
+  Future<void> _loadFramework() async {
+    try {
+      final framework = await ChatService.getUserFramework(widget.userProfile.id!);
+      if (mounted) {
+        setState(() {
+          _userFramework = framework;
+        });
+      }
+    } catch (e) {
+      print('[ChatPage] Error loading framework: $e');
     }
   }
 
@@ -399,6 +423,24 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             icon: const Icon(Icons.info_outline),
             onPressed: _showContextInfo,
           ),
+          // DEBUG ONLY — inspect the chat context the AI sees + sharing
+          // defaults. Remove this block (and chat_context_debug_page.dart)
+          // before production release.
+          if (kShowContextDebug)
+            IconButton(
+              icon: const Icon(Icons.bug_report),
+              tooltip: 'Inspect chat context (debug)',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatContextDebugPage(
+                      userProfile: widget.userProfile,
+                    ),
+                  ),
+                );
+              },
+            ),
           PopupMenuButton<String>(
             onSelected: _handleMenuAction,
             itemBuilder: (context) => [
@@ -780,9 +822,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   void _showFrameworkDetails() {
     if (_userFramework == null) {
+      // Not loaded yet (or the load failed) — try again so the menu isn't a
+      // dead end, and tell the user we're fetching it.
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Framework data is loading...')),
+        const SnackBar(content: Text('Loading your framework, try again in a moment...')),
       );
+      _loadFramework();
       return;
     }
 
@@ -832,10 +877,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(value, style: TextStyle(color: Colors.purple[700])),
+          const SizedBox(width: 12),
+          // Let long values (e.g. "4 strength + 90 min cardio") wrap and align
+          // right instead of overflowing the dialog width.
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(color: Colors.purple[700]),
+            ),
+          ),
         ],
       ),
     );

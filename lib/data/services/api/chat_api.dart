@@ -86,10 +86,6 @@ class ChatApi {
         body: jsonEncode({
           'user_id': userId,
           'message': messageData['message'],
-          'metadata': {
-            'context_version': messageData['context_version'],
-            'context_timestamp': DateTime.now().toIso8601String(),
-          }
         }),
       ).timeout(
         const Duration(seconds: 60),

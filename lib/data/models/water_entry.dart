@@ -9,6 +9,7 @@ class WaterEntry {
   final String? notes;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final bool sharedWithChat;
 
   WaterEntry({
     this.id,
@@ -20,6 +21,7 @@ class WaterEntry {
     this.notes,
     this.createdAt,
     this.updatedAt,
+    this.sharedWithChat = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -33,6 +35,7 @@ class WaterEntry {
       'notes': notes,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
+      'shared_with_chat': sharedWithChat,
     };
   }
 
@@ -48,9 +51,10 @@ class WaterEntry {
       createdAt: map['created_at'] != null 
       ? DateTime.parse(map['created_at']).toLocal()
       : DateTime.now(),
-      updatedAt: map['updated_at'] != null 
+      updatedAt: map['updated_at'] != null
       ? DateTime.parse(map['updated_at']).toLocal()
       : DateTime.now(),
+      sharedWithChat: map['shared_with_chat'] != false,
     );
   }
 
@@ -64,6 +68,7 @@ class WaterEntry {
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? sharedWithChat,
   }) {
     return WaterEntry(
       id: id ?? this.id,
@@ -75,6 +80,7 @@ class WaterEntry {
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      sharedWithChat: sharedWithChat ?? this.sharedWithChat,
     );
   }
 }

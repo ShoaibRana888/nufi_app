@@ -18,29 +18,17 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for iOS - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macOS - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -59,5 +47,42 @@ class DefaultFirebaseOptions {
     messagingSenderId: '69862723384',
     projectId: 'nufitionist-faf66',
     storageBucket: 'nufitionist-faf66.firebasestorage.app',
+  );
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyAuUAXF9nMKn_SHHfdotXlZ4Mqx8diiJ7A',
+    appId: '1:69862723384:web:149e53a14a5cd3420bfbcd',
+    messagingSenderId: '69862723384',
+    projectId: 'nufitionist-faf66',
+    authDomain: 'nufitionist-faf66.firebaseapp.com',
+    storageBucket: 'nufitionist-faf66.firebasestorage.app',
+    measurementId: 'G-5M2ZPYMMDC',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDek-KaojfT75OurHLWqCYtetLTWKrPDBo',
+    appId: '1:69862723384:ios:dd43412004a311da0bfbcd',
+    messagingSenderId: '69862723384',
+    projectId: 'nufitionist-faf66',
+    storageBucket: 'nufitionist-faf66.firebasestorage.app',
+    iosBundleId: 'com.example.userOnboarding',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDek-KaojfT75OurHLWqCYtetLTWKrPDBo',
+    appId: '1:69862723384:ios:7886f6c1189d3bba0bfbcd',
+    messagingSenderId: '69862723384',
+    projectId: 'nufitionist-faf66',
+    storageBucket: 'nufitionist-faf66.firebasestorage.app',
+    iosBundleId: 'com.prowrites.nufitionist',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyAuUAXF9nMKn_SHHfdotXlZ4Mqx8diiJ7A',
+    appId: '1:69862723384:web:89c73d4a4e8a74780bfbcd',
+    messagingSenderId: '69862723384',
+    projectId: 'nufitionist-faf66',
+    authDomain: 'nufitionist-faf66.firebaseapp.com',
+    storageBucket: 'nufitionist-faf66.firebasestorage.app',
+    measurementId: 'G-YRDDJZ4Y8F',
   );
 }

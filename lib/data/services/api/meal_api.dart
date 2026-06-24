@@ -73,8 +73,6 @@ class MealApi {
             : DateTime.now()
         );
 
-        await _chat.rebuildChatContext(mealData['user_id']);
-
         return normalizedMeal;
 
       } else {

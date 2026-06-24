@@ -9,6 +9,7 @@ class PeriodEntry {
   final String? mood;
   final String? notes;
   final DateTime? createdAt;
+  final bool sharedWithChat;
 
   PeriodEntry({
     this.id,
@@ -20,6 +21,7 @@ class PeriodEntry {
     this.mood,
     this.notes,
     this.createdAt,
+    this.sharedWithChat = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -33,6 +35,7 @@ class PeriodEntry {
       'mood': mood,
       'notes': notes,
       'created_at': createdAt?.toIso8601String(),
+      'shared_with_chat': sharedWithChat,
     };
   }
 
@@ -53,6 +56,7 @@ class PeriodEntry {
       createdAt: map['created_at'] != null || map['createdAt'] != null
           ? DateTime.parse(map['created_at'] ?? map['createdAt']).toLocal()  // ← Added .toLocal()
           : null,
+      sharedWithChat: map['shared_with_chat'] != false,
     );
   }
 
@@ -65,6 +69,7 @@ class PeriodEntry {
     List<String>? symptoms,
     String? mood,
     String? notes,
+    bool? sharedWithChat,
   }) {
     return PeriodEntry(
       id: id ?? this.id,
@@ -75,6 +80,7 @@ class PeriodEntry {
       symptoms: symptoms ?? this.symptoms,
       mood: mood ?? this.mood,
       notes: notes ?? this.notes,
+      sharedWithChat: sharedWithChat ?? this.sharedWithChat,
     );
   }
 }
