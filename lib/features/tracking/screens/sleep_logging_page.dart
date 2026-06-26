@@ -151,16 +151,14 @@ class _SleepLoggingPageState extends State<SleepLoggingPage> {
   }
 
   double _calculateTotalHours() {
-    // If we have an existing entry, use its stored total hours
-    if (_existingEntry != null) {
-      return _existingEntry!.totalHours;
-    }
-    
-    // Otherwise calculate from the selected times
+    // Always recompute from the selected times when both are present, so
+    // editing bedtime/wake on an existing entry updates the total. Fall back to
+    // the stored total (when editing) or the profile default only if a time is
+    // missing.
     if (_bedtime == null || _wakeTime == null) {
-      return widget.userProfile.sleepHours;
+      return _existingEntry?.totalHours ?? widget.userProfile.sleepHours;
     }
-    
+
     DateTime bedDateTime = DateTime(
       _selectedDate.year,
       _selectedDate.month,

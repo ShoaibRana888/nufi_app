@@ -502,26 +502,22 @@ class DataManager {
       final isConnected = await _connectivityService.isConnected();
       
       if (isConnected) {
-        if (kIsWeb) {
-          // For web, use API service (you'll need to implement this in ApiService)
-          try {
-            await _weightApi.deleteWeightEntry(entryId);
+        // Weight history is ALWAYS loaded from the backend API (see
+        // getWeightHistory), so deletes must also go to the backend on every
+        // platform. The old native path deleted only from an unused local SQL
+        // table, so the entry stayed in Supabase and reappeared on reload —
+        // which is why deletes "didn't work" on mobile.
+        try {
+          final success = await _weightApi.deleteWeightEntry(entryId);
+          if (success) {
             _log('Weight entry deleted via API');
-            return true;
-          } catch (e) {
-            _log('API delete failed: $e');
-            return false;
+          } else {
+            _log('API delete returned failure for entry: $entryId');
           }
-        } else {
-          // For native, use database
-          try {
-            final result = await WeightRepository.deleteWeightEntry(entryId);
-            _log('Weight entry deleted from database');
-            return result;
-          } catch (e) {
-            _log('Database delete failed: $e');
-            return false;
-          }
+          return success;
+        } catch (e) {
+          _log('API delete failed: $e');
+          return false;
         }
       } else {
         // When offline, remove from local storage

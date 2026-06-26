@@ -180,7 +180,10 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
     try {
       final response = await _apiService.getMealPresets(widget.userProfile.id!);
       setState(() {
-        _mealPresets = response['presets'] ?? [];
+        // jsonDecode yields a List<dynamic>; build a correctly-typed list so
+        // the assignment doesn't throw a TypeError (which would otherwise be
+        // swallowed below, leaving presets perpetually empty).
+        _mealPresets = List<Map<String, dynamic>>.from(response['presets'] ?? []);
       });
     } catch (e) {
       print('Error loading presets: $e');
@@ -191,7 +194,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
     try {
       final response = await _apiService.getMealSuggestions(widget.userProfile.id!);
       setState(() {
-        _recentMeals = response['recent_meals'] ?? [];
+        _recentMeals = List<Map<String, dynamic>>.from(response['recent_meals'] ?? []);
       });
     } catch (e) {
       print('Error loading recent meals: $e');

@@ -1245,23 +1245,31 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
   }
 
   Widget _buildQuickTimeButton(
-    String label, 
-    DateTime time, 
-    DateTime selectedDateTime, 
-    StateSetter setDialogState, 
+    String label,
+    DateTime time,
+    DateTime selectedDateTime,
+    StateSetter setDialogState,
     Function(DateTime) onTimeSelected
   ) {
-    final isSelected = selectedDateTime.year == time.year &&
-                      selectedDateTime.month == time.month &&
-                      selectedDateTime.day == time.day &&
-                      selectedDateTime.hour == time.hour &&
+    // Quick-time presets should only change the time of day, keeping whatever
+    // date the user already picked. Combine the preset's hour/minute with the
+    // currently selected date (the preset's own date is ignored).
+    final target = DateTime(
+      selectedDateTime.year,
+      selectedDateTime.month,
+      selectedDateTime.day,
+      time.hour,
+      time.minute,
+    );
+
+    final isSelected = selectedDateTime.hour == time.hour &&
                       selectedDateTime.minute == time.minute;
 
     return ActionChip(
       label: Text(label),
       onPressed: () {
         setDialogState(() {
-          onTimeSelected(time);
+          onTimeSelected(target);
         });
       },
       backgroundColor: isSelected ? Colors.indigo : null,
