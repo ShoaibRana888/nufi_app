@@ -46,9 +46,23 @@ class _ChatContextDebugPageState extends State<ChatContextDebugPage> {
   Future<void> _loadAll() async {
     setState(() => _loading = true);
     try {
-      final daily = await _chatApi.getChatContext(widget.userProfile.id!, date: _selectedDate);
-      final weeks = await _chatApi.getRecentWeeks(widget.userProfile.id!, weeks: 4);
-      final defaults = await _sharingApi.getDefaults(widget.userProfile.id!);
+      final userId = widget.userProfile.id!;
+
+      // Force a rebuild from source data before fetching, so the debug view
+      // reflects the latest logs. Past weekly contexts are otherwise served
+      // from cache and won't pick up newly added/back-dated activity.
+      await _chatApi.rebuildChatContext(userId, date: _selectedDate);
+      for (var w = 0; w < 4; w++) {
+        final weekDate = DateTime.now().subtract(Duration(days: 7 * w));
+        await _chatApi.rebuildWeeklyContext(
+          userId,
+          date: DateFormat('yyyy-MM-dd').format(weekDate),
+        );
+      }
+
+      final daily = await _chatApi.getChatContext(userId, date: _selectedDate);
+      final weeks = await _chatApi.getRecentWeeks(userId, weeks: 4);
+      final defaults = await _sharingApi.getDefaults(userId);
       if (!mounted) return;
       setState(() {
         _dailyContext = daily;
