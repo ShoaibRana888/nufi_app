@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FCMService {
@@ -22,6 +23,15 @@ class FCMService {
 
   /// Initialize FCM
   Future<void> initialize() async {
+    // flutter_local_notifications has no web implementation and the native
+    // channel/token setup below relies on mobile-only APIs. Web push would
+    // require a service worker + VAPID key that aren't configured here, so we
+    // skip FCM setup entirely on web to avoid crashing app startup.
+    if (kIsWeb) {
+      print('🔔 [FCM] Web platform detected — skipping native FCM setup');
+      return;
+    }
+
     print('🔔 [FCM] Initializing Firebase Cloud Messaging...');
 
     await _requestPermission();

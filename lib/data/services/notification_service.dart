@@ -4,6 +4,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -41,8 +42,16 @@ class NotificationService {
   static const int stepMilestone100Id = 7001;
 
   Future<void> initialize() async {
+    // flutter_local_notifications has no web implementation and this method uses
+    // dart:io Platform checks, which throw on web. Skip on web so startup does
+    // not fall into the error screen.
+    if (kIsWeb) {
+      print('🔔 [INIT] Web platform detected — skipping notification setup');
+      return;
+    }
+
     print('🔔 [INIT] Starting notification service initialization...');
-    
+
     tz.initializeTimeZones();
     
     // Auto-detect timezone

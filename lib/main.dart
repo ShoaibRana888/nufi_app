@@ -46,9 +46,13 @@ Future<void> main() async {
     print('✅ Firebase initialized successfully');
 
 
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    // Background message handling relies on a native/service-worker handler.
+    // On web it needs a configured service worker + VAPID key, so skip it.
+    if (!kIsWeb) {
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    }
 
-    // Initialize FCM Service
+    // Initialize FCM Service (no-op on web)
     print('🔔 Initializing FCM Service...');
     final fcmService = FCMService();
     await fcmService.initialize();
