@@ -239,6 +239,42 @@ class AuthApi {
     }
   }
 
+  /// Permanently delete the user's account and ALL of their data.
+  ///
+  /// Hits `DELETE /users/{id}` (under /api/health), which cascades the delete
+  /// across every per-user table on the backend. Irreversible.
+  Future<void> deleteAccount(String userId) async {
+    try {
+      print('[AuthApi] Deleting account for user: $userId');
+
+      final response = await _client.delete('/users/$userId').timeout(
+        const Duration(seconds: 60),
+        onTimeout: () => throw Exception('Request timed out'),
+      );
+
+      print('[AuthApi] Delete response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          print('[AuthApi] ✅ Account deleted: ${data['deleted']}');
+          return;
+        }
+        throw Exception(data['detail'] ?? data['error'] ?? 'Failed to delete account');
+      } else if (response.statusCode == 404) {
+        // Already gone on the server — treat as success so the client cleans up.
+        print('[AuthApi] Account already absent on server (404) — treating as deleted');
+        return;
+      } else {
+        final errorData = jsonDecode(response.body);
+        throw Exception(errorData['detail'] ?? 'Failed to delete account');
+      }
+    } catch (e) {
+      debugPrint('❌ API error deleting account: $e');
+      rethrow;
+    }
+  }
+
   // Check if email exists
   Future<bool> emailExists(String email) async {
     try {

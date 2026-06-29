@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/services/notification_service.dart';
+import 'package:user_onboarding/data/services/api/auth_api.dart';
+import 'package:user_onboarding/data/managers/user_manager.dart';
+import 'package:user_onboarding/features/auth/screens/login_screens.dart';
 import 'package:user_onboarding/features/profile/screens/notification_settings_page.dart';
 import 'package:user_onboarding/features/notifications/screens/notifications_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -384,9 +387,167 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
+          _buildSection(
+            'Account',
+            [
+              ListTile(
+                leading: const Icon(Icons.delete_forever, color: Colors.red),
+                title: const Text(
+                  'Delete Account',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Permanently delete your account and all your data',
+                ),
+                trailing: const Icon(Icons.chevron_right, color: Colors.red),
+                onTap: _confirmAndDeleteAccount,
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmAndDeleteAccount() async {
+    final controller = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        bool canDelete = false;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.red),
+                  SizedBox(width: 8),
+                  Text('Delete Account'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'This will permanently delete your account and all your data — '
+                    'meals, workouts, sleep, water, weight, supplements, period logs, '
+                    'and chat history. This action cannot be undone.',
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Type DELETE to confirm:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: const InputDecoration(
+                      hintText: 'DELETE',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        canDelete = value.trim().toUpperCase() == 'DELETE';
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext, false),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed:
+                      canDelete ? () => Navigator.pop(dialogContext, true) : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.red.shade100,
+                  ),
+                  child: const Text('Delete Forever'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await _performAccountDeletion();
+    }
+  }
+
+  Future<void> _performAccountDeletion() async {
+    // Capture context-bound objects before any async gaps.
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Deleting your account...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final userId = widget.userProfile.id;
+      if (userId.isEmpty) {
+        throw Exception('No user ID found');
+      }
+
+      // Delete everything on the backend first.
+      await AuthApi().deleteAccount(userId);
+
+      // Then wipe all local state.
+      await UserManager.logout();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      if (!mounted) return;
+      navigator.pop(); // close loading dialog
+
+      // Send the user back to login, clearing the whole navigation stack.
+      navigator.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Your account has been deleted.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      navigator.pop(); // close loading dialog
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete account: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildSection(String title, List<Widget> children) {
