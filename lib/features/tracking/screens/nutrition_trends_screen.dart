@@ -515,10 +515,10 @@ class _NutritionTrendsScreenState extends State<NutritionTrendsScreen>
             value: (percentages['fat'] ?? 0).toDouble(),
             title: '${percentages['fat']?.toStringAsFixed(0) ?? 0}%',
             radius: 60,
-            titleStyle: const TextStyle(
+            titleStyle: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],

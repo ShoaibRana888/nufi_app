@@ -173,7 +173,7 @@ class _EmergencyNotificationFixState extends State<EmergencyNotificationFix> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: Colors.blue.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Column(
@@ -256,7 +256,7 @@ class _EmergencyNotificationFixState extends State<EmergencyNotificationFix> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
+                  color: Colors.grey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -280,7 +280,7 @@ class _EmergencyNotificationFixState extends State<EmergencyNotificationFix> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.red.shade50,
+      color: Colors.red.withValues(alpha: 0.12),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -311,7 +311,7 @@ class _EmergencyNotificationFixState extends State<EmergencyNotificationFix> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
@@ -346,12 +346,12 @@ class _EmergencyNotificationFixState extends State<EmergencyNotificationFix> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     icon: _isFixing
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.surface,
                             ),
                           )
                         : const Icon(Icons.build),

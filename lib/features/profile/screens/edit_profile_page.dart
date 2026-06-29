@@ -423,10 +423,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                : const Text(
+                : Text(
                     'Save',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -839,10 +839,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       padding: const EdgeInsets.only(bottom: 16),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: Colors.black87,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );
@@ -1224,7 +1224,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: Colors.grey.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.grey[300]!),
         ),

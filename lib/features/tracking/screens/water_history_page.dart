@@ -252,7 +252,7 @@ class _WaterHistoryPageState extends State<WaterHistoryPage> {
                   CircularProgressIndicator(
                     value: progress.clamp(0.0, 1.0),
                     strokeWidth: 3,
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       isGoalAchieved ? Colors.green : Colors.blue,
                     ),

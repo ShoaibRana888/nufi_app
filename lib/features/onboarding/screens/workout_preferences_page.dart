@@ -211,7 +211,7 @@ class _WorkoutPreferencesPageState extends State<WorkoutPreferencesPage> {
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           color: isSelected 
                               ? workout['color'] as Color
-                              : Colors.black87,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -334,7 +334,7 @@ class _WorkoutPreferencesPageState extends State<WorkoutPreferencesPage> {
                           child: Text(
                             '$freq',
                             style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black87,
+                              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
@@ -347,7 +347,7 @@ class _WorkoutPreferencesPageState extends State<WorkoutPreferencesPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -474,7 +474,7 @@ class _WorkoutPreferencesPageState extends State<WorkoutPreferencesPage> {
                         displayText,
                         style: TextStyle(
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? durationColor : Colors.black87,
+                          color: isSelected ? durationColor : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],

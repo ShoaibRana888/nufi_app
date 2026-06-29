@@ -374,7 +374,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
                   padding: const EdgeInsets.all(12),
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
+                    color: Colors.orange.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.orange.shade300),
                   ),
@@ -426,7 +426,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade100,
+                            color: Colors.blue.withValues(alpha: 0.18),
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.blue, width: 2),
                           ),
@@ -516,7 +516,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.indigo.shade100,
+                            color: Colors.indigo.withValues(alpha: 0.18),
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.indigo, width: 2),
                           ),
@@ -558,7 +558,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -871,7 +871,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: Colors.blue.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.blue.shade200),
                   ),

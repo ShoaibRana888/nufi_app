@@ -56,7 +56,7 @@ class _WeeklyStatsCardState extends State<WeeklyStatsCard> {
         child: Container(
           height: 150,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
           ),
           child: const Center(
@@ -93,7 +93,7 @@ class _WeeklyStatsCardState extends State<WeeklyStatsCard> {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.all(16),
@@ -146,7 +146,7 @@ class _WeeklyStatsCardState extends State<WeeklyStatsCard> {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: (goalsProgress['calorie_goal_achievement'] ?? 0) / 100,
-                  backgroundColor: Colors.grey[200],
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     _getProgressColor(goalsProgress['calorie_goal_achievement'] ?? 0),
                   ),

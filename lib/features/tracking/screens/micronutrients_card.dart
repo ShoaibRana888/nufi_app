@@ -276,7 +276,7 @@ class _MicronutrientsCardState extends State<MicronutrientsCard> {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: (pct / 100).clamp(0.0, 1.0),
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 valueColor: AlwaysStoppedAnimation<Color>(barColor),
                 minHeight: 8,
               ),

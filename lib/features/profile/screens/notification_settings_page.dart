@@ -456,7 +456,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   const SizedBox(height: 8),
                   Text(
                     _getUserContextInfo(),
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -736,7 +736,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.blue.withOpacity(0.3)),
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -757,7 +757,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   'Notifications are automatically personalized based on your profile. '
                   'Only relevant reminders matching your lifestyle will be scheduled. '
                   'Update your profile to change meal count or other settings.',
-                  style: TextStyle(fontSize: 14, color: Colors.black87),
+                  style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
                 ),
               ],
             ),
@@ -775,10 +775,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),

@@ -353,7 +353,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
           ),
           if (_isLoading)
             Container(
-              color: Colors.black54,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               child: Center(
                 child: Card(
                   child: Padding(
@@ -467,7 +467,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade100,
+                        color: Colors.green.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -529,7 +529,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
     );
 
     return Card(
-      color: Colors.green.shade50,
+      color: Colors.green.withValues(alpha: 0.12),
       elevation: 2,
       child: ExpansionTile(
         leading: Icon(Icons.check_circle, color: Colors.green.shade700),
@@ -656,7 +656,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.orange : Colors.black87,
+                        color: isSelected ? Colors.orange : Theme.of(context).colorScheme.onSurface,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -675,7 +675,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
+                          color: Colors.blue.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -702,7 +702,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade100,
+                          color: Colors.green.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -729,9 +729,9 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                     color: Colors.green,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     size: 16,
                   ),
                 ),
@@ -820,15 +820,15 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                   color: Colors.green,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check, color: Colors.white, size: 12),
+                    Icon(Icons.check, color: Theme.of(context).colorScheme.surface, size: 12),
                     SizedBox(width: 4),
                     Text(
                       'Logged',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                       ),
@@ -971,7 +971,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
           
           // Workout summary
           Card(
-            color: Colors.orange.shade50,
+            color: Colors.orange.withValues(alpha: 0.12),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -1181,7 +1181,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
         return Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.green.shade50,
+            color: Colors.green.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.green.shade200),
           ),
@@ -1409,9 +1409,9 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: Colors.grey.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     children: _suggestedExercises.map((ex) {
@@ -1442,7 +1442,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
+                    color: Colors.orange.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.orange.shade200),
                   ),
@@ -2080,7 +2080,7 @@ double _calculateTotalCalories() {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
+                  color: Colors.green.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.green.shade200),
                 ),
@@ -2099,7 +2099,7 @@ double _calculateTotalCalories() {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: Colors.blue.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.blue.shade200),
                 ),

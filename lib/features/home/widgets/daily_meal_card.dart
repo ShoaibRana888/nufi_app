@@ -311,7 +311,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
     
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -397,7 +397,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: Colors.grey.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -446,7 +446,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                         child: LinearProgressIndicator(
                           value: (_consumedMacros['calories']! / _dailyCalorieGoal).clamp(0.0, 1.0),
                           minHeight: 8,
-                          backgroundColor: Colors.grey[200],
+                          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             _consumedMacros['calories']! > _dailyCalorieGoal 
                               ? Colors.red 
@@ -529,9 +529,9 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: Colors.blue.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.blue.shade100),
+                    border: Border.all(color: Colors.blue.withValues(alpha: 0.18)),
                   ),
                   child: Row(
                     children: [
@@ -672,7 +672,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
           Container(
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Colors.grey.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
             child: ClipRRect(

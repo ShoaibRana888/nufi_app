@@ -459,7 +459,7 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> with Sing
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: Colors.grey.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -881,7 +881,7 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> with Sing
         ),
         borderData: FlBorderData(
           show: true,
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
         ),
         lineBarsData: [
           LineChartBarData(
@@ -909,7 +909,7 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> with Sing
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Colors.grey.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,

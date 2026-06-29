@@ -368,7 +368,7 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: Colors.blue.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -408,7 +408,7 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
                       child: CircularProgressIndicator(
                         value: progressClamped,
                         strokeWidth: 12,
-                        backgroundColor: Colors.blue.shade100,
+                        backgroundColor: Colors.blue.withValues(alpha: 0.18),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           progress >= 1.0 ? Colors.green : Colors.blue,
                         ),
@@ -567,7 +567,7 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
+                  color: Colors.green.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.green.shade200),
                 ),

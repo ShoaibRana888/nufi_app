@@ -743,7 +743,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -781,7 +781,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
             child: LinearProgressIndicator(
               value: percentage,
               minHeight: 12,
-              backgroundColor: Colors.grey.shade200,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               valueColor: AlwaysStoppedAnimation<Color>(
                 _getProgressColor(percentage),
               ),
@@ -880,7 +880,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: Colors.grey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -900,7 +900,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
                 fontWeight: FontWeight.bold,
                 color: (isUnconfigured || isSupplementsUnconfigured) 
                     ? Colors.grey 
-                    : Colors.black87,
+                    : Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(
@@ -918,7 +918,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
                 child: LinearProgressIndicator(
                   value: progress,
                   minHeight: 3,
-                  backgroundColor: Colors.grey.shade200,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   valueColor: AlwaysStoppedAnimation<Color>(status.color),
                 ),
               )
@@ -926,7 +926,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
               Container(
                 height: 3,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
+                  color: Colors.grey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -1010,7 +1010,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: Colors.orange.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.orange.shade200,
@@ -1101,7 +1101,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
+                  color: Colors.teal.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(

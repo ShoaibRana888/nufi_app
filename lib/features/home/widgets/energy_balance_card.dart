@@ -145,7 +145,7 @@ class _EnergyBalanceCardState extends State<EnergyBalanceCard> {
                 child: CircularProgressIndicator(
                   value: progress.clamp(0.0, 1.0),
                   strokeWidth: 12,
-                  backgroundColor: Colors.grey[200],
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                 ),
               ),

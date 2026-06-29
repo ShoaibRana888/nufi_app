@@ -13,7 +13,7 @@ class MuscleGroupTracker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -58,7 +58,8 @@ class MuscleGroupTracker extends StatelessWidget {
             itemBuilder: (context, index) {
               final muscleGroup = muscleGroups[index];
               return _buildMuscleGroupTile(
-                muscleGroup['name'], 
+                context,
+                muscleGroup['name'],
                 muscleGroup['progress']
               );
             },
@@ -85,7 +86,7 @@ class MuscleGroupTracker extends StatelessWidget {
     );
   }
   
-  Widget _buildMuscleGroupTile(String name, double progress) {
+  Widget _buildMuscleGroupTile(BuildContext context, String name, double progress) {
     // Determine color based on progress
     Color progressColor;
     if (progress < 0.3) {
@@ -99,7 +100,7 @@ class MuscleGroupTracker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -116,7 +117,7 @@ class MuscleGroupTracker extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade200, width: 1),
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 1),
             ),
             padding: const EdgeInsets.all(2),
             child: SizedBox(
@@ -129,7 +130,7 @@ class MuscleGroupTracker extends StatelessWidget {
                   CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 8,
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                   ),
                   
@@ -138,7 +139,7 @@ class MuscleGroupTracker extends StatelessWidget {
                     height: 58,
                     width: 58,
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: Colors.grey.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                   ),

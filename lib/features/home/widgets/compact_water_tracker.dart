@@ -188,7 +188,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       return Container(
         height: 60,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -233,7 +233,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
             ),
             child: Row(
               children: [
@@ -285,7 +285,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
                               Container(
                                 height: 8,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[200],
+                                  color: Colors.grey.withValues(alpha: 0.3),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -398,8 +398,8 @@ class _QuickLogBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -500,7 +500,7 @@ class _QuickLogBottomSheet extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
+                color: Colors.green.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.green.shade200),
               ),

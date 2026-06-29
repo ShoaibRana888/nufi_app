@@ -147,7 +147,7 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: Colors.blue.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.blue.shade200),
       ),
@@ -442,7 +442,7 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 child: Row(
                   children: [
@@ -524,7 +524,7 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
+                                    color: Colors.green.withValues(alpha: 0.18),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -555,7 +555,7 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
                                         height: 8,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(4),
-                                          color: Colors.grey[200],
+                                          color: Colors.grey.withValues(alpha: 0.3),
                                         ),
                                       ),
                                       Container(

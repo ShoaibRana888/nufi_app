@@ -17,7 +17,7 @@ class WorkoutSplitCalendar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -56,6 +56,7 @@ class WorkoutSplitCalendar extends StatelessWidget {
             children: List.generate(7, (index) {
               final isCurrentDay = index == currentDayIndex;
               return _buildDayCircle(
+                context,
                 dayAbbreviations[index],
                 isCurrentDay,
               );
@@ -85,7 +86,7 @@ class WorkoutSplitCalendar extends StatelessWidget {
     );
   }
   
-  Widget _buildDayCircle(String day, bool isCurrentDay) {
+  Widget _buildDayCircle(BuildContext context, String day, bool isCurrentDay) {
     return Container(
       width: 36,
       height: 36,
@@ -104,7 +105,7 @@ class WorkoutSplitCalendar extends StatelessWidget {
         child: Text(
           day,
           style: TextStyle(
-            color: isCurrentDay ? Colors.white : Colors.black,
+            color: isCurrentDay ? Colors.white : Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
@@ -122,9 +123,9 @@ class WorkoutSplitCalendar extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Colors.grey.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
       ),
       child: isRestDay
           ? Column(

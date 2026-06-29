@@ -820,9 +820,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 width: double.infinity,
                 color: Colors.amber,
                 padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.wifi_off, size: 16, color: Colors.black),
+                    Icon(Icons.wifi_off, size: 16, color: Theme.of(context).colorScheme.onSurface),
                     SizedBox(width: 8),
                     Text(
                       'Offline Mode - Data will be saved locally',
@@ -839,7 +839,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: LinearProgressIndicator(
                 value: (_currentPage + 1) / _totalPages,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                 minHeight: 8,
                 borderRadius: BorderRadius.circular(4),

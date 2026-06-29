@@ -370,8 +370,8 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
     
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -396,10 +396,10 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                   // Date header
                   Text(
                     DateFormat('EEEE, MMMM d, yyyy').format(day),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -408,7 +408,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Colors.grey.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -457,7 +457,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                       margin: const EdgeInsets.only(top: 12),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
+                        color: Colors.orange.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.orange.shade200),
                       ),
@@ -605,7 +605,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: Colors.blue.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.blue.shade200),
       ),
@@ -794,9 +794,9 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -1005,7 +1005,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
+                        color: Colors.blue.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.blue.shade200),
                       ),
@@ -1395,7 +1395,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         body: const Center(
           child: CircularProgressIndicator(color: Color(0xFFE91E63)),
         ),
@@ -1406,20 +1406,20 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
     final hasOngoingPeriod = _currentPeriod != null && _currentPeriod!.endDate == null;
     
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
           children: [
-            const Text(
+            Text(
               'Period Tracker',
               style: TextStyle(
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -1438,7 +1438,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.black87),
+            icon: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onSurface),
             onPressed: _showLegend,
           ),
         ],
@@ -1451,11 +1451,11 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.shade200,
+                    color: Colors.grey.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -1484,8 +1484,8 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                   titleCentered: true,
                   leftChevronIcon: Icon(Icons.chevron_left, color: Colors.grey.shade600),
                   rightChevronIcon: Icon(Icons.chevron_right, color: Colors.grey.shade600),
-                  titleTextStyle: const TextStyle(
-                    color: Colors.black87,
+                  titleTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1548,7 +1548,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: Colors.orange.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.orange.shade300),
                     ),
@@ -1640,7 +1640,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
               icon: Icons.bubble_chart,
             ),
             _buildLegendItem(
-              color: Colors.purple.shade100,
+              color: Colors.purple.withValues(alpha: 0.18),
               label: 'Fertile Window',
               icon: Icons.favorite,
             ),

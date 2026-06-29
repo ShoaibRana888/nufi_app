@@ -363,7 +363,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Row(
           children: [
@@ -389,8 +389,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ), 
           ],
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 1,
         actions: [
           if (_hasWeeklyContext)
@@ -634,8 +634,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.3))),
       ),
       child: Row(
         children: [
@@ -971,7 +971,7 @@ class MessageBubble extends StatelessWidget {
                   bottomLeft: isUser ? const Radius.circular(16) : const Radius.circular(4),
                   bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(16),
                 ),
-                border: !isUser ? Border.all(color: Colors.grey[200]!) : null,
+                border: !isUser ? Border.all(color: Colors.grey.withValues(alpha: 0.3)) : null,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -979,7 +979,7 @@ class MessageBubble extends StatelessWidget {
                   Text(
                     text,
                     style: TextStyle(
-                      color: isUser ? Colors.white : Colors.black87,
+                      color: isUser ? Colors.white : Theme.of(context).colorScheme.onSurface,
                       fontSize: 16,
                       height: 1.4,
                     ),
@@ -1036,8 +1036,8 @@ class ChatInput extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(top: BorderSide(color: Colors.grey.withValues(alpha: 0.3))),
       ),
       child: Row(
         children: [

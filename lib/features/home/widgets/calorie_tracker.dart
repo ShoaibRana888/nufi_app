@@ -213,7 +213,7 @@ class _CalorieTrackerState extends State<CalorieTracker> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -290,7 +290,7 @@ class _CalorieTrackerState extends State<CalorieTracker> {
                     height: 10,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Colors.grey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
@@ -497,7 +497,7 @@ class _CalorieTrackerState extends State<CalorieTracker> {
               child: CircularProgressIndicator(
                 value: percentage,
                 strokeWidth: 8,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
             ),

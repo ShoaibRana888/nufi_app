@@ -106,8 +106,8 @@ class _MealSuggestionsSheetState extends State<MealSuggestionsSheet>
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -325,7 +325,7 @@ class _MealSuggestionsSheetState extends State<MealSuggestionsSheet>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: Colors.grey.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(

@@ -169,7 +169,7 @@ class _DietaryPreferencesPageState extends State<DietaryPreferencesPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Colors.grey.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(

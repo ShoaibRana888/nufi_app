@@ -110,7 +110,7 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Meal History'),
         backgroundColor: Colors.green,
@@ -161,10 +161,10 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     'Meals (${_meals.length})',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -206,7 +206,7 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -382,7 +382,7 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -406,10 +406,10 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
                 child: const Icon(Icons.calculate, color: Colors.green, size: 20),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Daily Nutrition Summary',
                 style: TextStyle(
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -440,16 +440,16 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: Colors.grey.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[200]!),
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
             ),
             child: Column(
               children: [
                 Text(
                   '${_dailyTotals['calories']?.toStringAsFixed(0) ?? '0'}',
-                  style: const TextStyle(
-                    color: Colors.black87,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
@@ -557,9 +557,9 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

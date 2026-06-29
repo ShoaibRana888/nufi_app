@@ -167,7 +167,7 @@ class _SupplementHistoryPageState extends State<SupplementHistoryPage> {
                   children: [
                     Icon(
                       _selectedPeriod == period ? Icons.check : Icons.access_time,
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 20,
                     ),
                     const SizedBox(width: 8),

@@ -419,9 +419,9 @@ class _SleepInfoPageState extends State<SleepInfoPage> with SingleTickerProvider
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: Colors.grey.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[200]!),
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
             ),
             child: Column(
               children: [
@@ -439,7 +439,7 @@ class _SleepInfoPageState extends State<SleepInfoPage> with SingleTickerProvider
                     const SizedBox(width: 12),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
@@ -543,7 +543,7 @@ class _SleepInfoPageState extends State<SleepInfoPage> with SingleTickerProvider
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: _adjustByBedtime ? Colors.indigo : Colors.black,
+                                  color: _adjustByBedtime ? Colors.indigo : Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             ],
@@ -590,7 +590,7 @@ class _SleepInfoPageState extends State<SleepInfoPage> with SingleTickerProvider
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: !_adjustByBedtime ? Colors.orange : Colors.black,
+                                  color: !_adjustByBedtime ? Colors.orange : Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             ],

@@ -212,7 +212,7 @@ class _TrendsScreenState extends State<TrendsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Colors.grey.withValues(alpha: 0.15),
         border: Border(
           top: BorderSide(color: Colors.grey[300]!),
         ),

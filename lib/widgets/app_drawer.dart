@@ -116,7 +116,7 @@ class AppDrawer extends StatelessWidget {
         ),
       ),
       currentAccountPicture: CircleAvatar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         child: Text(
           userProfile.name.isNotEmpty 
               ? userProfile.name[0].toUpperCase()
@@ -141,8 +141,8 @@ class AppDrawer extends StatelessWidget {
       ),
       otherAccountsPictures: [
         Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -193,7 +193,7 @@ class AppDrawer extends StatelessWidget {
       title: Text(
         title,
         style: TextStyle(
-          color: isSelected ? Colors.blue : Colors.black87,
+          color: isSelected ? Colors.blue : Theme.of(context).colorScheme.onSurface,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),

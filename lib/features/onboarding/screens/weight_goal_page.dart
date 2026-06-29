@@ -234,7 +234,7 @@ class _WeightGoalPageState extends State<WeightGoalPage> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: isSelected ? goal['color'] as Color : Colors.black,
+                                color: isSelected ? goal['color'] as Color : Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             Text(
@@ -436,7 +436,7 @@ class _WeightGoalPageState extends State<WeightGoalPage> {
                               timeline['title']!,
                               style: TextStyle(
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? Colors.blue : Colors.black,
+                                color: isSelected ? Colors.blue : Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             if (isRecommended) ...[

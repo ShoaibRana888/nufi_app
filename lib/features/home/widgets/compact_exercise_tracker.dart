@@ -214,10 +214,10 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2), // Uniform color for all chips
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.2), // Uniform color for all chips
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
               width: 1,
             ),
           ),
@@ -286,7 +286,7 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
+                        color: Theme.of(context).colorScheme.surface.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -327,10 +327,10 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.4),
+                            color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
                             width: 1,
                           ),
                         ),
@@ -395,7 +395,7 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
                               height: 12,
                               width: constraints.maxWidth,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                             ),
@@ -414,7 +414,7 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
                                 borderRadius: BorderRadius.circular(6),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -444,10 +444,10 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Theme.of(context).colorScheme.surface.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                       width: 1,
                     ),
                   ),
@@ -542,10 +542,10 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
                   width: double.infinity,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Theme.of(context).colorScheme.surface.withOpacity(0.25),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
                       width: 1.5,
                     ),
                   ),

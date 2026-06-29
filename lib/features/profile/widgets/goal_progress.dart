@@ -32,18 +32,18 @@ class GoalProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     // If goals list is provided, use the new format
     if (goals != null && goals!.isNotEmpty) {
-      return _buildGoalsList();
+      return _buildGoalsList(context);
     }
-    
+
     // Otherwise use the single goal format
-    return _buildSingleGoal();
+    return _buildSingleGoal(context);
   }
 
-  Widget _buildSingleGoal() {
+  Widget _buildSingleGoal(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -97,7 +97,7 @@ class GoalProgress extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.grey[200],
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 8,
             ),
@@ -107,14 +107,14 @@ class GoalProgress extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalsList() {
+  Widget _buildGoalsList(BuildContext context) {
     return Column(
       children: goals!.map((goal) {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -162,7 +162,7 @@ class GoalProgress extends StatelessWidget {
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
                       value: (goal['progress'] as double? ?? 0.0).clamp(0.0, 1.0),
-                      backgroundColor: Colors.grey[200],
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                       valueColor: AlwaysStoppedAnimation<Color>(
                         goal['color'] as Color? ?? Colors.blue,
                       ),

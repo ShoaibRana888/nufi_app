@@ -330,7 +330,7 @@ class _DashboardHomeState extends State<DashboardHome> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       drawer: ActivityDrawer(userProfile: _currentUserProfile),
       body: 
         // Stack(
@@ -524,10 +524,10 @@ class _DashboardHomeState extends State<DashboardHome> with WidgetsBindingObserv
             children: [
               Text(
                 _getGreeting(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Text(
@@ -676,7 +676,7 @@ class _DashboardHomeState extends State<DashboardHome> with WidgetsBindingObserv
               return Chip(
                 avatar: Text(achievement['icon'], style: const TextStyle(fontSize: 16)),
                 label: Text(achievement['title']),
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
               );
             }).toList(),
           ),
@@ -739,7 +739,7 @@ class CompactDailyGoalsCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

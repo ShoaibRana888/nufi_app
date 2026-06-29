@@ -13,7 +13,7 @@ class RecoveryTimer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -66,6 +66,7 @@ class RecoveryTimer extends StatelessWidget {
             itemBuilder: (context, index) {
               final group = muscleGroups[index];
               return _buildMuscleRecoveryCard(
+                context,
                 group['name'],
                 group['lastTrainedDays'],
                 group['recoveryDays'],
@@ -114,6 +115,7 @@ class RecoveryTimer extends StatelessWidget {
   }
   
   Widget _buildMuscleRecoveryCard(
+    BuildContext context,
     String name,
     int lastTrainedDays,
     int recoveryDays,
@@ -141,7 +143,7 @@ class RecoveryTimer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -169,7 +171,7 @@ class RecoveryTimer extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade200, width: 1),
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 1),
             ),
             padding: const EdgeInsets.all(2),
             child: SizedBox(
@@ -184,7 +186,7 @@ class RecoveryTimer extends StatelessWidget {
                     width: 80,
                     child: CircularProgressIndicator(
                       value: recoveryPercentage,
-                      backgroundColor: Colors.grey[200],
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                       valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                       strokeWidth: 8, // Made slightly thicker
                     ),

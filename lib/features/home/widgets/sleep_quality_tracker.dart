@@ -19,7 +19,7 @@ class SleepQualityTracker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -113,7 +113,7 @@ class SleepQualityTracker extends StatelessWidget {
                       child: CircularProgressIndicator(
                         value: sleepQuality,
                         strokeWidth: 8,
-                        backgroundColor: Colors.grey[200],
+                        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                         valueColor: AlwaysStoppedAnimation<Color>(_getSleepQualityColor(sleepQuality)),
                       ),
                     ),
@@ -194,7 +194,7 @@ class SleepQualityTracker extends StatelessWidget {
           Container(
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Colors.grey.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: CustomPaint(
@@ -245,7 +245,7 @@ class SleepQualityTracker extends StatelessWidget {
               height: 6,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.grey.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),

@@ -152,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: RefreshIndicator(
         onRefresh: _refreshProfile,
         child: CustomScrollView(
@@ -202,9 +202,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                             width: 100,
                             height: 100,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.surface,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
+                              border: Border.all(color: Theme.of(context).colorScheme.surface, width: 3),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
@@ -234,7 +234,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                             icon: const Icon(Icons.edit, size: 16),
                             label: const Text('Edit Profile'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
+                              backgroundColor: Theme.of(context).colorScheme.surface,
                               foregroundColor: Colors.blue,
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                               shape: RoundedRectangleBorder(
@@ -254,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(50),
                 child: Container(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   child: TabBar(
                     controller: _tabController,
                     isScrollable: false,
@@ -736,7 +736,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -1000,7 +1000,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: isHighlighted ? Colors.blue : Colors.black,
+              color: isHighlighted ? Colors.blue : Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -1132,7 +1132,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
-                    color: color ?? Colors.black,
+                    color: color ?? Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -1185,7 +1185,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: color ?? Colors.black,
+                  color: color ?? Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),

@@ -255,7 +255,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: Colors.blue.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.blue.shade200),
               ),
@@ -434,7 +434,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(DateUtils.isSameDay(_selectedDate, DateTime.now()) 
           ? 'Smart Meal Logging' 
@@ -520,7 +520,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
 
   Widget _buildCalendar() {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: TableCalendar(
         firstDay: DateTime.now().subtract(const Duration(days: 365)),
         lastDay: DateTime.now(),
@@ -555,7 +555,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
 
   Widget _buildDateIndicator() {
     return Container(
-      color: Colors.orange.shade100,
+      color: Colors.orange.withValues(alpha: 0.18),
       padding: const EdgeInsets.all(8),
       child: Row(
         children: [
@@ -604,7 +604,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       constraints: const BoxConstraints(maxHeight: 250),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
@@ -714,7 +714,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade100,
+                      color: Colors.green.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -824,7 +824,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
                 child: Text(
                   mealType,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
+                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -841,7 +841,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Colors.grey.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(25),
       ),
       child: Row(
@@ -1582,7 +1582,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
                           child: ListTile(
                             contentPadding: const EdgeInsets.all(12),
                             leading: CircleAvatar(
-                              backgroundColor: Colors.amber.shade100,
+                              backgroundColor: Colors.amber.withValues(alpha: 0.18),
                               child: const Icon(Icons.star, color: Colors.amber),
                             ),
                             title: Text(
@@ -1857,7 +1857,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: Colors.grey.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -1889,7 +1889,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
+                    color: Colors.orange.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.orange.shade200),
                   ),
@@ -1954,7 +1954,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
                       ? Colors.orange.shade50 
                       : null,
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
+                      color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                     ),
                   );
                 }).toList(),
@@ -2098,7 +2098,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
         margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: Colors.grey.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -2164,7 +2164,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.green.shade100,
+                  backgroundColor: Colors.green.withValues(alpha: 0.18),
                   child: Text(
                     meal['meal_type']?.substring(0, 1) ?? 'M',
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -2273,7 +2273,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
+              color: Colors.green.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -2330,7 +2330,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
         const SizedBox(height: 4),
         LinearProgressIndicator(
           value: percentage,
-          backgroundColor: Colors.grey.shade200,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           valueColor: AlwaysStoppedAnimation<Color>(color),
           minHeight: 8,
         ),
@@ -2380,7 +2380,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
+        color: Colors.green.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.green.shade200),
       ),
@@ -2505,7 +2505,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.purple.shade50,
+        color: Colors.purple.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.purple.shade200),
       ),

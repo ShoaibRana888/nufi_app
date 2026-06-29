@@ -527,7 +527,7 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
 
   Widget _buildCalendar() {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: TableCalendar(
         firstDay: DateTime.now().subtract(const Duration(days: 365)),
         lastDay: DateTime.now(),
@@ -566,7 +566,7 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
     }
     
     return Container(
-      color: Colors.green.shade50,
+      color: Colors.green.withValues(alpha: 0.12),
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [

@@ -147,7 +147,7 @@ class _WaterTrackerState extends State<WaterTracker> {
             // Progress bar
             LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
-              backgroundColor: Colors.blue.shade100,
+              backgroundColor: Colors.blue.withValues(alpha: 0.18),
               valueColor: AlwaysStoppedAnimation<Color>(
                 progress >= 1.0 ? Colors.green : Colors.blue,
               ),
@@ -187,7 +187,7 @@ class _WaterTrackerState extends State<WaterTracker> {
                     icon: const Icon(Icons.remove),
                     label: const Text('Remove'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade100,
+                      backgroundColor: Colors.red.withValues(alpha: 0.18),
                       foregroundColor: Colors.red.shade700,
                     ),
                   ),
@@ -205,7 +205,7 @@ class _WaterTrackerState extends State<WaterTracker> {
                         : const Icon(Icons.add),
                     label: Text(_isSaving ? 'Saving...' : 'Add Glass'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade100,
+                      backgroundColor: Colors.blue.withValues(alpha: 0.18),
                       foregroundColor: Colors.blue.shade700,
                     ),
                   ),

@@ -184,7 +184,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
               child: CircularProgressIndicator(
                 value: 1.0,
                 strokeWidth: 8,
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.transparent),
               ),
             ),
@@ -195,7 +195,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
               child: CircularProgressIndicator(
                 value: progress * _progressAnimation.value,
                 strokeWidth: 8,
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                 valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
@@ -277,7 +277,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: const Icon(
@@ -316,7 +316,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Row(
@@ -470,7 +470,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
                             borderRadius: BorderRadius.circular(8),
                             child: LinearProgressIndicator(
                               value: progress,
-                              backgroundColor: Colors.white.withOpacity(0.2),
+                              backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                               minHeight: 8,
                             ),
@@ -495,7 +495,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
                             style: const TextStyle(fontSize: 13),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
+                            backgroundColor: Theme.of(context).colorScheme.surface,
                             foregroundColor: const Color(0xFF6B5ACF),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

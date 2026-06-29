@@ -292,7 +292,7 @@ class _VoiceInputWidgetState extends State<VoiceInputWidget>
                         decoration: BoxDecoration(
                           color: Colors.orange,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 1),
+                          border: Border.all(color: Theme.of(context).colorScheme.surface, width: 1),
                         ),
                         child: const Icon(
                           Icons.lock,

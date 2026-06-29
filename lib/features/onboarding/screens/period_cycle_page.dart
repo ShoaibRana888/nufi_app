@@ -297,7 +297,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Colors.grey.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: !_isFieldValid('lastPeriod') && _showValidationErrors
@@ -318,7 +318,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
                           : 'Select date',
                       style: TextStyle(
                         fontSize: 16,
-                        color: _lastPeriodDate != null ? Colors.black : Colors.grey,
+                        color: _lastPeriodDate != null ? Theme.of(context).colorScheme.onSurface : Colors.grey,
                       ),
                     ),
                     const Spacer(),
@@ -506,7 +506,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
                           'Regular',
                           style: TextStyle(
                             fontWeight: _isCycleRegular == true ? FontWeight.bold : FontWeight.normal,
-                            color: _isCycleRegular == true ? Colors.green : Colors.black,
+                            color: _isCycleRegular == true ? Colors.green : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -541,7 +541,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
                           'Irregular',
                           style: TextStyle(
                             fontWeight: _isCycleRegular == false ? FontWeight.bold : FontWeight.normal,
-                            color: _isCycleRegular == false ? Colors.orange : Colors.black,
+                            color: _isCycleRegular == false ? Colors.orange : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -644,7 +644,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? option['color'] as Color : Colors.black87,
+                          color: isSelected ? option['color'] as Color : Theme.of(context).colorScheme.onSurface,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -752,7 +752,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: isSelected ? Colors.purple : Colors.black,
+                                color: isSelected ? Colors.purple : Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             Text(

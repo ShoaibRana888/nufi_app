@@ -1,7 +1,9 @@
 // lib/features/profile/screens/settings_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
+import 'package:user_onboarding/providers/theme_provider.dart';
 import 'package:user_onboarding/data/services/notification_service.dart';
 import 'package:user_onboarding/data/services/api/auth_api.dart';
 import 'package:user_onboarding/data/managers/user_manager.dart';
@@ -27,7 +29,6 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _pushNotifications = true;
   bool _emailNotifications = false;
   bool _dataSync = true;
-  String _selectedTheme = 'System';
   String _selectedUnits = 'Metric';
 
   Future<void> _scheduleNotifications() async {
@@ -184,7 +185,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: Colors.blue.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Column(
@@ -229,7 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.red.shade50,
+              color: Colors.red.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.red.shade200),
             ),
@@ -348,11 +349,15 @@ class _SettingsPageState extends State<SettingsPage> {
           _buildSection(
             'Preferences',
             [
-              _buildDropdownTile(
-                'Theme',
-                _selectedTheme,
-                ['Light', 'Dark', 'System'],
-                (value) => setState(() => _selectedTheme = value!),
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, _) => _buildDropdownTile(
+                  'Theme',
+                  themeProvider.label,
+                  ['Light', 'Dark', 'System'],
+                  (value) {
+                    if (value != null) themeProvider.setFromLabel(value);
+                  },
+                ),
               ),
               _buildDropdownTile(
                 'Units',
@@ -566,7 +571,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         Container(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           child: Column(children: children),
         ),
       ],

@@ -354,7 +354,7 @@ class _SleepLoggingPageState extends State<SleepLoggingPage> {
 
   Widget _buildEditingNotice() {
     return Card(
-      color: Colors.orange.shade50,
+      color: Colors.orange.withValues(alpha: 0.12),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
@@ -378,7 +378,7 @@ class _SleepLoggingPageState extends State<SleepLoggingPage> {
 
   Widget _buildDefaultsInfo() {
     return Card(
-      color: Colors.blue.shade50,
+      color: Colors.blue.withValues(alpha: 0.12),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
@@ -479,7 +479,7 @@ class _SleepLoggingPageState extends State<SleepLoggingPage> {
                           const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: _selectBedtime,
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple.shade100),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple.withValues(alpha: 0.18)),
                             child: Text(
                               _bedtime?.format(context) ?? 'Select',
                               style: const TextStyle(color: Colors.purple),
@@ -496,7 +496,7 @@ class _SleepLoggingPageState extends State<SleepLoggingPage> {
                           const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: _selectWakeTime,
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple.shade100),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple.withValues(alpha: 0.18)),
                             child: Text(
                               _wakeTime?.format(context) ?? 'Select',
                               style: const TextStyle(color: Colors.purple),
@@ -576,7 +576,7 @@ class _SleepLoggingPageState extends State<SleepLoggingPage> {
                 runSpacing: 4,
                 children: _sleepIssues.map((issue) => Chip(
                   label: Text(issue),
-                  backgroundColor: Colors.orange.shade100,
+                  backgroundColor: Colors.orange.withValues(alpha: 0.18),
                   deleteIcon: const Icon(Icons.close, size: 16),
                   onDeleted: () {
                     setState(() {

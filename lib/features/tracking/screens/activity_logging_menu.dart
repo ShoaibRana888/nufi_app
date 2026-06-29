@@ -66,7 +66,7 @@ class ActivityLoggingMenu extends StatelessWidget {
                   ),
                 ),  
               ),
-              _buildQuickStats(),
+              _buildQuickStats(context),
             ],
           ),
         ),
@@ -242,12 +242,12 @@ class ActivityLoggingMenu extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickStats() {
+  Widget _buildQuickStats(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

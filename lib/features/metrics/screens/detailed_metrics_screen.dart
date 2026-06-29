@@ -278,8 +278,8 @@ class _DetailedMetricsScreenState extends State<DetailedMetricsScreen> with Sing
                       child: Center(
                         child: Text(
                           valueText,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.surface,
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
                           ),
@@ -302,7 +302,7 @@ class _DetailedMetricsScreenState extends State<DetailedMetricsScreen> with Sing
                           return LinearProgressIndicator(
                             value: progress * _animation.value,
                             minHeight: 10,
-                            backgroundColor: Colors.grey.shade200,
+                            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                             valueColor: AlwaysStoppedAnimation<Color>(color),
                             borderRadius: BorderRadius.circular(5),
                           );

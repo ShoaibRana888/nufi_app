@@ -99,7 +99,7 @@ class _PermissionRequestScreenState extends State<PermissionRequestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: _isChecking
             ? const Center(child: CircularProgressIndicator())

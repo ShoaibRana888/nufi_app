@@ -182,7 +182,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
+                  color: Colors.teal.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -852,7 +852,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
 
    Widget _buildCalendar() {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: TableCalendar(
         firstDay: DateTime.now().subtract(const Duration(days: 365)),
         lastDay: DateTime.now(),
@@ -890,7 +890,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
     }
     
     return Container(
-      color: Colors.teal.shade50,
+      color: Colors.teal.withValues(alpha: 0.12),
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
@@ -1105,7 +1105,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
           const SizedBox(height: 16),
           LinearProgressIndicator(
             value: progress,
-            backgroundColor: Colors.white.withOpacity(0.3),
+            backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.3),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
             minHeight: 8,
           ),
@@ -1171,7 +1171,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: taken ? color.withOpacity(0.3) : Colors.grey[300]!,

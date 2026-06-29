@@ -17,7 +17,7 @@ Widget build(BuildContext context) {
   return Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
@@ -84,7 +84,7 @@ Widget build(BuildContext context) {
                     child: CircularProgressIndicator(
                       value: progress,
                       strokeWidth: 8,
-                      backgroundColor: Colors.grey[200],
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
                     ),
                   ),
@@ -108,7 +108,7 @@ Widget build(BuildContext context) {
                       child: CircularProgressIndicator(
                         value: progress,
                         strokeWidth: 8,
-                        backgroundColor: Colors.grey[200],
+                        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
                       ),
                     ),
@@ -127,7 +127,7 @@ Widget build(BuildContext context) {
           const SizedBox(height: 16),
           LinearProgressIndicator(
             value: progress,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
             minHeight: 8,
             borderRadius: BorderRadius.circular(4),
@@ -182,7 +182,7 @@ Widget build(BuildContext context) {
                 Container(
                   height: 6,
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Colors.grey.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),

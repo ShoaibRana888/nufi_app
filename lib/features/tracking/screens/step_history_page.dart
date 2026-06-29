@@ -136,7 +136,7 @@ class _StepHistoryPageState extends State<StepHistoryPage> {
   Widget _buildFilters() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.grey.shade50,
+      color: Colors.grey.withValues(alpha: 0.15),
       child: Column(
         children: [
           TextField(
@@ -364,7 +364,7 @@ class _StepHistoryPageState extends State<StepHistoryPage> {
             // Progress bar
             LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.grey.shade200,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               valueColor: AlwaysStoppedAnimation<Color>(
                 isGoalAchieved ? Colors.green : Colors.orange,
               ),

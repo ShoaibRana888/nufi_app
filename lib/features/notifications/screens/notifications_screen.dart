@@ -234,7 +234,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final hasUnread = notifications.any((n) => n['is_read'] == false);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Notifications'),
         backgroundColor: Colors.blue,

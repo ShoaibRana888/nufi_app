@@ -297,7 +297,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
                         child: Text(
                           '${(goal / 1000).toStringAsFixed(goal % 1000 == 0 ? 0 : 1)}k',
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
+                            color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
@@ -455,7 +455,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
                         location['title'],
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: isSelected ? Colors.blue : Colors.black,
+                          color: isSelected ? Colors.blue : Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
                         ),
                         textAlign: TextAlign.center,
@@ -551,7 +551,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
                 },
                 selectedColor: Colors.blue.withOpacity(0.2),
                 checkmarkColor: Colors.blue,
-                backgroundColor: Colors.grey[100],
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                   side: BorderSide(
@@ -642,7 +642,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
                           Text(
                             level,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black,
+                              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
@@ -702,7 +702,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
                         Text(
                           'Yes',
                           style: TextStyle(
-                            color: _hasTrainer ? Colors.white : Colors.black,
+                            color: _hasTrainer ? Colors.white : Theme.of(context).colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -738,7 +738,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
                         Text(
                           'No',
                           style: TextStyle(
-                            color: !_hasTrainer ? Colors.white : Colors.black,
+                            color: !_hasTrainer ? Colors.white : Theme.of(context).colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),

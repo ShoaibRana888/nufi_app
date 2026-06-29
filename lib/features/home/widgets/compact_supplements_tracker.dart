@@ -90,7 +90,7 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
       return Container(
         height: 200,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -145,7 +145,7 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -184,7 +184,7 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -228,7 +228,7 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
                       value: progress,
-                      backgroundColor: Colors.white.withOpacity(0.2),
+                      backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                       valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                       minHeight: 6,
                     ),
@@ -299,7 +299,7 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
                     icon: const Icon(Icons.checklist, size: 18),
                     label: const Text('Manage Supplements'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       foregroundColor: Colors.teal,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,

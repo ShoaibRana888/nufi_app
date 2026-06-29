@@ -41,7 +41,7 @@ class NotificationBadge extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.red,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 1.5),
+                border: Border.all(color: Theme.of(context).colorScheme.surface, width: 1.5),
               ),
               constraints: const BoxConstraints(
                 minWidth: 18,

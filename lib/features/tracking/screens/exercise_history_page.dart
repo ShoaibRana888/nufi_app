@@ -140,7 +140,7 @@ class _EnhancedExerciseHistoryPageState extends State<EnhancedExerciseHistoryPag
   Widget _buildFiltersSection() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.grey.shade50,
+      color: Colors.grey.withValues(alpha: 0.15),
       child: Column(
         children: [
           // Muscle group filter
