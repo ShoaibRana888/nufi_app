@@ -1,5 +1,6 @@
 // lib/features/onboarding/screens/weight_goal_page.dart
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/onboarding/widgets/required_label.dart';
 import 'package:flutter/services.dart';
 
 class WeightGoalPage extends StatefulWidget {
@@ -132,21 +133,7 @@ class _WeightGoalPageState extends State<WeightGoalPage> {
           const SizedBox(height: 24),
           
           // Weight Goal Selection with validation
-          Row(
-            children: const [
-              Text(
-                'Select your goal',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('Select your goal', fontSize: 16),
           const SizedBox(height: 12),
           
           if (!_isFieldValid('goal') && _showValidationErrors)
@@ -262,21 +249,7 @@ class _WeightGoalPageState extends State<WeightGoalPage> {
           // Target Weight Input (show only if not maintaining)
           if (_selectedWeightGoal.isNotEmpty && _selectedWeightGoal != 'maintain_weight') ...[
             const SizedBox(height: 24),
-            Row(
-              children: const [
-                Text(
-                  'Target Weight (kg)',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  ' *',
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+            RequiredLabel('Target Weight (kg)', fontSize: 16),
             const SizedBox(height: 8),
             TextField(
               controller: _targetWeightController,
@@ -349,21 +322,7 @@ class _WeightGoalPageState extends State<WeightGoalPage> {
           // Timeline Selection
           if (_selectedWeightGoal.isNotEmpty) ...[
             const SizedBox(height: 24),
-            Row(
-              children: const [
-                Text(
-                  'Timeline',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  ' *',
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+            RequiredLabel('Timeline', fontSize: 16),
             const SizedBox(height: 8),
             Text(
               'Choose a realistic timeline for your goal',
