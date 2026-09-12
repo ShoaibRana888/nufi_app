@@ -13,13 +13,21 @@ import 'package:intl/intl.dart';
 class WaterLoggingPage extends StatefulWidget {
   final UserProfile userProfile;
 
-  const WaterLoggingPage({Key? key, required this.userProfile}) : super(key: key);
+  /// Injectable for tests; defaults to a real WaterApi. See ADR-0004.
+  final WaterApi? waterApi;
+
+  const WaterLoggingPage({
+    Key? key,
+    required this.userProfile,
+    this.waterApi,
+  }) : super(key: key);
 
   @override
   State<WaterLoggingPage> createState() => _WaterLoggingPageState();
 }
 
 class _WaterLoggingPageState extends State<WaterLoggingPage> {
+  late final WaterApi _waterApi = widget.waterApi ?? WaterApi();
   WaterEntry? _todayEntry;
   bool _isLoading = true;
   bool _isSaving = false;
@@ -30,12 +38,16 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
 
   // Constants for calculations
   static const double mlPerGlass = 250.0; // 250ml per glass
-  static const double defaultTarget = 2000.0; // 2L default target
+
+  /// The ml target for the user's glass goal. Derived, never stored: a
+  /// hardcoded 2000ml (= 8 glasses) used to drive the progress bar and
+  /// goal-met state, so anyone with a goal above 8 "finished" early.
+  double get _targetMl => _dailyGoal * mlPerGlass;
 
   @override
   void initState() {
     super.initState();
-    _dailyGoal = widget.userProfile.waterIntakeGlasses ?? 8;
+    _dailyGoal = widget.userProfile.waterIntakeGlasses;
     _loadWaterForDate(_selectedDate);
   }
 
@@ -45,20 +57,21 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
     setState(() => _isLoading = true);
     
     try {
-      final entry = await WaterApi().getWaterEntryByDate(
+      final entry = await _waterApi.getWaterEntryByDate(
         widget.userProfile.id!, 
         date
       );
       
       setState(() {
         _selectedDate = date;
-        _todayEntry = entry ?? WaterEntry(
-          userId: widget.userProfile.id!,
-          date: date,
-          glassesConsumed: 0,
-          totalMl: 0.0,
-          targetMl: defaultTarget,
-        );
+        _todayEntry = entry?.copyWith(targetMl: _targetMl) ??
+            WaterEntry(
+              userId: widget.userProfile.id!,
+              date: date,
+              glassesConsumed: 0,
+              totalMl: 0.0,
+              targetMl: _targetMl,
+            );
         _isLoading = false;
       });
     } catch (e) {
@@ -102,7 +115,7 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
           date: date,
           glassesConsumed: 0,
           totalMl: 0.0,
-          targetMl: defaultTarget,
+          targetMl: _targetMl,
         );
       });
     }
@@ -114,7 +127,7 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
     setState(() => _isSaving = true);
 
     try {
-      await WaterApi().saveWaterEntry(_todayEntry!);
+      await _waterApi.saveWaterEntry(_todayEntry!);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

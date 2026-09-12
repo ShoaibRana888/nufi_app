@@ -18,12 +18,17 @@ class CompactWaterTracker extends StatefulWidget {
   /// Ask the dashboard to read the day again (after this card wrote to it).
   final Future<void> Function() refreshDay;
 
+  /// Injectable for tests; defaults to a real WaterApi. Reads come from [day];
+  /// this is the write path. See ADR-0004.
+  final WaterApi? waterApi;
+
   const CompactWaterTracker({
     Key? key,
     required this.userProfile,
     required this.day,
     required this.refreshDay,
     this.onUpdate,
+    this.waterApi,
   }) : super(key: key);
 
   @override
@@ -32,6 +37,7 @@ class CompactWaterTracker extends StatefulWidget {
 
 class _CompactWaterTrackerState extends State<CompactWaterTracker> 
     with SingleTickerProviderStateMixin {
+  late final WaterApi _waterApi = widget.waterApi ?? WaterApi();
   WaterEntry? _todayEntry;
   bool _isLoading = true;
   bool _isSaving = false;
@@ -79,12 +85,17 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       if (!mounted) return;
 
       if (entry != null) {
+        // The stored target may be the legacy 2000ml constant; the profile
+        // goal is the source of truth, and _addGlasses resaves whatever is
+        // here, so normalise before it can be written back.
         setState(() {
-          _todayEntry = entry;
+          _todayEntry = entry.copyWith(
+            targetMl: widget.userProfile.waterIntakeGlasses * 250.0,
+          );
         });
       } else {
         // Create a new entry for today if none exists
-        final targetGlasses = widget.userProfile.formData['waterIntakeGlasses'] ?? 8;
+        final targetGlasses = widget.userProfile.waterIntakeGlasses;
         setState(() {
           _todayEntry = WaterEntry(
             userId: widget.userProfile.id,
@@ -104,7 +115,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       print('Error loading today\'s water entry: $e');
       if (!mounted) return;
       // Still create a default entry on error
-      final targetGlasses = widget.userProfile.formData['waterIntakeGlasses'] ?? 8;
+      final targetGlasses = widget.userProfile.waterIntakeGlasses;
       setState(() {
         _todayEntry = WaterEntry(
           userId: widget.userProfile.id,
@@ -139,7 +150,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
         totalMl: (_todayEntry!.glassesConsumed + count) * mlPerGlass,
       );
 
-      await WaterApi().saveWaterEntry(updatedEntry);
+      await _waterApi.saveWaterEntry(updatedEntry);
       if (!mounted) return;
 
       setState(() {
@@ -157,7 +168,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       widget.onUpdate?.call();
 
       // Show achievement message if goal reached
-      final targetGlasses = widget.userProfile.waterIntakeGlasses ?? 8;
+      final targetGlasses = widget.userProfile.waterIntakeGlasses;
       if (updatedEntry.glassesConsumed >= targetGlasses && 
           (_todayEntry!.glassesConsumed - count) < targetGlasses) {
         if (mounted) {
@@ -177,7 +188,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
   }
 
   void _showQuickLogDialog() {
-    final targetGlasses = widget.userProfile.waterIntakeGlasses ?? 8;
+    final targetGlasses = widget.userProfile.waterIntakeGlasses;
     final glassesConsumed = _todayEntry?.glassesConsumed ?? 0;
     final remaining = targetGlasses - glassesConsumed;
     
@@ -228,7 +239,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       );
     }
 
-    final targetGlasses = widget.userProfile.waterIntakeGlasses ?? 8;
+    final targetGlasses = widget.userProfile.waterIntakeGlasses;
     final glassesConsumed = _todayEntry?.glassesConsumed ?? 0;
     final progress = (glassesConsumed / targetGlasses).clamp(0.0, 1.0);
     final isGoalReached = glassesConsumed >= targetGlasses;
