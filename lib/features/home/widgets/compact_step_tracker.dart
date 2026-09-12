@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/step_entry.dart';
 import 'package:user_onboarding/data/repositories/step_repository.dart';
@@ -15,13 +16,21 @@ import 'package:user_onboarding/data/services/step_counter_service.dart';
 class CompactStepTracker extends StatefulWidget {
   final UserProfile userProfile;
   final VoidCallback? onUpdate;
-  final Duration loadDelay;
+
+  /// The dashboard's one read of today. DailySnapshot already falls back to
+  /// on-device steps when the backend cannot supply them, so this card no
+  /// longer needs its own network-then-local read for the initial load.
+  final Future<DaySnapshot> day;
+
+  /// Ask the dashboard to read the day again (after this card wrote to it).
+  final Future<void> Function() refreshDay;
 
   const CompactStepTracker({
     Key? key,
     required this.userProfile,
+    required this.day,
+    required this.refreshDay,
     this.onUpdate,
-    this.loadDelay = Duration.zero,
   }) : super(key: key);
 
   @override
@@ -58,16 +67,22 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    // Deferred by the dashboard so lower cards load after the top ones.
-    Future.delayed(widget.loadDelay, () {
-      if (mounted) _checkPermissionAndInitialize();
-    });
+    _checkPermissionAndInitialize();
     _stepCounterService.addListener(_onStepCountUpdate);
   }
 
+  @override
+  void didUpdateWidget(CompactStepTracker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.day, widget.day)) _loadTodayEntry();
+  }
+
   void _onStepCountUpdate() {
+    // The pedometer path is unchanged: a repository read per count update,
+    // not a whole-day read. Deriving this from the service's own
+    // `todaySteps` would remove the request entirely; its own change.
     if (_stepCounterService.isPedometerAvailable && mounted) {
-      _loadTodayEntry();
+      _loadFromRepository();
     }
   }
 
@@ -121,7 +136,7 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
           duration: Duration(seconds: 3),
         ),
       );
-      await _loadTodayEntry();
+      await _loadFromRepository();
     } else {
       _showPermissionDialog();
     }
@@ -216,13 +231,19 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
     super.dispose();
   }
 
-  Future<void> _loadTodayEntry() async {
+  Future<void> _loadTodayEntry() =>
+      _apply(() async => (await widget.day).steps.value);
+
+  Future<void> _loadFromRepository() =>
+      _apply(() => StepRepository.getTodayStepEntry(widget.userProfile.id!));
+
+  Future<void> _apply(Future<StepEntry?> Function() read) async {
     if (widget.userProfile.id == null) return;
     
     setState(() => _isLoading = true);
     
     try {
-      final entry = await StepRepository.getTodayStepEntry(widget.userProfile.id!);
+      final entry = await read();
       if (!mounted) return;
       final stepGoal = widget.userProfile.dailyStepGoal ??
                       (widget.userProfile.dailyStepGoal as int?) ??
@@ -463,7 +484,7 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
                       userProfile: widget.userProfile,
                     ),
                   ),
-                ).then((_) => _loadTodayEntry());
+                ).then((_) => widget.refreshDay());
               },
               borderRadius: BorderRadius.circular(16),
               child: Container(

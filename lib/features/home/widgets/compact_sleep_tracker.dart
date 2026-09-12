@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/sleep_logging_page.dart';
 import 'package:user_onboarding/data/services/api/sleep_api.dart';
@@ -7,13 +8,21 @@ import 'package:intl/intl.dart';
 class CompactSleepTracker extends StatefulWidget {
   final UserProfile userProfile;
   final VoidCallback? onUpdate;
-  final Duration loadDelay;
+
+  /// The dashboard's one read of today; tonight's entry comes from it. When
+  /// there is none, last night's is a different day and stays a request of
+  /// its own.
+  final Future<DaySnapshot> day;
+
+  /// Ask the dashboard to read the day again (after this card wrote to it).
+  final Future<void> Function() refreshDay;
 
   const CompactSleepTracker({
     Key? key,
     required this.userProfile,
+    required this.day,
+    required this.refreshDay,
     this.onUpdate,
-    this.loadDelay = Duration.zero,
   }) : super(key: key);
 
   @override
@@ -49,10 +58,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
       curve: Curves.easeInOut,
     ));
     _initializeSleepGoal();
-    // Deferred by the dashboard so lower cards load after the top ones.
-    Future.delayed(widget.loadDelay, () {
-      if (mounted) _loadSleepData();
-    });
+    _loadSleepData();
   }
 
   @override
@@ -71,6 +77,9 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.userProfile != widget.userProfile) {
       _initializeSleepGoal();
+    }
+    if (oldWidget.userProfile != widget.userProfile ||
+        !identical(oldWidget.day, widget.day)) {
       _loadSleepData();
     }
   }
@@ -79,33 +88,37 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
     setState(() => _isLoading = true);
     
     try {
-      // Check for today's sleep first
+      // Today's entry from the day the dashboard already read.
       final today = DateTime.now();
-      final todayStr = DateFormat('yyyy-MM-dd').format(today);
-      
-      var sleepLog = await _apiService.getSleepEntryByDate(
-        widget.userProfile.id, todayStr);
-      
-      // If no entry for today, check yesterday
-      if (sleepLog == null || sleepLog['entry'] == null) {
+      final todayEntry = (await widget.day).sleep.value;
+      double? hours;
+      double? qualityScore;
+
+      if (todayEntry != null) {
+        _sleepDate = today;
+        hours = todayEntry.totalHours;
+        qualityScore = todayEntry.qualityScore;
+      } else {
+        // No entry for today: last night's. A different day, so its own read.
         final yesterday = today.subtract(const Duration(days: 1));
         final yesterdayStr = DateFormat('yyyy-MM-dd').format(yesterday);
-        sleepLog = await _apiService.getSleepEntryByDate(
+        final sleepLog = await _apiService.getSleepEntryByDate(
           widget.userProfile.id, yesterdayStr);
         _sleepDate = yesterday;
-      } else {
-        _sleepDate = today;
+        if (sleepLog != null && sleepLog['success'] == true && sleepLog['entry'] != null) {
+          final entry = sleepLog['entry'];
+          hours = (entry['total_hours'] as num?)?.toDouble() ?? 0;
+          qualityScore = (entry['quality_score'] as num?)?.toDouble() ?? 0;
+        }
       }
       if (!mounted) return;
 
-
-      if (sleepLog != null && sleepLog['success'] == true && sleepLog['entry'] != null) {
-        final entry = sleepLog['entry'];
-        
+      if (hours != null) {
+        final loadedHours = hours;
+        final loadedScore = qualityScore ?? 0;
         setState(() {
-          _lastNightHours = (entry['total_hours'] as num?)?.toDouble() ?? 0;
-          final qualityScore = (entry['quality_score'] as num?)?.toDouble() ?? 0;
-          _sleepQuality = _getQualityFromScore(qualityScore);
+          _lastNightHours = loadedHours;
+          _sleepQuality = _getQualityFromScore(loadedScore);
         });
         
         // Animate progress after data loads
@@ -144,7 +157,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
         ),
       ),
     ).then((_) {
-      _loadSleepData();
+      widget.refreshDay();
       widget.onUpdate?.call();
     });
   }

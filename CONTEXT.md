@@ -35,10 +35,14 @@ presentation, local caching, and notifications; the backend owns persistence and
     a section for `missing` and names it in `_read_errors` for `error`. Keeping these
     apart is the point — a failed read rendered as an empty day is a lie about the
     user's data.
-  - **`today_report_screen` is the only consumer.** The dashboard was wired to it in F1
-    and removed again in `e918b74`: it fed a write-only `todayProgress` map that no
-    visible widget rendered. The dashboard's compact trackers each self-fetch, which is
-    the larger remaining win and its own decision.
+  - **Two consumers: `today_report_screen` and `dashboard_home`.** The dashboard was
+    wired to it in F1 and removed again in `e918b74` (it fed a write-only map), then
+    wired properly in [ADR-0007](docs/adr/0007-dashboard-reads-the-day-once.md): the
+    dashboard reads the day **once** and its today-data cards (meals, water, steps,
+    exercise-today, sleep-today) derive from that one `Future<DaySnapshot>`, re-deriving
+    when the dashboard swaps in a new one. Five requests became one. Supplements never
+    fetched; period, exercise-week and sleep-yesterday are different questions and stay
+    their own reads.
 - **Coach** — the AI chat assistant (user-facing name is "coach"; code says `chat` /
   `ChatApi`). The coach answers using **chat context** built from the user's shared data.
 - **Chat context** — the digest of a user's recent tracker data (daily and weekly) that

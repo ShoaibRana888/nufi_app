@@ -1,19 +1,27 @@
 // lib/features/home/widgets/daily_meal_card.dart
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_history_page.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_logging_page.dart';
-import 'package:user_onboarding/data/services/api/meal_api.dart';
-import 'package:intl/intl.dart';
 
 class DailyGoalsCard extends StatefulWidget {
   final UserProfile userProfile;
   final VoidCallback? onTap;
   final bool isCompact;
+
+  /// The dashboard's one read of today; the consumed macros are its meal
+  /// totals. This card used to fetch today's meal list and sum it itself.
+  final Future<DaySnapshot> day;
+
+  /// Ask the dashboard to read the day again (after this card wrote to it).
+  final Future<void> Function() refreshDay;
   
   const DailyGoalsCard({
     Key? key,
     required this.userProfile,
+    required this.day,
+    required this.refreshDay,
     this.onTap,
     this.isCompact = false,
   }) : super(key: key);
@@ -39,7 +47,6 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
   };
   
   bool _isLoadingProgress = false;
-  final MealApi _apiService = MealApi();
   
   @override
   void initState() {
@@ -55,6 +62,9 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
     if (oldWidget.userProfile != widget.userProfile) {
       _loadUserData();
       _calculateDailyGoals();
+    }
+    if (oldWidget.userProfile != widget.userProfile ||
+        !identical(oldWidget.day, widget.day)) {
       _loadTodayProgress();
     }
   }
@@ -168,32 +178,18 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
     setState(() => _isLoadingProgress = true);
     
     try {
-      final dateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      final meals = await _apiService.getMealHistory(
-        widget.userProfile.id!,
-        date: dateStr,
-      );
+      // The backend's roll-up for today, from the day the dashboard already
+      // read. A day with nothing logged carries zeros; a failed read is
+      // absent and shows as zeros too, as a failed fetch did before.
+      final meals = (await widget.day).meals.value ?? const MealsDay();
       if (!mounted) return;
 
-      // Calculate consumed macros
-      double totalProtein = 0;
-      double totalCarbs = 0;
-      double totalFat = 0;
-      double totalCalories = 0;
-      
-      for (var meal in meals) {
-        totalProtein += (meal['protein_g'] ?? meal['protein'] ?? 0).toDouble();
-        totalCarbs += (meal['carbs_g'] ?? meal['carbs'] ?? 0).toDouble();
-        totalFat += (meal['fat_g'] ?? meal['fat'] ?? 0).toDouble();
-        totalCalories += (meal['calories'] ?? 0).toDouble();
-      }
-      
       setState(() {
         _consumedMacros = {
-          'protein': totalProtein,
-          'carbs': totalCarbs,
-          'fat': totalFat,
-          'calories': totalCalories,
+          'protein': meals.proteinG,
+          'carbs': meals.carbsG,
+          'fat': meals.fatG,
+          'calories': meals.calories,
         };
         _isLoadingProgress = false;
       });
@@ -533,7 +529,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                                 userProfile: widget.userProfile,
                               ),
                             ),
-                          ).then((_) => _loadTodayProgress());
+                          ).then((_) => widget.refreshDay());
                         },
                         icon: const Icon(Icons.add, size: 18),
                         label: const Text('Log Meal'),
@@ -557,7 +553,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                                 userProfile: widget.userProfile,
                               ),
                             ),
-                          ).then((_) => _loadTodayProgress());
+                          ).then((_) => widget.refreshDay());
                         },
                         icon: const Icon(Icons.history, size: 16),
                         label: const Text('History'),
