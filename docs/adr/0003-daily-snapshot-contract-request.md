@@ -72,14 +72,26 @@ is the authoritative copy of the shape.
 ### 1. The per-section error marker is `_read_errors`
 
 This ADR asked for "a 5xx/partial-failure marker per section" without saying
-what one looks like. It is a top-level map of section name to message —
+what one looks like. It is a top-level map of section name to a fixed token —
 the same key and rule the backend's own day reads use:
 
 ```jsonc
 { "user_id": "...", "date": "2026-09-06",
   "meals": { ... }, "water": { ... },
-  "_read_errors": { "sleep": "sleep_entries exploded" } }
+  "_read_errors": { "sleep": "read_failed" } }
 ```
+
+> **Amended 2026-09-12.** This originally read "section name to message" with
+> the example `"sleep_entries exploded"`, and as built it *was* the message:
+> the backend store's raw exception text, which for a PostgREST failure
+> carries the SQL message, the Postgres error code and a hint naming tables
+> and columns, and for an HTTP failure the request URL with the project host
+> — on a route with no auth. This client reads only the key: `Section.error`
+> holds the value and no screen renders it. So the value is now the opaque
+> token **`"read_failed"`**, identical for every failed section. The
+> missing-vs-error distinction is carried by presence, not by the message.
+> **Treat the value as opaque; never parse or display it.** Backend
+> reasoning: its ADR-0007.
 
 So, per section: **present ⇒ `ok`**, **absent ⇒ `missing`**, **absent and named
 in `_read_errors` ⇒ `error`** — exactly `SectionStatus`. A failed section is

@@ -98,7 +98,7 @@ void main() {
     // empty state.
     final document = dayDocument()
       ..remove('water')
-      ..['_read_errors'] = {'water': 'daily_water unreachable'};
+      ..['_read_errors'] = {'water': 'read_failed'};
 
     await tester.pumpWidget(MaterialApp(
       home: TodayReportScreen(
