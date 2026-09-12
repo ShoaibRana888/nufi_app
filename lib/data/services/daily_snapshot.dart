@@ -24,7 +24,9 @@ typedef DayReader = Future<Map<String, dynamic>> Function(
     String userId, DateTime date);
 
 /// Reads steps from on-device storage. Used only when the day read could not
-/// supply a steps section — see [_stepsSection].
+/// supply a steps section — see [_stepsSection]. Local means local: the
+/// default is the repository's storage-only read, not its network-first one,
+/// so a day with no server steps row stays one request.
 typedef LocalStepsReader = Future<StepEntry?> Function(
     String userId, DateTime date);
 
@@ -44,7 +46,7 @@ class DailySnapshot {
     LocalStepsReader? readLocalSteps,
     DateTime Function()? clock,
   })  : _readDay = readDay ?? _defaultReadDay,
-        _readLocalSteps = readLocalSteps ?? StepRepository.getStepEntryByDate,
+        _readLocalSteps = readLocalSteps ?? StepRepository.getLocalStepEntryByDate,
         _clock = clock ?? DateTime.now;
 
   static Future<Map<String, dynamic>> _defaultReadDay(String u, DateTime d) =>

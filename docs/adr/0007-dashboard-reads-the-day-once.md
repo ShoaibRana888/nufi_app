@@ -60,6 +60,13 @@ has to own the read.
 7. **`DaySnapshot`'s exercise entries are the day's by construction**, so the card's
    per-row `startsWith(today)` check against the device clock is removed. It was the
    one place the client re-derived which day a row belonged to.
+8. **`DailySnapshot`'s steps fallback is local-only now.** Its default was
+   `StepRepository.getStepEntryByDate`, which tries `StepApi` *before* on-device storage
+   — so a day with no server steps row (the documented normal case) cost a second
+   request, undoing the consolidation this ADR is for. That default predates this ADR
+   (ADR-0006 introduced the fallback); it became load-bearing here. The repository gains
+   `getLocalStepEntryByDate`, storage only, and the module defaults to it. Raised by
+   review on this PR.
 
 ## Consequences
 
