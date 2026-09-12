@@ -1,5 +1,6 @@
 // lib/features/onboarding/screens/period_cycle_page.dart
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/onboarding/widgets/required_label.dart';
 import 'package:intl/intl.dart';
 
 class PeriodCyclePage extends StatefulWidget {
@@ -100,21 +101,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
           const SizedBox(height: 24),
           
           // Do you have periods?
-          Row(
-            children: const [
-              Text(
-                'Do you have regular periods?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('Do you have regular periods?'),
           const SizedBox(height: 12),
           
           if (!_isFieldValid('hasPeriods') && _showValidationErrors)
@@ -240,21 +227,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
             const SizedBox(height: 24),
             
             // Last Period Date
-            Row(
-              children: const [
-                Text(
-                  'When did your last period start?',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  ' *',
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+            RequiredLabel('When did your last period start?'),
             const SizedBox(height: 12),
             
             if (!_isFieldValid('lastPeriod') && _showValidationErrors)
@@ -439,21 +412,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
             const SizedBox(height: 24),
             
             // Is cycle regular?
-            Row(
-              children: const [
-                Text(
-                  'Is your cycle regular?',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  ' *',
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+            RequiredLabel('Is your cycle regular?'),
             const SizedBox(height: 12),
             
             if (!_isFieldValid('cycleRegular') && _showValidationErrors)
@@ -555,21 +514,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
           const SizedBox(height: 24),
           
           // Pregnancy Status
-          Row(
-            children: const [
-              Text(
-                'Pregnancy Status',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('Pregnancy Status'),
           const SizedBox(height: 12),
           
           if (!_isFieldValid('pregnancy') && _showValidationErrors)
@@ -658,21 +603,7 @@ class _PeriodCyclePageState extends State<PeriodCyclePage> {
           const SizedBox(height: 24),
           
           // Tracking Preference
-          Row(
-            children: const [
-              Text(
-                'Period Tracking Preference',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('Period Tracking Preference'),
           const SizedBox(height: 12),
           
           if (!_isFieldValid('tracking') && _showValidationErrors)

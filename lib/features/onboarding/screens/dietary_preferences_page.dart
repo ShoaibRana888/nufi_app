@@ -1,5 +1,6 @@
 // lib/features/onboarding/screens/dietary_preferences_page.dart
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/onboarding/widgets/required_label.dart';
 
 class DietaryPreferencesPage extends StatefulWidget {
   final Map<String, dynamic> formData;
@@ -179,9 +180,11 @@ class _DietaryPreferencesPageState extends State<DietaryPreferencesPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Daily Meals',
-                      style: TextStyle(fontSize: 16),
+                    const Flexible(
+                      child: Text(
+                        'Daily Meals',
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
                     Text(
                       '$_dailyMealsCount ${_dailyMealsCount == 1 ? 'meal' : 'meals'}',
@@ -252,21 +255,7 @@ class _DietaryPreferencesPageState extends State<DietaryPreferencesPage> {
           const SizedBox(height: 24),
           
           // Dietary preferences with validation
-          Row(
-            children: const [
-              Text(
-                'Dietary Preferences',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('Dietary Preferences'),
           const SizedBox(height: 8),
           const Text(
             'Select all that apply',
@@ -333,13 +322,18 @@ class _DietaryPreferencesPageState extends State<DietaryPreferencesPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Daily Water Intake Goal',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              // Flexible so the label yields to the toggle instead of
+              // overflowing the row on narrow screens.
+              const Flexible(
+                child: Text(
+                  'Daily Water Intake Goal',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               // Toggle button
               ToggleButtons(
                 borderRadius: BorderRadius.circular(8),
@@ -444,21 +438,7 @@ class _DietaryPreferencesPageState extends State<DietaryPreferencesPage> {
           const SizedBox(height: 24),
           
           // Medical conditions with validation
-          Row(
-            children: const [
-              Text(
-                'Medical Conditions',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('Medical Conditions'),
           const SizedBox(height: 8),
           const Text(
             'Select any that apply (important for personalized recommendations)',
