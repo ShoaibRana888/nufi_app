@@ -66,7 +66,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
         });
       } else {
         // Create a new entry for today if none exists
-        final targetGlasses = widget.userProfile.formData['waterIntakeGlasses'] ?? 8;
+        final targetGlasses = widget.userProfile.waterIntakeGlasses;
         setState(() {
           _todayEntry = WaterEntry(
             userId: widget.userProfile.id,
@@ -86,7 +86,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       print('Error loading today\'s water entry: $e');
       if (!mounted) return;
       // Still create a default entry on error
-      final targetGlasses = widget.userProfile.formData['waterIntakeGlasses'] ?? 8;
+      final targetGlasses = widget.userProfile.waterIntakeGlasses;
       setState(() {
         _todayEntry = WaterEntry(
           userId: widget.userProfile.id,
@@ -139,7 +139,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       widget.onUpdate?.call();
 
       // Show achievement message if goal reached
-      final targetGlasses = widget.userProfile.waterIntakeGlasses ?? 8;
+      final targetGlasses = widget.userProfile.waterIntakeGlasses;
       if (updatedEntry.glassesConsumed >= targetGlasses && 
           (_todayEntry!.glassesConsumed - count) < targetGlasses) {
         if (mounted) {
@@ -159,7 +159,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
   }
 
   void _showQuickLogDialog() {
-    final targetGlasses = widget.userProfile.waterIntakeGlasses ?? 8;
+    final targetGlasses = widget.userProfile.waterIntakeGlasses;
     final glassesConsumed = _todayEntry?.glassesConsumed ?? 0;
     final remaining = targetGlasses - glassesConsumed;
     
@@ -210,7 +210,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       );
     }
 
-    final targetGlasses = widget.userProfile.waterIntakeGlasses ?? 8;
+    final targetGlasses = widget.userProfile.waterIntakeGlasses;
     final glassesConsumed = _todayEntry?.glassesConsumed ?? 0;
     final progress = (glassesConsumed / targetGlasses).clamp(0.0, 1.0);
     final isGoalReached = glassesConsumed >= targetGlasses;
