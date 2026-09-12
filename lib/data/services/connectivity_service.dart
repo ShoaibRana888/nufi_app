@@ -49,7 +49,16 @@ class ConnectivityService {
 
   /// Same lightweight endpoint the login screen's warm-up ping uses.
   static const String _probePath = '/check';
-  static const Duration _probeTimeout = Duration(seconds: 8);
+
+  /// Matches the login request's own budget (AuthApi.loginUser and
+  /// SessionRepository.login both allow 60s), because the backend spins down
+  /// when idle and a first request can take 30–50s to cold-start. The gate
+  /// must never be stricter than the request it guards: a shorter timeout
+  /// here would call a connected user offline precisely when the server is
+  /// waking up. A genuinely offline device does not wait this out — it fails
+  /// immediately with no route to host — so the budget only bites when there
+  /// is a route and the server is slow, which is the case it exists for.
+  static const Duration _probeTimeout = Duration(seconds: 60);
 
   // Whether the given results represent an active connection.
   bool _hasConnection(List<ConnectivityResult> results) =>
@@ -87,14 +96,36 @@ class ConnectivityService {
   /// Reports reachability on each interface change, applying the same
   /// probe-on-none rule as [isConnected] so listeners (the onboarding banner)
   /// agree with the gate.
+  ///
+  /// Probes are asynchronous, so a `none` event's probe can still be in
+  /// flight when a newer wifi event has already reported true. Each event
+  /// takes a sequence number and a probe only reports if it is still the
+  /// latest — an older result must not overwrite a newer state.
   void setupConnectivityListener(Function(bool) onConnectivityChanged) {
-    _connectivity.onConnectivityChanged
-        .listen((List<ConnectivityResult> results) async {
-      if (_hasConnection(results)) {
-        onConnectivityChanged(true);
-      } else {
-        onConnectivityChanged(await _canReachBackend());
-      }
+    _connectivity.onConnectivityChanged.listen((results) {
+      _onInterfaceChange(results, onConnectivityChanged);
     });
+  }
+
+  int _listenerSequence = 0;
+
+  @visibleForTesting
+  Future<void> onInterfaceChangeForTest(
+    List<ConnectivityResult> results,
+    Function(bool) onConnectivityChanged,
+  ) =>
+      _onInterfaceChange(results, onConnectivityChanged);
+
+  Future<void> _onInterfaceChange(
+    List<ConnectivityResult> results,
+    Function(bool) onConnectivityChanged,
+  ) async {
+    final sequence = ++_listenerSequence;
+    if (_hasConnection(results)) {
+      onConnectivityChanged(true);
+      return;
+    }
+    final reachable = await _canReachBackend();
+    if (sequence == _listenerSequence) onConnectivityChanged(reachable);
   }
 }

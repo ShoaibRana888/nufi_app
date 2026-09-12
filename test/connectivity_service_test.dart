@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:user_onboarding/data/services/connectivity_service.dart';
@@ -51,6 +53,29 @@ void main() {
     );
 
     expect(await svc.isConnected(), false);
+  });
+
+  test('a stale probe result cannot overwrite a newer state', () async {
+    // A `none` event starts a probe; wifi comes back before it resolves; the
+    // probe then fails. The onboarding banner assigns every callback straight
+    // to its state, so the late false would have re-shown "Offline Mode"
+    // after connectivity was already restored.
+    final probeGate = Completer<void>();
+    final svc = ConnectivityService.withChecks(
+      checkInterface: () async => [ConnectivityResult.none],
+      probe: () => probeGate.future,
+    );
+    final reported = <bool>[];
+
+    final stale = svc.onInterfaceChangeForTest(
+      [ConnectivityResult.none], reported.add);   // starts the probe
+    await svc.onInterfaceChangeForTest(
+      [ConnectivityResult.wifi], reported.add);   // newer: reports true now
+    probeGate.completeError(Exception('timed out'));
+    await stale;
+
+    // The stale probe's false was discarded.
+    expect(reported, [true]);
   });
 
   test('a failing interface check falls through to the probe', () async {
