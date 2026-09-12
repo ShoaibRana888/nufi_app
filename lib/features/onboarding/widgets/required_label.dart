@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 /// not wrap and overflowed instead — visibly, on the two longest labels at
 /// iPhone width, and latently on every other one at any narrower width. One
 /// rich text wraps like a paragraph and keeps the asterisk glued to the last
-/// word.
+/// word: the separator is a non-breaking space, since an ordinary space is a
+/// line-break opportunity and would let the asterisk wrap onto a line alone.
 class RequiredLabel extends StatelessWidget {
   final String text;
   final double fontSize;
@@ -22,7 +23,7 @@ class RequiredLabel extends StatelessWidget {
         style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
         children: const [
           TextSpan(
-            text: ' *',
+            text: '\u00A0*',
             style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
           ),
         ],
