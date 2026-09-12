@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/exercise_logging_page.dart';
 import 'package:user_onboarding/data/services/api/exercise_api.dart';
@@ -10,9 +11,19 @@ class CompactExerciseTracker extends StatefulWidget {
   final VoidCallback? onUpdate;
   final Duration loadDelay;
 
+  /// The dashboard's one read of today; today's exercises come from it.
+  /// The week's exercises are a different question and stay a request of
+  /// their own.
+  final Future<DaySnapshot> day;
+
+  /// Ask the dashboard to read the day again (after this card wrote to it).
+  final Future<void> Function() refreshDay;
+
   const CompactExerciseTracker({
     Key? key,
     required this.userProfile,
+    required this.day,
+    required this.refreshDay,
     this.onUpdate,
     this.loadDelay = Duration.zero,
   }) : super(key: key);
@@ -57,6 +68,9 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.userProfile != widget.userProfile) {
       _initializeExerciseGoal();
+    }
+    if (oldWidget.userProfile != widget.userProfile ||
+        !identical(oldWidget.day, widget.day)) {
       _loadExerciseData();
     }
   }
@@ -70,12 +84,10 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
       final weekStart = now.subtract(Duration(days: now.weekday - 1));
       final weekStartStr = DateFormat('yyyy-MM-dd').format(weekStart);
       
-      // Load today's exercise data
-      final todayExercises = await _apiService.getExerciseLogs(
-        widget.userProfile.id,
-        startDate: today,
-        endDate: today,
-      );
+      // Today's exercises come from the day the dashboard already read.
+      // Missing and error both read as "none today", as a failed request
+      // did before.
+      final todayExercises = (await widget.day).exercise.value?.entries;
       
       // Load this week's exercise data
       final weekExercises = await _apiService.getExerciseLogs(
@@ -87,28 +99,26 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
       // Calculate today's total minutes
       int todayMinutes = 0;
       int todayCount = 0;
+      // The day's entries are the day's by construction; no need to re-check
+      // each row's date against this device's clock.
       if (todayExercises != null && todayExercises.isNotEmpty) {
         for (var exercise in todayExercises) {
-          // Check if the exercise date is actually today
-          final exerciseDate = exercise['exercise_date'] ?? exercise['created_at'];
-          if (exerciseDate != null && exerciseDate.toString().startsWith(today)) {
-            // Check if it's a cardio exercise with duration
-            if (exercise['duration_minutes'] != null) {
-              todayMinutes += (exercise['duration_minutes'] as num?)?.toInt() ?? 0;
-            } else {
-              // For strength exercises, estimate duration based on sets
-              // Typically, a set takes about 1-2 minutes including rest
-              final sets = (exercise['sets'] as num?)?.toInt() ?? 0;
+          // Check if it's a cardio exercise with duration
+          if (exercise['duration_minutes'] != null) {
+            todayMinutes += (exercise['duration_minutes'] as num?)?.toInt() ?? 0;
+          } else {
+            // For strength exercises, estimate duration based on sets
+            // Typically, a set takes about 1-2 minutes including rest
+            final sets = (exercise['sets'] as num?)?.toInt() ?? 0;
 
-              if (sets > 0) {
-                // Estimate: 2 minutes per set for strength training (includes rest)
-                // This is a reasonable approximation for tracking purposes
-                final estimatedMinutes = sets * 2;
-                todayMinutes += estimatedMinutes;
-              }
+            if (sets > 0) {
+              // Estimate: 2 minutes per set for strength training (includes rest)
+              // This is a reasonable approximation for tracking purposes
+              final estimatedMinutes = sets * 2;
+              todayMinutes += estimatedMinutes;
             }
-            todayCount++;
           }
+          todayCount++;
         }
       }
       
@@ -157,7 +167,7 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
         ),
       ),
     ).then((_) {
-      _loadExerciseData();
+      widget.refreshDay();
       widget.onUpdate?.call();
     });
   }

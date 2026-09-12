@@ -1,6 +1,7 @@
 // lib/features/home/widgets/compact_water_tracker.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/water_entry.dart';
 import 'package:user_onboarding/data/services/api/water_api.dart';
@@ -10,9 +11,18 @@ class CompactWaterTracker extends StatefulWidget {
   final UserProfile userProfile;
   final VoidCallback? onUpdate;
 
+  /// The dashboard's one read of today; this card takes its water section
+  /// from it instead of fetching its own. A new future means "re-derive".
+  final Future<DaySnapshot> day;
+
+  /// Ask the dashboard to read the day again (after this card wrote to it).
+  final Future<void> Function() refreshDay;
+
   const CompactWaterTracker({
     Key? key,
     required this.userProfile,
+    required this.day,
+    required this.refreshDay,
     this.onUpdate,
   }) : super(key: key);
 
@@ -48,6 +58,12 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
   }
 
   @override
+  void didUpdateWidget(CompactWaterTracker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.day, widget.day)) _loadTodayEntry();
+  }
+
+  @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
@@ -57,7 +73,9 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
     try {
       setState(() => _isLoading = true);
       
-      final entry = await WaterApi().getTodayWaterEntry(widget.userProfile.id);
+      // missing and error both land in the "no entry yet" branch below, as a
+      // failed fetch did before -- the card has no error state to show.
+      final entry = (await widget.day).water.value;
       if (!mounted) return;
 
       if (entry != null) {
@@ -228,7 +246,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
                   userProfile: widget.userProfile,
                 ),
               ),
-            ).then((_) => _loadTodayEntry());
+            ).then((_) => widget.refreshDay());
           },
           borderRadius: BorderRadius.circular(16),
           child: Container(
