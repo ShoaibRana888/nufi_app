@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'package:user_onboarding/data/models/weight_entry.dart';
 import 'package:user_onboarding/data/services/api/api_client.dart';
-import 'package:user_onboarding/data/services/api/chat_api.dart';
 
 /// Weight tracking API.
 class WeightApi {
@@ -13,7 +12,6 @@ class WeightApi {
   WeightApi._internal();
 
   final ApiClient _client = ApiClient();
-  final ChatApi _chat = ChatApi();
 
   Future<String> saveWeightEntry(WeightEntry weightEntry) async {
     try {
@@ -34,14 +32,6 @@ class WeightApi {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         final entryId = data['id'] ?? weightEntry.id;
-
-        // ✅ UPDATE CHAT CONTEXT (fire-and-forget; does not block the save)
-        _chat.syncContext(
-          weightEntry.userId,
-          'weight',
-          {'weight': weightEntry.weight},
-          date: weightEntry.date
-        );
 
         return entryId;
       } else {

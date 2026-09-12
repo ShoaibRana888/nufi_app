@@ -158,20 +158,20 @@ void main() {
       final module = buildModule(
         readDay: (u, d) async => document(
           omit: ['sleep'],
-          readErrors: {'sleep': 'sleep_entries exploded'},
+          readErrors: {'sleep': 'read_failed'},
         ),
       );
       final snap = await module.forDay('u1', today);
 
       expect(snap.sleep.isError, isTrue);
-      expect(snap.sleep.error.toString(), contains('exploded'));
+      expect(snap.sleep.error, 'read_failed'); // opaque token, carried as-is
     });
 
     test('a failed section does not take its neighbours down', () async {
       final module = buildModule(
         readDay: (u, d) async => document(
           omit: ['water'],
-          readErrors: {'water': 'daily_water unreachable'},
+          readErrors: {'water': 'read_failed'},
         ),
       );
       final snap = await module.forDay('u1', today);
@@ -231,7 +231,7 @@ void main() {
       final module = buildModule(
         readDay: (u, d) async => document(
           omit: ['steps'],
-          readErrors: {'steps': 'daily_steps unreachable'},
+          readErrors: {'steps': 'read_failed'},
         ),
         readLocalSteps: (u, d) async => local,
       );
@@ -252,7 +252,7 @@ void main() {
       final module = buildModule(
         readDay: (u, d) async => document(
           omit: ['steps'],
-          readErrors: {'steps': 'daily_steps unreachable'},
+          readErrors: {'steps': 'read_failed'},
         ),
         readLocalSteps: (u, d) async => null,
       );

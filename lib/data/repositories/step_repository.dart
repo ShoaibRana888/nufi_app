@@ -24,7 +24,15 @@ class StepRepository {
       print('Error getting steps by date from API: $e');
     }
 
-    // Fallback to local storage
+    return getLocalStepEntryByDate(userId, date);
+  }
+
+  /// On-device steps only -- what the pedometer accrued and what the last
+  /// network read cached. Never touches the network. This is the fallback
+  /// DailySnapshot uses when the day read could not supply steps; the
+  /// network-first read above would make that "one request" into two.
+  static Future<StepEntry?> getLocalStepEntryByDate(
+      String userId, DateTime date) async {
     final prefs = await SharedPreferences.getInstance();
     final dateKey = '${date.year}-${date.month}-${date.day}';
     final stepsJson = prefs.getString('${_stepsKey}_${userId}_$dateKey');

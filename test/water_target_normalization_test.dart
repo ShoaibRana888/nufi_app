@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/water_entry.dart';
 import 'package:user_onboarding/data/services/api/water_api.dart';
@@ -10,18 +11,15 @@ import 'package:user_onboarding/features/tracking/screens/water_history_page.dar
 ///
 /// Rows created before the target fix carry a 2000ml constant that was never a
 /// record of the user's goal. Two consumers read it back: the dashboard's
-/// compact tracker, which resaves whatever it loaded — so a stale target would
-/// be written back on the next glass — and the history page, which reports
+/// compact tracker, which takes today's row from the dashboard's DaySnapshot
+/// (ADR-0007) and resaves whatever it loaded — so a stale target would be
+/// written back on the next glass — and the history page, which reports
 /// "goals achieved" straight from the stored value.
 class _FakeWaterApi implements WaterApi {
-  final WaterEntry? today;
   final List<WaterEntry> history;
   final List<WaterEntry> saved = [];
 
-  _FakeWaterApi({this.today, this.history = const []});
-
-  @override
-  Future<WaterEntry?> getTodayWaterEntry(String userId) async => today;
+  _FakeWaterApi({this.history = const []});
 
   @override
   Future<List<WaterEntry>> getWaterHistory(String userId,
@@ -81,11 +79,21 @@ void main() {
 
   testWidgets('the compact tracker resaves a legacy row with the profile target',
       (tester) async {
-    final api = _FakeWaterApi(today: legacyRow());
+    final api = _FakeWaterApi();
+    final day = DaySnapshot(
+      userId: 'u1',
+      date: DateTime.now(),
+      water: Section.ok(legacyRow()),
+    );
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SingleChildScrollView(
-          child: CompactWaterTracker(userProfile: tenGlassUser(), waterApi: api),
+          child: CompactWaterTracker(
+            userProfile: tenGlassUser(),
+            day: Future.value(day),
+            refreshDay: () async {},
+            waterApi: api,
+          ),
         ),
       ),
     ));

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:user_onboarding/data/models/step_entry.dart';
 import 'package:user_onboarding/data/services/api/api_client.dart';
-import 'package:user_onboarding/data/services/api/chat_api.dart';
 
 /// Step tracking API.
 class StepApi {
@@ -14,7 +13,6 @@ class StepApi {
   StepApi._internal();
 
   final ApiClient _client = ApiClient();
-  final ChatApi _chat = ChatApi();
 
   Future<StepEntry?> getTodaySteps(String userId) async {
     try {
@@ -103,15 +101,7 @@ class StepApi {
         body: jsonEncode(entry.toMap()),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // ✅ UPDATE CHAT CONTEXT (fire-and-forget; does not block the save)
-        _chat.syncContext(
-          entry.userId,
-          'steps',
-          entry.toMap(),
-          date: entry.date
-        );
-      } else {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Failed to save step entry');
       }
     } catch (e) {

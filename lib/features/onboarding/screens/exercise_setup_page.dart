@@ -1,5 +1,6 @@
 // lib/features/onboarding/screens/exercise_setup_page.dart
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/onboarding/widgets/required_label.dart';
 
 class CurrentExerciseSetupPage extends StatefulWidget {
   final Map<String, dynamic> formData;
@@ -189,17 +190,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
                       size: 24,
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Daily Step Goal',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Text(
-                      ' *',
-                      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                    ),
+                    const Flexible(child: RequiredLabel('Daily Step Goal')),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -273,8 +264,10 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: _presetStepGoals.map((goal) {
                     final isSelected = _dailyStepGoal == goal;
                     return GestureDetector(
@@ -368,21 +361,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
           const SizedBox(height: 24),
           
           // Workout location
-          Row(
-            children: const [
-              Text(
-                'Where do you usually workout?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('Where do you usually workout?'),
           const SizedBox(height: 12),
           
           if (!_isFieldValid('location') && _showValidationErrors)
@@ -411,7 +390,9 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              childAspectRatio: 0.8,
+              // Tall enough for icon + wrapped title + two description lines
+              // at narrow-phone cell widths (~100px); 0.8 overflowed there.
+              childAspectRatio: 0.7,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             ),
@@ -479,21 +460,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
           const SizedBox(height: 24),
           
           // Available equipment
-          Row(
-            children: const [
-              Text(
-                'What equipment do you have access to?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('What equipment do you have access to?'),
           const SizedBox(height: 8),
           const Text(
             'Select all that apply',
@@ -566,21 +533,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
           const SizedBox(height: 24),
           
           // Fitness level
-          Row(
-            children: const [
-              Text(
-                'What\'s your current fitness level?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          const RequiredLabel('What\'s your current fitness level?'),
           const SizedBox(height: 12),
           
           if (!_isFieldValid('fitness') && _showValidationErrors)
@@ -659,21 +612,7 @@ class _CurrentExerciseSetupPageState extends State<CurrentExerciseSetupPage> {
           const SizedBox(height: 24),
           
           // Trainer option
-          Row(
-            children: const [
-              Text(
-                'Do you work with a personal trainer?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('Do you work with a personal trainer?'),
           const SizedBox(height: 12),
           Row(
             children: [

@@ -1,5 +1,6 @@
 // lib/features/onboarding/screens/workout_preferences_page.dart
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/onboarding/widgets/required_label.dart';
 
 class WorkoutPreferencesPage extends StatefulWidget {
   final Map<String, dynamic> formData;
@@ -106,21 +107,7 @@ class _WorkoutPreferencesPageState extends State<WorkoutPreferencesPage> {
           const SizedBox(height: 24),
           
           // Workout Types Selection
-          Row(
-            children: const [
-              Text(
-                'What types of exercise do you enjoy?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('What types of exercise do you enjoy?'),
           const SizedBox(height: 8),
           const Text(
             'Select all that apply',
@@ -251,21 +238,7 @@ class _WorkoutPreferencesPageState extends State<WorkoutPreferencesPage> {
           const SizedBox(height: 24),
           
           // Workout Frequency
-          Row(
-            children: const [
-              Text(
-                'How often do you want to workout?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('How often do you want to workout?'),
           const SizedBox(height: 16),
           
           Container(
@@ -377,21 +350,7 @@ class _WorkoutPreferencesPageState extends State<WorkoutPreferencesPage> {
           const SizedBox(height: 24),
           
           // Workout Duration
-          Row(
-            children: const [
-              Text(
-                'How long are your typical workouts?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          RequiredLabel('How long are your typical workouts?'),
           const SizedBox(height: 16),
           
           if (!_isFieldValid('duration') && _showValidationErrors)

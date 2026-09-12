@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_onboarding/data/services/api/supplement_api.dart';
 import 'package:user_onboarding/data/services/notification_service.dart';
+import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
+import 'package:user_onboarding/data/services/daily_snapshot.dart';
 import 'package:user_onboarding/features/home/widgets/activity_drawer.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_logging_page.dart';
 import 'package:user_onboarding/features/tracking/screens/supplements_logging_page.dart';
@@ -30,10 +32,15 @@ class DashboardHome extends StatefulWidget {
   final UserProfile userProfile;
   final Function(int)? onTabChange;
 
+  /// Injected for tests; production defaults to a fresh [DailySnapshot]
+  /// (the ADR-0004 seam, same as today_report_screen).
+  final DailySnapshot? dailySnapshot;
+
   const DashboardHome({
     Key? key,
     required this.userProfile,
     this.onTabChange,
+    this.dailySnapshot,
   }) : super(key: key);
 
   @override
@@ -50,6 +57,16 @@ class _DashboardHomeState extends State<DashboardHome>
   bool get wantKeepAlive => true;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // The day, read once. The today-data cards (meals, water, steps, exercise,
+  // sleep) used to fetch their own section -- five requests for one day --
+  // and stagger themselves so the page did not fire them all at once. They
+  // now read from this one future; `_reloadDay` swaps in a fresh one and every
+  // card re-derives in didUpdateWidget, so a glass logged on one card updates
+  // the day for all of them with one request.
+  late final DailySnapshot _dailySnapshot =
+      widget.dailySnapshot ?? DailySnapshot();
+  late Future<DaySnapshot> _today;
   
   // Core state
   DateTime selectedDate = DateTime.now();
@@ -78,6 +95,7 @@ class _DashboardHomeState extends State<DashboardHome>
   void initState() {
     super.initState();
     _currentUserProfile = widget.userProfile;
+    _today = _readToday();
     WidgetsBinding.instance.addObserver(this);
     _setupListeners();
     _checkSupplementsSetup();
@@ -298,8 +316,20 @@ class _DashboardHomeState extends State<DashboardHome>
     if (userProvider.userProfile != null && mounted) {
       setState(() {
         _currentUserProfile = userProvider.userProfile!;
+        _today = _readToday();
       });
     }
+  }
+
+  Future<DaySnapshot> _readToday() =>
+      _dailySnapshot.forDay(_currentUserProfile.id ?? '', DateTime.now());
+
+  /// A card that changed the day asks for it to be read again; the new
+  /// future reaches every card through didUpdateWidget.
+  Future<void> _reloadDay() async {
+    if (!mounted) return;
+    setState(() => _today = _readToday());
+    await _today;
   }
 
   String _getGreeting() {
@@ -367,6 +397,8 @@ class _DashboardHomeState extends State<DashboardHome>
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: DailyGoalsCard(
                           userProfile: widget.userProfile,
+                          day: _today,
+                          refreshDay: _reloadDay,
                           onTap: () {
                             // Navigate to meal logging page
                             Navigator.push(
@@ -389,6 +421,8 @@ class _DashboardHomeState extends State<DashboardHome>
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: CompactWaterTracker(
                           userProfile: _currentUserProfile,
+                          day: _today,
+                          refreshDay: _reloadDay,
                         ),
                       ),
                     ),
@@ -400,9 +434,8 @@ class _DashboardHomeState extends State<DashboardHome>
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: CompactStepTracker(
                           userProfile: _currentUserProfile,
-                          // Staggered so the lower cards load after the top of
-                          // the page (weight/weekly/meal/water) has settled.
-                          loadDelay: const Duration(milliseconds: 900),
+                          day: _today,
+                          refreshDay: _reloadDay,
                         ),
                       ),
                     ),
@@ -413,7 +446,10 @@ class _DashboardHomeState extends State<DashboardHome>
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: CompactExerciseTracker(
                           userProfile: _currentUserProfile,
-                          loadDelay: const Duration(milliseconds: 1100),
+                          day: _today,
+                          refreshDay: _reloadDay,
+                          // Staggered: the week read is still its own request.
+                          loadDelay: const Duration(milliseconds: 900),
                         ),
                       ),
                     ),
@@ -425,7 +461,8 @@ class _DashboardHomeState extends State<DashboardHome>
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: CompactSleepTracker(
                           userProfile: _currentUserProfile,
-                          loadDelay: const Duration(milliseconds: 1300),
+                          day: _today,
+                          refreshDay: _reloadDay,
                         ),
                       ),
                     ),
