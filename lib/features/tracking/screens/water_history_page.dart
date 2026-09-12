@@ -9,13 +9,21 @@ import 'package:intl/intl.dart';
 class WaterHistoryPage extends StatefulWidget {
   final UserProfile userProfile;
 
-  const WaterHistoryPage({Key? key, required this.userProfile}) : super(key: key);
+  /// Injectable for tests; defaults to a real WaterApi. See ADR-0004.
+  final WaterApi? waterApi;
+
+  const WaterHistoryPage({
+    Key? key,
+    required this.userProfile,
+    this.waterApi,
+  }) : super(key: key);
 
   @override
   State<WaterHistoryPage> createState() => _WaterHistoryPageState();
 }
 
 class _WaterHistoryPageState extends State<WaterHistoryPage> {
+  late final WaterApi _waterApi = widget.waterApi ?? WaterApi();
   final SharingApi _sharingApi = SharingApi();
   List<WaterEntry> _entries = [];
   bool _isLoading = true;
@@ -32,9 +40,12 @@ class _WaterHistoryPageState extends State<WaterHistoryPage> {
     setState(() => _isLoading = true);
     
     try {
-      final entries = await WaterApi().getWaterHistory(widget.userProfile.id!, limit: 30);
+      final entries = await _waterApi.getWaterHistory(widget.userProfile.id!, limit: 30);
+      // Stored targets were a 2000ml constant, not a record of the goal, so
+      // "achieved" here is measured against the profile goal, not the row.
+      final target = widget.userProfile.waterIntakeGlasses * 250.0;
       setState(() {
-        _entries = entries;
+        _entries = entries.map((e) => e.copyWith(targetMl: target)).toList();
         _isLoading = false;
       });
     } catch (e) {

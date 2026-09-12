@@ -10,10 +10,14 @@ class CompactWaterTracker extends StatefulWidget {
   final UserProfile userProfile;
   final VoidCallback? onUpdate;
 
+  /// Injectable for tests; defaults to a real WaterApi. See ADR-0004.
+  final WaterApi? waterApi;
+
   const CompactWaterTracker({
     Key? key,
     required this.userProfile,
     this.onUpdate,
+    this.waterApi,
   }) : super(key: key);
 
   @override
@@ -22,6 +26,7 @@ class CompactWaterTracker extends StatefulWidget {
 
 class _CompactWaterTrackerState extends State<CompactWaterTracker> 
     with SingleTickerProviderStateMixin {
+  late final WaterApi _waterApi = widget.waterApi ?? WaterApi();
   WaterEntry? _todayEntry;
   bool _isLoading = true;
   bool _isSaving = false;
@@ -57,12 +62,17 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
     try {
       setState(() => _isLoading = true);
       
-      final entry = await WaterApi().getTodayWaterEntry(widget.userProfile.id);
+      final entry = await _waterApi.getTodayWaterEntry(widget.userProfile.id);
       if (!mounted) return;
 
       if (entry != null) {
+        // The stored target may be the legacy 2000ml constant; the profile
+        // goal is the source of truth, and _addGlasses resaves whatever is
+        // here, so normalise before it can be written back.
         setState(() {
-          _todayEntry = entry;
+          _todayEntry = entry.copyWith(
+            targetMl: widget.userProfile.waterIntakeGlasses * 250.0,
+          );
         });
       } else {
         // Create a new entry for today if none exists
@@ -121,7 +131,7 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
         totalMl: (_todayEntry!.glassesConsumed + count) * mlPerGlass,
       );
 
-      await WaterApi().saveWaterEntry(updatedEntry);
+      await _waterApi.saveWaterEntry(updatedEntry);
       if (!mounted) return;
 
       setState(() {
