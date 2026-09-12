@@ -1,7 +1,6 @@
 // lib/data/services/api/exercise_api.dart
 import 'dart:convert';
 import 'package:user_onboarding/data/services/api/api_client.dart';
-import 'package:user_onboarding/data/services/api/chat_api.dart';
 
 /// Exercise tracking API.
 class ExerciseApi {
@@ -12,7 +11,6 @@ class ExerciseApi {
   ExerciseApi._internal();
 
   final ApiClient _client = ApiClient();
-  final ChatApi _chat = ChatApi();
 
   Future<Map<String, dynamic>> createExerciseEntry(Map<String, dynamic> exerciseData) async {
     // This just calls the existing logExercise method
@@ -30,13 +28,6 @@ class ExerciseApi {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-
-        // ✅ UPDATE CHAT CONTEXT (fire-and-forget; does not block the save)
-        _chat.syncContext(
-          exerciseData['user_id'],
-          'exercise',
-          responseData['exercise'] ?? exerciseData
-        );
 
         return responseData;
       } else {
@@ -199,40 +190,6 @@ class ExerciseApi {
     } catch (e) {
       print('[ExerciseApi] Weekly summary error: $e');
       return {};
-    }
-  }
-
-  // Add method to delete exercise
-  Future<bool> deleteExercise(String exerciseId) async {
-    try {
-      final response = await _client.delete('/exercise/$exerciseId');
-
-      return response.statusCode == 200;
-    } catch (e) {
-      print('[ExerciseApi] Delete exercise error: $e');
-      return false;
-    }
-  }
-
-  // Add method to update exercise
-  Future<Map<String, dynamic>> updateExercise(
-    String exerciseId,
-    Map<String, dynamic> updateData
-  ) async {
-    try {
-      final response = await _client.put(
-        '/exercise/$exerciseId',
-        body: jsonEncode(updateData),
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Failed to update exercise');
-      }
-    } catch (e) {
-      print('[ExerciseApi] Update exercise error: $e');
-      return {'success': false};
     }
   }
 }

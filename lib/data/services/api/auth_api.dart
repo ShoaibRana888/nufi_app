@@ -293,26 +293,6 @@ class AuthApi {
     }
   }
 
-  // Check if email exists
-  Future<bool> emailExists(String email) async {
-    try {
-      // Try to login with a dummy password to check if email exists
-      final response = await _client.post(
-        '/login',
-        body: jsonEncode({
-          'email': email,
-          'password': 'dummy_password_for_check',
-        }),
-      );
-
-      // If we get a 401, it means the email exists but password is wrong
-      return response.statusCode == 401;
-    } catch (e) {
-      debugPrint('API error when checking email: $e');
-      return false;
-    }
-  }
-
   // Helper method to convert UserProfile to onboarding format
   Map<String, dynamic> _convertUserProfileToOnboardingFormat(UserProfile userProfile) {
     return {

@@ -1,7 +1,6 @@
 // lib/data/services/api/sleep_api.dart
 import 'dart:convert';
 import 'package:user_onboarding/data/services/api/api_client.dart';
-import 'package:user_onboarding/data/services/api/chat_api.dart';
 
 /// Sleep tracking API.
 class SleepApi {
@@ -12,7 +11,6 @@ class SleepApi {
   SleepApi._internal();
 
   final ApiClient _client = ApiClient();
-  final ChatApi _chat = ChatApi();
 
   Future<Map<String, dynamic>> createSleepEntry(Map<String, dynamic> sleepData) async {
     try {
@@ -25,13 +23,6 @@ class SleepApi {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-
-        // ✅ UPDATE CHAT CONTEXT (fire-and-forget; does not block the save)
-        _chat.syncContext(
-          sleepData['user_id'],
-          'sleep',
-          responseData['entry'] ?? sleepData
-        );
 
         return responseData;
       } else {

@@ -6,9 +6,14 @@ import 'package:user_onboarding/data/services/api/api_client.dart';
 
 /// Chat + chat-context API.
 ///
-/// For now this holds only the cross-cutting context-sync helpers that every
-/// activity write (water, steps, weight, ...) calls after saving. The
-/// conversational chat methods will move here when the chat domain is split.
+/// The per-write context sync (`syncContext` / `updateChatContext`) that every
+/// tracker Api used to call after saving is gone. Each backend write endpoint
+/// refreshes the chat context itself, synchronously, from the row it stored --
+/// so the client-side echo was redundant on every path, and on the backend it
+/// resolved "today" on the server clock and carried the client's own copy of
+/// `shared_with_chat`, undoing the fixes in nufi-ai-backend ADR-0005/0006.
+/// What remains here is the rebuild, the cached-context reads and the daily
+/// reset.
 class ChatApi {
   static final ChatApi _instance = ChatApi._internal();
 
@@ -18,60 +23,10 @@ class ChatApi {
 
   final ApiClient _client = ApiClient();
 
-  /// Fire-and-forget chat-context sync. Kicks the context update off in the
-  /// background WITHOUT blocking the activity-save path, so logging feels
-  /// instant. The AI coach's context is (re)built when the Chat screen opens
-  /// and again server-side before each chat response, so a slightly stale
-  /// cache here has no user-visible effect. Errors are swallowed inside
-  /// [updateChatContext].
-  void syncContext(
-    String userId,
-    String activityType,
-    Map<String, dynamic> data,
-    {DateTime? date}
-  ) {
-    unawaited(updateChatContext(userId, activityType, data, date: date));
-  }
-
   /// Fire-and-forget context rebuild (used after edits/deletes). Non-blocking;
   /// the authoritative rebuild happens on Chat open + server-side per reply.
   void rebuildContextInBackground(String userId, {DateTime? date}) {
     unawaited(rebuildChatContext(userId, date: date));
-  }
-
-  Future<void> updateChatContext(
-    String userId,
-    String activityType,
-    Map<String, dynamic> data,
-    {DateTime? date}
-  ) async {
-    try {
-      // Use provided date or today
-      final targetDate = date ?? DateTime.now();
-      final dateStr = DateFormat('yyyy-MM-dd').format(targetDate);
-
-      print('[ChatApi] Updating chat context for $activityType on $dateStr');
-
-      // Add the date to the data if not present
-      if (!data.containsKey('date') && !data.containsKey('created_at')) {
-        data['created_at'] = targetDate.toIso8601String();
-      }
-
-      final response = await _client.post(
-        '/chat/context/update/$userId?activity_type=$activityType',
-        body: jsonEncode(data),
-      );
-
-      if (response.statusCode == 200) {
-        print('[ChatApi] ✅ Chat context updated successfully for $activityType');
-      } else {
-        // Don't throw - this is non-critical, chat can rebuild if needed
-        print('[ChatApi] ⚠️ Context update failed (${response.statusCode}), will sync on next chat');
-      }
-    } catch (e) {
-      // Silent failure - the chat will rebuild context if needed
-      print('[ChatApi] ⚠️ Context update error (non-critical): $e');
-    }
   }
 
   Future<bool> rebuildChatContext(String userId, {DateTime? date}) async {

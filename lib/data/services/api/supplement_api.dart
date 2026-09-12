@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:user_onboarding/data/services/api/api_client.dart';
-import 'package:user_onboarding/data/services/api/chat_api.dart';
 
 /// Supplement tracking API.
 class SupplementApi {
@@ -13,7 +12,6 @@ class SupplementApi {
   SupplementApi._internal();
 
   final ApiClient _client = ApiClient();
-  final ChatApi _chat = ChatApi();
 
   Future<Map<String, dynamic>> saveSupplementPreferences(String userId, List<Map<String, dynamic>> supplements) async {
     try {
@@ -190,13 +188,6 @@ class SupplementApi {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-
-        // ✅ UPDATE CHAT CONTEXT (fire-and-forget; does not block the save)
-        _chat.syncContext(
-          logData['user_id'],
-          'supplement',
-          logData
-        );
 
         return responseData;
       } else {
