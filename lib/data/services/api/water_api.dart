@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:user_onboarding/data/models/water_entry.dart';
 import 'package:user_onboarding/data/services/api/api_client.dart';
-import 'package:user_onboarding/data/services/api/chat_api.dart';
 
 /// Water tracking API.
 class WaterApi {
@@ -14,7 +13,6 @@ class WaterApi {
   WaterApi._internal();
 
   final ApiClient _client = ApiClient();
-  final ChatApi _chat = ChatApi();
 
   Future<String> saveWaterEntry(WaterEntry waterEntry) async {
     try {
@@ -28,14 +26,6 @@ class WaterApi {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         final entryId = data['id'] ?? waterEntry.id ?? DateTime.now( ).millisecondsSinceEpoch.toString(); 
-
-        // ✅ UPDATE CHAT CONTEXT (fire-and-forget; does not block the save)
-        _chat.syncContext(
-          waterEntry.userId,
-          'water',
-          waterEntry.toMap(),
-          date: waterEntry.date
-        );
 
         return entryId;
       } else {

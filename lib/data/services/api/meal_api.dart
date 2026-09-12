@@ -63,16 +63,6 @@ class MealApi {
           normalizedMeal = data;
         }
 
-        // ✅ UPDATE CHAT CONTEXT (fire-and-forget; does not block the save)
-        _chat.syncContext(
-          mealData['user_id'],
-          'meal',
-          normalizedMeal,
-          date: mealData['meal_date'] != null
-            ? DateTime.parse(mealData['meal_date'])
-            : DateTime.now()
-        );
-
         return normalizedMeal;
 
       } else {
@@ -351,13 +341,6 @@ class MealApi {
       final response = await _client.delete('/meals/$mealId');
 
       if (response.statusCode == 200) {
-        // ✅ UPDATE CHAT CONTEXT AFTER DELETION (fire-and-forget, non-blocking)
-        _chat.syncContext(
-          userId,
-          'meal_delete',
-          {'meal_id': mealId, 'deleted': true}
-        );
-
         _chat.rebuildContextInBackground(userId);
 
         return true;
@@ -382,12 +365,6 @@ class MealApi {
 
         // ✅ UPDATE CHAT CONTEXT AFTER MEAL UPDATE (fire-and-forget, non-blocking)
         if (mealData['user_id'] != null) {
-          _chat.syncContext(
-            mealData['user_id'],
-            'meal',
-            updatedMeal
-          );
-
           _chat.rebuildContextInBackground(mealData['user_id']);
         }
 
