@@ -211,6 +211,35 @@ void main() {
 
       expect(find.text(CardLoadError.compactMessage), findsNWidgets(7));
       expect(find.textContaining('0/7'), findsNothing);
+      // 0 of 0 read is not a completed day (raised in review).
+      expect(find.textContaining('All activities completed'), findsNothing);
+      expect(find.textContaining('Perfect Day'), findsNothing);
+      expect(find.textContaining('could not be loaded'), findsOneWidget);
+    });
+
+    testWidgets('an unread section blocks the celebration even when everything read is done',
+        (tester) async {
+      // Every readable section complete, water unreadable: the numbers say
+      // 6/6, but neither "All activities completed" nor "Perfect Day" is a
+      // claim the screen can make about a tracker it could not read.
+      final document = dayWithFailed('water')
+        ..['meals'] = {
+          'totals': {'calories': 1800.0, 'protein_g': 90.0, 'carbs_g': 200.0, 'fat_g': 60.0},
+          'count': 3, 'entries': const [],
+        }
+        ..['steps'] = {'user_id': 'u1', 'date': '2026-09-07', 'steps': 12000, 'goal': 10000}
+        ..['sleep'] = {'user_id': 'u1', 'date': '2026-09-07', 'total_hours': 8.0, 'quality_score': 8,
+                       'bedtime': '2026-09-06T22:00:00', 'wake_time': '2026-09-07T06:00:00'}
+        ..['weight'] = {'id': 'w1', 'user_id': 'u1', 'date': '2026-09-07T07:00:00', 'weight': 60.0}
+        ..['exercise'] = {'entries': [{'exercise_name': 'run', 'duration_minutes': 30}],
+                          'total_minutes': 30, 'total_calories_burned': 250.0}
+        ..['supplements'] = {'items': [{'name': 'D3', 'taken': true}], 'taken_count': 1, 'total_count': 1};
+      await pumpReport(tester, fakeSnapshot(document: document));
+
+      expect(find.text(CardLoadError.compactMessage), findsOneWidget);
+      expect(find.textContaining('All activities completed'), findsNothing);
+      expect(find.textContaining('Perfect Day'), findsNothing);
+      expect(find.textContaining('could not be loaded'), findsOneWidget);
     });
   });
 }

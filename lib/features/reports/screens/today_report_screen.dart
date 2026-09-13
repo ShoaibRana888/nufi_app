@@ -752,7 +752,12 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
         supplementsEntry.total == 0 && 
         supplementsEntry.details['Status'] == 'Not configured';
     
-    if (missing.isEmpty && !supplementsNotConfigured) {
+    // "Perfect Day" is a claim about every tracker; a section that could
+    // not be read cannot support it, so an unread section blocks the
+    // celebration even when everything that was read is complete.
+    final anyUnread = trackingStatus.values.any((s) => s.loadFailed);
+
+    if (missing.isEmpty && !supplementsNotConfigured && !anyUnread) {
       // Success state - everything complete
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1041,7 +1046,13 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
     final read = trackingStatus.values.where((s) => !s.loadFailed);
     final completed = read.where((s) => s.isComplete).length;
     final total = read.length;
-    
+    final anyUnread = read.length != trackingStatus.length;
+
+    // The numeric progress excludes unread sections; the words do not get
+    // to. With every section unread, 0 == 0 is not a completed day.
+    if (anyUnread) {
+      return '⚠️ Some trackers could not be loaded';
+    }
     if (completed == total) {
       return '🎉 All activities completed!';
     } else if (completed >= total * 0.7) {
