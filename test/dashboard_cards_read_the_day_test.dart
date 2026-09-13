@@ -219,6 +219,21 @@ void main() {
       expect(refreshes, 1);
     });
 
+    testWidgets('the error row reads in dark mode', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(body: CompactWaterTracker(
+          userProfile: testProfile(), day: Future.value(failed('water')), refreshDay: noop,
+        )),
+      ));
+      await tester.pumpAndSettle();
+
+      final title = tester.widget<Text>(find.text('Water'));
+      final onSurface = ThemeData.dark().colorScheme.onSurface;
+      expect(title.style?.color, onSurface,
+          reason: 'fixed greys were near-invisible on the dark card surface');
+    });
+
     testWidgets('a fresh day clears the error', (tester) async {
       Widget build(Future<DaySnapshot> d) => host(CompactWaterTracker(
             userProfile: testProfile(), day: d, refreshDay: noop,

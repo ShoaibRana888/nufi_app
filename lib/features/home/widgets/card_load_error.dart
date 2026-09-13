@@ -30,6 +30,9 @@ class CardLoadError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Theme-aware, not fixed greys: the app follows the system theme, and
+    // an error row nobody can read in dark mode is not an error state.
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Material(
       borderRadius: BorderRadius.circular(16),
       elevation: 2,
@@ -57,17 +60,17 @@ class CardLoadError extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey[800],
+                        color: onSurface,
                       ),
                     ),
                     Text(
                       "Couldn't load. Tap to retry.",
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 12, color: onSurface.withOpacity(0.7)),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.refresh, color: Colors.grey[500], size: 20),
+              Icon(Icons.refresh, color: onSurface.withOpacity(0.6), size: 20),
             ],
           ),
         ),

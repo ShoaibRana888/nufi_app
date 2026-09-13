@@ -94,7 +94,14 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
       // Today's entry from the day the dashboard already read.
       final today = DateTime.now();
       final section = (await widget.day).sleep;
-      if (mounted) _loadFailed = section.isError;
+      if (!mounted) return;
+      if (section.isError) {
+        // Show the failure now rather than after the yesterday read below,
+        // which is a separate request that could hang in the same outage.
+        setState(() => _loadFailed = true);
+        return;
+      }
+      _loadFailed = false;
       final todayEntry = section.value;
       double? hours;
       double? qualityScore;

@@ -88,10 +88,16 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
       final weekStartStr = DateFormat('yyyy-MM-dd').format(weekStart);
       
       // Today's exercises come from the day the dashboard already read.
-      // Missing and error both read as "none today", as a failed request
-      // did before.
       final section = (await widget.day).exercise;
-      if (mounted) _loadFailed = section.isError;
+      if (!mounted) return;
+      if (section.isError) {
+        // Show the failure now. The week read below is a separate request
+        // to the same backend; during the outage that produced this error
+        // it could hang, and the retry must not wait behind it.
+        setState(() => _loadFailed = true);
+        return;
+      }
+      _loadFailed = false;
       final todayExercises = section.value?.entries;
       
       // Load this week's exercise data
