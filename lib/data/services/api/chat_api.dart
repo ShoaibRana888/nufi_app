@@ -98,35 +98,6 @@ class ChatApi {
     }
   }
 
-  Future<bool> checkAndResetDailyContext(String userId) async {
-    try {
-      // Check if context needs reset
-      final checkResponse = await _client.get('/chat/context/check/$userId');
-
-      if (checkResponse.statusCode == 200) {
-        final checkData = jsonDecode(checkResponse.body);
-
-        if (checkData['needs_reset'] == true) {
-          print('[ChatApi] 📅 New day detected, resetting context...');
-
-          // Trigger daily reset
-          final resetResponse = await _client.post('/chat/context/daily-reset/$userId');
-
-          if (resetResponse.statusCode == 200) {
-            print('[ChatApi] ✅ Daily context reset complete');
-            return true;
-          }
-        } else {
-          print('[ChatApi] 📊 Context is current for today');
-        }
-      }
-      return false;
-    } catch (e) {
-      print('[ChatApi] ❌ Daily context check error: $e');
-      return false;
-    }
-  }
-
   /// Fetch chat history. Defaults to the most recent [limit] messages
   /// (oldest-first) so long transcripts don't ship in full on every open.
   /// Pass [before] (an ISO `created_at`) to page further back — used for

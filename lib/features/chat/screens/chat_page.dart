@@ -64,20 +64,14 @@ class _ChatPageState extends State<ChatPage>
     _primeFromCache();
 
     // Load everything the user actually sees IMMEDIATELY and in parallel.
-    // Previously these were gated behind checkAndResetDailyContext(), so the
-    // chat history (the thing the user opened the screen to read) waited on an
-    // unrelated context-housekeeping round-trip before it even started.
+    // The daily context reset that used to fire here (and on home_page) is
+    // gone: the read in _loadChatContext rebuilds the day from the source
+    // tables (backend ADR-0008) and the backend rebuilds again before each
+    // reply, so the row the reset created was never read without being
+    // rewritten first. Two round-trips on every open, for nobody.
     _loadChatHistory();
     _loadChatContext();
     _checkWeeklyContext();
-
-    // Context housekeeping is fire-and-forget — it must never block the UI.
-    // The daily reset creates the day's row if it is missing; the read in
-    // _loadChatContext rebuilds it from the source tables (backend ADR-0008),
-    // and the backend rebuilds again before each reply, so the background
-    // rebuild that used to follow the reset here was a third copy of the
-    // same work.
-    _apiService.checkAndResetDailyContext(widget.userProfile.id!);
   }
 
   @override
