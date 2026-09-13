@@ -150,7 +150,7 @@ class _EnhancedExerciseLoggingPageState extends State<EnhancedExerciseLoggingPag
     try {
       // Load exercise history
       final history = await _apiService.getExerciseHistory(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         limit: 100,
       );
       

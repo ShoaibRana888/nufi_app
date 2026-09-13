@@ -131,50 +131,50 @@ class _EditProfilePageState extends State<EditProfilePage> {
       text: widget.userProfile.weight.toString(),
     );
     _targetWeightController = TextEditingController(
-      text: widget.userProfile.targetWeight?.toString() ?? '',
+      text: widget.userProfile.targetWeight.toString(),
     );
 
     // Phase 1 - Daily Targets
     _dailyStepGoalController = TextEditingController(
-      text: (widget.userProfile.dailyStepGoal ?? 10000).toString(),
+      text: (widget.userProfile.dailyStepGoal).toString(),
     );
     _sleepHoursController = TextEditingController(
-      text: (widget.userProfile.sleepHours ?? 8).toString(),
+      text: (widget.userProfile.sleepHours).toString(),
     );
     _waterIntakeLitersController = TextEditingController(
-      text: (widget.userProfile.waterIntake ?? 2.0).toStringAsFixed(1),
+      text: (widget.userProfile.waterIntake).toStringAsFixed(1),
     );
     _waterIntakeGlassesController = TextEditingController(
-      text: (widget.userProfile.waterIntakeGlasses ?? 8).toString(),
+      text: (widget.userProfile.waterIntakeGlasses).toString(),
     );
     _workoutFrequencyController = TextEditingController(
-      text: (widget.userProfile.workoutFrequency ?? 3).toString(),
+      text: (widget.userProfile.workoutFrequency).toString(),
     );
     _workoutDurationController = TextEditingController(
-      text: (widget.userProfile.workoutDuration ?? 30).toString(),
+      text: (widget.userProfile.workoutDuration).toString(),
     );
     
     // Phase 2
     _bedtimeController = TextEditingController(
-      text: widget.userProfile.bedtime ?? '22:00',
+      text: widget.userProfile.bedtime,
     );
     _wakeupTimeController = TextEditingController(
-      text: widget.userProfile.wakeupTime ?? '06:00',
+      text: widget.userProfile.wakeupTime,
     );
-    _selectedSleepIssues = List<String>.from(widget.userProfile.sleepIssues ?? []);
-    _selectedDietaryPreferences = List<String>.from(widget.userProfile.dietaryPreferences ?? []);
-    _selectedWorkoutTypes = List<String>.from(widget.userProfile.preferredWorkouts ?? []);
-    _selectedWorkoutLocation = widget.userProfile.workoutLocation ?? 'Gym';
+    _selectedSleepIssues = List<String>.from(widget.userProfile.sleepIssues);
+    _selectedDietaryPreferences = List<String>.from(widget.userProfile.dietaryPreferences);
+    _selectedWorkoutTypes = List<String>.from(widget.userProfile.preferredWorkouts);
+    _selectedWorkoutLocation = widget.userProfile.workoutLocation;
 
 
     //Phase 3
-    _selectedMedicalConditions = List<String>.from(widget.userProfile.medicalConditions ?? []);
+    _selectedMedicalConditions = List<String>.from(widget.userProfile.medicalConditions);
     _otherMedicalConditionController = TextEditingController(
-      text: widget.userProfile.otherMedicalCondition ?? '',
+      text: widget.userProfile.otherMedicalCondition,
     );
-    _selectedEquipment = List<String>.from(widget.userProfile.availableEquipment ?? []);
-    _hasTrainer = widget.userProfile.hasTrainer ?? false;
-    if (widget.userProfile.gender?.toLowerCase() == 'female') {
+    _selectedEquipment = List<String>.from(widget.userProfile.availableEquipment);
+    _hasTrainer = widget.userProfile.hasTrainer;
+    if (widget.userProfile.gender.toLowerCase() == 'female') {
       _hasPeriods = widget.userProfile.hasPeriods;
       _pregnancyStatus = widget.userProfile.pregnancyStatus ?? '';
       _periodTrackingPreference = widget.userProfile.periodTrackingPreference ?? '';
@@ -184,10 +184,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     // Dropdown values
     _selectedActivityLevel = _mapToActivityLevelKey(widget.userProfile.activityLevel);
-    _selectedPrimaryGoal = widget.userProfile.primaryGoal ?? 'General Wellness';
-    _selectedWeightGoal = widget.userProfile.weightGoal ?? 'maintain_weight';
+    _selectedPrimaryGoal = widget.userProfile.primaryGoal;
+    _selectedWeightGoal = widget.userProfile.weightGoal;
     _selectedGoalTimeline = widget.userProfile.goalTimeline ?? '12_weeks';
-    _selectedFitnessLevel = widget.userProfile.fitnessLevel ?? 'Beginner';
+    _selectedFitnessLevel = widget.userProfile.fitnessLevel;
 
     // Add listeners for water intake synchronization
     _waterIntakeLitersController.addListener(_onWaterLitersChanged);
@@ -225,8 +225,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void _calculateMetrics() {
     final height = double.tryParse(_heightController.text) ?? 0;
     final weight = double.tryParse(_weightController.text) ?? 0;
-    final age = widget.userProfile.age ?? 25;
-    final gender = widget.userProfile.gender ?? 'Male';
+    final age = widget.userProfile.age;
+    final gender = widget.userProfile.gender;
 
     if (height > 0 && weight > 0) {
       // Calculate BMI
@@ -360,12 +360,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         hasTrainer: _hasTrainer,
         
         // Women's health (conditional)
-        hasPeriods: widget.userProfile.gender?.toLowerCase() == 'female' ? _hasPeriods : null,
-        pregnancyStatus: widget.userProfile.gender?.toLowerCase() == 'female' ? _pregnancyStatus : null,
-        periodTrackingPreference: widget.userProfile.gender?.toLowerCase() == 'female' 
+        hasPeriods: widget.userProfile.gender.toLowerCase() == 'female' ? _hasPeriods : null,
+        pregnancyStatus: widget.userProfile.gender.toLowerCase() == 'female' ? _pregnancyStatus : null,
+        periodTrackingPreference: widget.userProfile.gender.toLowerCase() == 'female' 
             ? _periodTrackingPreference : null,
-        cycleLength: widget.userProfile.gender?.toLowerCase() == 'female' ? _cycleLength : null,
-        cycleLengthRegular: widget.userProfile.gender?.toLowerCase() == 'female' 
+        cycleLength: widget.userProfile.gender.toLowerCase() == 'female' ? _cycleLength : null,
+        cycleLengthRegular: widget.userProfile.gender.toLowerCase() == 'female' 
             ? _cycleLengthRegular : null,
       );
 
@@ -458,8 +458,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _buildSectionHeader('Account Information'),
             _buildReadOnlyField('Name', widget.userProfile.name),
             _buildReadOnlyField('Email', widget.userProfile.email),
-            _buildReadOnlyField('Age', '${widget.userProfile.age ?? 0} years'),
-            _buildReadOnlyField('Gender', widget.userProfile.gender ?? 'Not specified'),
+            _buildReadOnlyField('Age', '${widget.userProfile.age} years'),
+            _buildReadOnlyField('Gender', widget.userProfile.gender),
             if (widget.userProfile.createdAt != null)
               _buildReadOnlyField(
                 'Member Since',
@@ -685,7 +685,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             if (widget.userProfile.startingWeight != null)
               _buildProgressSummary(),
 
-            if (widget.userProfile.gender?.toLowerCase() == 'female') ...[
+            if (widget.userProfile.gender.toLowerCase() == 'female') ...[
               const SizedBox(height: 24),
               _buildSectionHeader("Women's Health"),
               _buildWomensHealthSection(),

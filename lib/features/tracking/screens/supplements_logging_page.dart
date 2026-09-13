@@ -91,7 +91,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
       // ✅ NEW: Check database before showing setup dialog
       print('🔍 No local setup found, checking database...');
       try {
-        final dbPreferences = await SupplementApi().getSupplementPreferences(widget.userProfile.id!);
+        final dbPreferences = await SupplementApi().getSupplementPreferences(widget.userProfile.id);
         
         if (dbPreferences.isNotEmpty) {
           print('✅ Found ${dbPreferences.length} supplements in database, syncing to local storage...');
@@ -405,7 +405,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
         }).toList();
 
         await SupplementApi().saveSupplementPreferences(
-          widget.userProfile.id!,
+          widget.userProfile.id,
           supplementsForBackend,
         );
         print('✅ Saved supplement preferences to database');
@@ -415,7 +415,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
       }
 
       // Initialize today's status from database
-      final dbStatus = await SupplementApi().getTodaysSupplementStatus(widget.userProfile.id!);
+      final dbStatus = await SupplementApi().getTodaysSupplementStatus(widget.userProfile.id);
       final todaysStatus = <String, bool>{};
       for (var supplement in supplements) {
         final name = supplement['name'] as String;
@@ -446,8 +446,6 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
   }
 
   Future<void> _loadSupplementsForDate(DateTime date) async {
-    if (widget.userProfile.id == null) return;
-    
     setState(() {
       _selectedDate = date;
       _todaysDate = DateFormat('yyyy-MM-dd').format(date);
@@ -498,7 +496,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
     try {
       print('📋 Loading user supplements for user ID: ${widget.userProfile.id}');
       
-      final dbPreferences = await SupplementApi().getSupplementPreferences(widget.userProfile.id!);
+      final dbPreferences = await SupplementApi().getSupplementPreferences(widget.userProfile.id);
       print('📋 Received ${dbPreferences.length} preferences from repository');
         
       if (dbPreferences.isNotEmpty) {
@@ -579,12 +577,10 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
   }
 
   Future<void> _loadTodaysStatus() async {
-    if (widget.userProfile.id == null) return;
-    
     try {
       // Try to get status from API
       final statusFromApi = await SupplementApi().getSupplementStatusByDate(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         DateFormat('yyyy-MM-dd').format(_selectedDate),
       );
       
@@ -1185,8 +1181,6 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
   }
 
   Future<void> _toggleSupplement(String supplementName) async {
-    if (widget.userProfile.id == null) return;
-    
     final currentStatus = _todaysTaken[supplementName] ?? false;
     final newStatus = !currentStatus;
     
@@ -1204,7 +1198,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
       
       // Save to API/database
       await SupplementApi().logIntake(
-        userId: widget.userProfile.id!,
+        userId: widget.userProfile.id,
         date: _todaysDate,
         supplementName: supplementName,
         taken: newStatus,
@@ -1391,7 +1385,7 @@ class _SupplementLoggingPageState extends State<SupplementLoggingPage> {
       };
 
       await SupplementApi().saveSupplementPreferences(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         [supplementForBackend], 
       );
     } catch (e) {

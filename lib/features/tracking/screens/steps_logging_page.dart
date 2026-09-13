@@ -49,8 +49,7 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
     final hasSetStepGoal = prefs.getBool('has_set_step_goal_${widget.userProfile.id}') ?? false;
     
     // ✅ Check if user already has a step goal in their profile (existing users)
-    final hasStepGoalInProfile = widget.userProfile.dailyStepGoal != null && 
-                                  widget.userProfile.dailyStepGoal > 0;
+    final hasStepGoalInProfile = widget.userProfile.dailyStepGoal > 0;
     
     // If user has step goal in profile but flag not set, set it now (for existing users)
     if (hasStepGoalInProfile && !hasSetStepGoal) {
@@ -159,19 +158,15 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
   }
 
   Future<void> _loadStepDataForDate(DateTime date) async {
-    if (widget.userProfile.id == null) return;
-    
     setState(() => _isLoading = true);
     
     try {
       final entry = await StepRepository.getStepEntryByDate(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         date,
       );
       
-      final stepGoal = widget.userProfile.dailyStepGoal ?? 
-                      (widget.userProfile.formData['dailyStepGoal'] as int?) ?? 
-                      10000;
+      final stepGoal = widget.userProfile.dailyStepGoal;
       
       StepEntry loadedEntry;
       if (entry != null) {
@@ -187,7 +182,7 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
         }
       } else {
         loadedEntry = StepEntry(
-          userId: widget.userProfile.id!,
+          userId: widget.userProfile.id,
           date: date,
           steps: 0,
           goal: stepGoal,
@@ -237,14 +232,12 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
       }
       
       // Initialize with empty entry on error
-      final stepGoal = widget.userProfile.dailyStepGoal ?? 
-                      (widget.userProfile.formData['dailyStepGoal'] as int?) ?? 
-                      10000;
+      final stepGoal = widget.userProfile.dailyStepGoal;
       
       setState(() {
         _selectedDate = date;
         _todayEntry = StepEntry(
-          userId: widget.userProfile.id!,
+          userId: widget.userProfile.id,
           date: date,
           steps: 0,
           goal: stepGoal,
@@ -254,8 +247,6 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
   }
 
   Future<void> _loadWeeklyHistory() async {
-    if (widget.userProfile.id == null) return;
-    
     try {
       final now = DateTime.now();
       final List<StepEntry> history = [];
@@ -264,7 +255,7 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
       for (int i = 6; i >= 0; i--) {
         final date = now.subtract(Duration(days: i));
         final entry = await StepRepository.getStepEntryByDate(
-          widget.userProfile.id!,
+          widget.userProfile.id,
           date,
         );
         
@@ -342,7 +333,7 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
 
   double _calculateCalories(int steps) {
     // Rough estimation: 0.04 calories per step (varies by weight)
-    final userWeight = widget.userProfile.weight ?? 70;
+    final userWeight = widget.userProfile.weight;
     return steps * 0.04 * (userWeight / 70);
   }
 
@@ -628,7 +619,7 @@ class _StepsLoggingPageState extends State<StepsLoggingPage> {
           final entry = _weeklyHistory.firstWhere(
             (e) => DateUtils.isSameDay(e.date, date),
             orElse: () => StepEntry(
-              userId: widget.userProfile.id!,
+              userId: widget.userProfile.id,
               date: date,
               steps: 0,
               goal: 10000,

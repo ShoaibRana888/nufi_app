@@ -91,7 +91,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
       _calculateDailyGoals();
       if (mounted) setState(() {});
     });
-    _dailyMealGoal = widget.userProfile.dailyMealsCount ?? 3;
+    _dailyMealGoal = widget.userProfile.dailyMealsCount;
     _setMealTypeByTime();
     
     // Add listener for search
@@ -176,7 +176,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
 
   Future<void> _loadPresets() async {
     try {
-      final response = await _apiService.getMealPresets(widget.userProfile.id!);
+      final response = await _apiService.getMealPresets(widget.userProfile.id);
       setState(() {
         // jsonDecode yields a List<dynamic>; build a correctly-typed list so
         // the assignment doesn't throw a TypeError (which would otherwise be
@@ -190,7 +190,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
 
   Future<void> _loadRecentMeals() async {
     try {
-      final response = await _apiService.getMealSuggestions(widget.userProfile.id!);
+      final response = await _apiService.getMealSuggestions(widget.userProfile.id);
       setState(() {
         _recentMeals = List<Map<String, dynamic>>.from(response['recent_meals'] ?? []);
       });
@@ -203,7 +203,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
     try {
       final dateStr = DateFormat('yyyy-MM-dd').format(date);
       final meals = await _apiService.getMealHistory(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         date: dateStr,
       );
       
@@ -296,12 +296,10 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
   }
 
   Future<void> _loadExerciseData() async {
-    if (widget.userProfile.id == null) return;
-    
     try {
       final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
       final exercises = await _exerciseApi.getExerciseLogs(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         startDate: dateStr,
         endDate: dateStr,
       );
@@ -323,10 +321,10 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
 
   void _calculateDailyGoals() {
     try {
-      final tdee = (widget.userProfile.formData?['tdee'] ?? widget.userProfile.tdee ?? 2000).toDouble();
-      final weightGoal = widget.userProfile.primaryGoal ?? 'maintain_weight';
-      final currentWeight = widget.userProfile.weight ?? 70.0;
-      final activityLevel = widget.userProfile.activityLevel ?? 'moderately_active';
+      final tdee = (widget.userProfile.formData['tdee'] ?? widget.userProfile.tdee ?? 2000).toDouble();
+      final weightGoal = widget.userProfile.primaryGoal;
+      final currentWeight = widget.userProfile.weight;
+      final activityLevel = widget.userProfile.activityLevel;
       
       // Match the logic from daily_meal_card.dart
       double calorieAdjustment = 0;
@@ -1269,7 +1267,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
   }
 
   Future<void> _analyzeMeal() async {
-    if (widget.userProfile.id == null || widget.userProfile.id!.isEmpty) {
+    if (widget.userProfile.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('User ID not found. Please log in again.'),
@@ -2630,7 +2628,7 @@ class _EnhancedMealLoggingPageState extends State<EnhancedMealLoggingPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => MealSuggestionsSheet(
-        userId: widget.userProfile.id!,
+        userId: widget.userProfile.id,
         mealType: _selectedMealType.toLowerCase(),
         onSuggestionSelected: (suggestion) {
           Navigator.pop(context);

@@ -95,19 +95,19 @@ class AuthApi {
         // Phase 2
         'bedtime': userProfile.bedtime,
         'wakeup_time': userProfile.wakeupTime,
-        'sleep_issues': userProfile.sleepIssues ?? [],
-        'dietary_preferences': userProfile.dietaryPreferences ?? [],
-        'preferred_workouts': userProfile.preferredWorkouts ?? [],
+        'sleep_issues': userProfile.sleepIssues,
+        'dietary_preferences': userProfile.dietaryPreferences,
+        'preferred_workouts': userProfile.preferredWorkouts,
         'workout_location': userProfile.workoutLocation,
 
         // Phase 3
-        'medical_conditions': userProfile.medicalConditions ?? [],
+        'medical_conditions': userProfile.medicalConditions,
         'other_medical_condition': userProfile.otherMedicalCondition,
-        'available_equipment': userProfile.availableEquipment ?? [],
+        'available_equipment': userProfile.availableEquipment,
         'has_trainer': userProfile.hasTrainer,
 
         // Women's Health (only if female)
-        if (userProfile.gender?.toLowerCase() == 'female') ...{
+        if (userProfile.gender.toLowerCase() == 'female') ...{
           'has_periods': userProfile.hasPeriods,
           'pregnancy_status': userProfile.pregnancyStatus,
           'period_tracking_preference': userProfile.periodTrackingPreference,
@@ -305,9 +305,9 @@ class AuthApi {
         'height': userProfile.height,
         'weight': userProfile.weight,
         'activityLevel': userProfile.activityLevel,
-        'bmi': userProfile.formData?['bmi'] ?? 0.0,
-        'bmr': userProfile.formData?['bmr'] ?? 0.0,
-        'tdee': userProfile.formData?['tdee'] ?? 0.0,
+        'bmi': userProfile.formData['bmi'] ?? 0.0,
+        'bmr': userProfile.formData['bmr'] ?? 0.0,
+        'tdee': userProfile.formData['tdee'] ?? 0.0,
       },
       'primaryGoal': userProfile.primaryGoal,
       'weightGoal': {

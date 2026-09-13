@@ -55,12 +55,7 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
 
   void _initializeExerciseGoal() {
     // Get exercise goal from user profile
-    if (widget.userProfile.workoutDuration != null) {
-      _dailyGoal = widget.userProfile.workoutDuration;
-    } else {
-      // Default fallback if no exercise goal is set
-      _dailyGoal = 30; // 30 minutes default
-    }
+    _dailyGoal = widget.userProfile.workoutDuration;
     
     // Ensure exercise goal is reasonable (between 10 and 180 minutes)
     _dailyGoal = _dailyGoal.clamp(10, 180);
@@ -137,7 +132,7 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
       int weeklyCount = 0;
       Set<String> muscleGroups = {};
       
-      if (weekExercises != null && weekExercises.isNotEmpty) {
+      if (weekExercises.isNotEmpty) {
         for (var exercise in weekExercises) {
           final exerciseDate = exercise['exercise_date'] ?? exercise['created_at'];
           if (exerciseDate != null) {

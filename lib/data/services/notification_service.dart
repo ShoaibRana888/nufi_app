@@ -672,7 +672,7 @@ class NotificationService {
         title: title,
         body: body,
         type: 'reminder',
-      ).catchError((e) => print('⚠️ DB log failed: $e'));
+      );
 
       print('✅ [SCHEDULE] ID $id scheduled successfully');
     } catch (e) {
@@ -720,7 +720,7 @@ class NotificationService {
         title: title,
         body: body,
         type: type,
-      ).catchError((e) => print('⚠️ DB log failed: $e'));
+      );
     }
   }
 

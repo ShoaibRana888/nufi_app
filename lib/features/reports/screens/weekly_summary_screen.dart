@@ -39,7 +39,7 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
     try {
       // Load current week
       final currentWeek = await _apiService.getWeeklyContext(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         date: DateFormat('yyyy-MM-dd').format(_selectedDate),
       );
 
@@ -48,7 +48,7 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
       Map<String, dynamic>? previousWeek;
       try {
         previousWeek = await _apiService.getWeeklyContext(
-          widget.userProfile.id!,
+          widget.userProfile.id,
           date: DateFormat('yyyy-MM-dd')
               .format(_selectedDate.subtract(const Duration(days: 7))),
         );
@@ -58,7 +58,7 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
 
       // Load recent weeks for trends
       final recentWeeks = await _apiService.getRecentWeeks(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         weeks: 4,
       );
 
@@ -87,7 +87,7 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => TrendsScreen(
-                    userId: widget.userProfile.id!,
+                    userId: widget.userProfile.id,
                   ),
                 ),
               );

@@ -49,9 +49,9 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
     
     try {
       final user = await SessionRepository().currentProfile();
-      if (user != null && user.id != null) {
-        final periods = await PeriodApi().getPeriodHistory(user.id!, limit: 24);
-        final currentPeriod = await PeriodApi().getCurrentPeriod(user.id!);
+      if (user != null) {
+        final periods = await PeriodApi().getPeriodHistory(user.id, limit: 24);
+        final currentPeriod = await PeriodApi().getCurrentPeriod(user.id);
         
         setState(() {
           _userProfile = user;
@@ -73,7 +73,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
     final newShared = !entry.sharedWithChat;
 
     final ok = await _sharingApi.setEntrySharing(
-      userId: _userProfile!.id!,
+      userId: _userProfile!.id,
       activityType: 'period',
       itemId: entry.id!,
       shared: newShared,
@@ -491,7 +491,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
                           final DateTime? endDate = await showDatePicker(
                             context: context,
                             initialDate: day,
-                            firstDate: periodEntry!.startDate,
+                            firstDate: periodEntry.startDate,
                             lastDate: DateTime.now(),
                             helpText: 'Select end date',
                           );
@@ -778,7 +778,7 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
   }
 
   Future<void> _startPeriodOnDay(DateTime day) async {
-    if (_userProfile == null || _userProfile!.id == null) return;
+    if (_userProfile == null) return;
 
     // Validate the date first
     final validationError = _getStartPeriodValidationError(day);
@@ -1090,13 +1090,13 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
   }
 
   Future<void> _savePeriodEntry(DateTime startDate, DateTime? endDate) async {
-    if (_userProfile == null || _userProfile!.id == null) return;
+    if (_userProfile == null) return;
     
     setState(() => _isLoading = true);
     
     try {
       final newPeriod = PeriodEntry(
-        userId: _userProfile!.id!,
+        userId: _userProfile!.id,
         startDate: startDate,
         endDate: endDate,
         flowIntensity: 'Medium',
@@ -1300,11 +1300,11 @@ class _PeriodCalendarPageState extends State<PeriodCalendarPage> {
   }
 
   Future<void> _savePeriodData(DateTime day, PeriodEntry? existingEntry) async {
-    if (_userProfile == null || _userProfile!.id == null) return;
+    if (_userProfile == null) return;
     
     try {
       final periodEntry = existingEntry ?? PeriodEntry(
-        userId: _userProfile!.id!,
+        userId: _userProfile!.id,
         startDate: day,
         flowIntensity: _selectedFlow,
         symptoms: _selectedSymptoms,

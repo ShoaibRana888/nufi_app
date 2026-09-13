@@ -81,7 +81,7 @@ class _DashboardWeightGoalCardState extends State<DashboardWeightGoalCard> {
   @override
   Widget build(BuildContext context) {
     final weightGoal = widget.userProfile.weightGoal;
-    if (weightGoal == null || weightGoal.isEmpty) {
+    if (weightGoal.isEmpty) {
       return const SizedBox.shrink();
     }
     
@@ -95,8 +95,8 @@ class _DashboardWeightGoalCardState extends State<DashboardWeightGoalCard> {
       );
     }
     
-    final currentWeight = _currentWeight ?? widget.userProfile.weight ?? 70.0;
-    final targetWeight = widget.userProfile.targetWeight ?? currentWeight;
+    final currentWeight = _currentWeight ?? widget.userProfile.weight;
+    final targetWeight = widget.userProfile.targetWeight;
     final startingWeight = _startingWeight ?? currentWeight;
     final totalChange = currentWeight - startingWeight;
     

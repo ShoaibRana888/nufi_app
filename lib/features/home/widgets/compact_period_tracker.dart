@@ -53,7 +53,7 @@ class _CompactPeriodTrackerState extends State<CompactPeriodTracker> {
       final cycleLength = widget.userProfile.cycleLength ?? 28;
       
       final history = await PeriodApi().getPeriodHistory(
-        widget.userProfile.id ?? '',
+        widget.userProfile.id,
         limit: 12,
       );
       

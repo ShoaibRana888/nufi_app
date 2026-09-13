@@ -76,7 +76,7 @@ class UserProvider extends ChangeNotifier {
   // Set user after login or onboarding
   Future<void> setUser(UserProfile profile) async {
     _userProfile = profile;
-    await _session.startSession(profile.id ?? '', profile: profile);
+    await _session.startSession(profile.id, profile: profile);
     notifyListeners();
   }
 
