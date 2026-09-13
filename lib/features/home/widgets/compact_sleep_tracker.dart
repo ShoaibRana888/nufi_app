@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/home/widgets/card_load_error.dart';
 import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/sleep_logging_page.dart';
@@ -33,6 +34,8 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
     with SingleTickerProviderStateMixin {
   final SleepApi _apiService = SleepApi();
   double _lastNightHours = 0;
+  // The day's sleep section could not be read. Shown instead of a zero.
+  bool _loadFailed = false;
   String _sleepQuality = '';
   bool _isLoading = true;
   // True once the first load attempt completes — keeps existing data on screen
@@ -90,7 +93,16 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
     try {
       // Today's entry from the day the dashboard already read.
       final today = DateTime.now();
-      final todayEntry = (await widget.day).sleep.value;
+      final section = (await widget.day).sleep;
+      if (!mounted) return;
+      if (section.isError) {
+        // Show the failure now rather than after the yesterday read below,
+        // which is a separate request that could hang in the same outage.
+        setState(() => _loadFailed = true);
+        return;
+      }
+      _loadFailed = false;
+      final todayEntry = section.value;
       double? hours;
       double? qualityScore;
 
@@ -251,6 +263,12 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
 
   @override
   Widget build(BuildContext context) {
+    if (_loadFailed) {
+      return CardLoadError(
+        title: 'Sleep', icon: Icons.bedtime, color: Colors.indigo,
+        onRetry: widget.refreshDay,
+      );
+    }
     final progress = (_lastNightHours / _sleepGoal).clamp(0.0, 1.0);
     final bool goalMet = _lastNightHours >= _sleepGoal;
     final isToday = _sleepDate != null && 

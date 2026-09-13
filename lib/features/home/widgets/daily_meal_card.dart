@@ -1,5 +1,6 @@
 // lib/features/home/widgets/daily_meal_card.dart
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/home/widgets/card_load_error.dart';
 import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_history_page.dart';
@@ -47,6 +48,8 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
   };
   
   bool _isLoadingProgress = false;
+  // The day's meals section could not be read. Shown instead of zeros.
+  bool _loadFailed = false;
   
   @override
   void initState() {
@@ -181,8 +184,10 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
       // The backend's roll-up for today, from the day the dashboard already
       // read. A day with nothing logged carries zeros; a failed read is
       // absent and shows as zeros too, as a failed fetch did before.
-      final meals = (await widget.day).meals.value ?? const MealsDay();
+      final section = (await widget.day).meals;
       if (!mounted) return;
+      _loadFailed = section.isError;
+      final meals = section.value ?? const MealsDay();
 
       setState(() {
         _consumedMacros = {
@@ -270,6 +275,12 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
   
   @override
   Widget build(BuildContext context) {
+    if (_loadFailed) {
+      return CardLoadError(
+        title: 'Meals', icon: Icons.restaurant, color: Colors.deepOrange,
+        onRetry: widget.refreshDay,
+      );
+    }
     final goalColor = _getGoalColor();
     
     return Container(

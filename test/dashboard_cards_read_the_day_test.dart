@@ -137,19 +137,116 @@ void main() {
       expect(find.textContaining('0 / 8 glasses'), findsOneWidget);
     });
 
-    testWidgets('meals with a failed read shows zeros', (tester) async {
+  });
+
+  // A failed read is not an empty day. Until this state existed every card
+  // rendered a failed section as its zero -- "0 / 8 glasses", "0 consumed".
+  group('a failed section is the card\'s error state, not a zero', () {
+    DaySnapshot failed(String section) => DaySnapshot(
+          userId: 'u1', date: today,
+          meals: section == 'meals' ? const Section.error('read_failed') : const Section.missing(),
+          water: section == 'water' ? const Section.error('read_failed') : const Section.missing(),
+          sleep: section == 'sleep' ? const Section.error('read_failed') : const Section.missing(),
+          exercise: section == 'exercise' ? const Section.error('read_failed') : const Section.missing(),
+        );
+
+    testWidgets('meals', (tester) async {
       await tester.pumpWidget(host(SingleChildScrollView(
         child: DailyGoalsCard(
-          userProfile: testProfile(),
-          day: Future.value(DaySnapshot(
-              userId: 'u1', date: today,
-              meals: const Section.error('read_failed'))),
-          refreshDay: noop,
+          userProfile: testProfile(), day: Future.value(failed('meals')), refreshDay: noop,
         ),
       )));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('0 consumed'), findsOneWidget);
+      expect(find.text('Meals'), findsOneWidget);
+      expect(find.text("Couldn't load. Tap to retry."), findsOneWidget);
+      expect(find.textContaining('consumed'), findsNothing);
+    });
+
+    testWidgets('water', (tester) async {
+      await tester.pumpWidget(host(CompactWaterTracker(
+        userProfile: testProfile(), day: Future.value(failed('water')), refreshDay: noop,
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text("Couldn't load. Tap to retry."), findsOneWidget);
+      expect(find.textContaining('glasses'), findsNothing);
+    });
+
+    testWidgets('sleep', (tester) async {
+      await tester.pumpWidget(host(CompactSleepTracker(
+        userProfile: testProfile(), day: Future.value(failed('sleep')), refreshDay: noop,
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text("Couldn't load. Tap to retry."), findsOneWidget);
+    });
+
+    testWidgets('exercise', (tester) async {
+      await tester.pumpWidget(host(CompactExerciseTracker(
+        userProfile: testProfile(), day: Future.value(failed('exercise')), refreshDay: noop,
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text("Couldn't load. Tap to retry."), findsOneWidget);
+    });
+
+    testWidgets('a missing section is still the empty state, not an error', (tester) async {
+      await tester.pumpWidget(host(CompactWaterTracker(
+        userProfile: testProfile(),
+        day: Future.value(DaySnapshot(userId: 'u1', date: today)),
+        refreshDay: noop,
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text("Couldn't load. Tap to retry."), findsNothing);
+      expect(find.textContaining('0 / 8 glasses'), findsOneWidget);
+    });
+
+    testWidgets('tapping the error row asks the dashboard to read the day again',
+        (tester) async {
+      var refreshes = 0;
+      await tester.pumpWidget(host(CompactWaterTracker(
+        userProfile: testProfile(),
+        day: Future.value(failed('water')),
+        refreshDay: () async => refreshes++,
+      )));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Couldn't load. Tap to retry."));
+      await tester.pumpAndSettle();
+
+      expect(refreshes, 1);
+    });
+
+    testWidgets('the error row reads in dark mode', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(body: CompactWaterTracker(
+          userProfile: testProfile(), day: Future.value(failed('water')), refreshDay: noop,
+        )),
+      ));
+      await tester.pumpAndSettle();
+
+      final title = tester.widget<Text>(find.text('Water'));
+      final onSurface = ThemeData.dark().colorScheme.onSurface;
+      expect(title.style?.color, onSurface,
+          reason: 'fixed greys were near-invisible on the dark card surface');
+    });
+
+    testWidgets('a fresh day clears the error', (tester) async {
+      Widget build(Future<DaySnapshot> d) => host(CompactWaterTracker(
+            userProfile: testProfile(), day: d, refreshDay: noop,
+          ));
+
+      await tester.pumpWidget(build(Future.value(failed('water'))));
+      await tester.pumpAndSettle();
+      expect(find.text("Couldn't load. Tap to retry."), findsOneWidget);
+
+      await tester.pumpWidget(build(Future.value(day(glasses: 4))));
+      await tester.pumpAndSettle();
+      expect(find.text("Couldn't load. Tap to retry."), findsNothing);
+      expect(find.textContaining('4 / 8 glasses'), findsOneWidget);
     });
   });
 

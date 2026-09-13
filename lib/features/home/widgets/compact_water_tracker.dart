@@ -1,6 +1,7 @@
 // lib/features/home/widgets/compact_water_tracker.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:user_onboarding/features/home/widgets/card_load_error.dart';
 import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/water_entry.dart';
@@ -40,6 +41,8 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
   late final WaterApi _waterApi = widget.waterApi ?? WaterApi();
   WaterEntry? _todayEntry;
   bool _isLoading = true;
+  // The day's water section could not be read. Shown instead of a zero.
+  bool _loadFailed = false;
   bool _isSaving = false;
   late AnimationController _animationController;
   late Animation<double> _fillAnimation;
@@ -81,8 +84,10 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
       
       // missing and error both land in the "no entry yet" branch below, as a
       // failed fetch did before -- the card has no error state to show.
-      final entry = (await widget.day).water.value;
+      final section = (await widget.day).water;
       if (!mounted) return;
+      _loadFailed = section.isError;
+      final entry = section.value;
 
       if (entry != null) {
         // The stored target may be the legacy 2000ml constant; the profile
@@ -216,6 +221,12 @@ class _CompactWaterTrackerState extends State<CompactWaterTracker>
 
   @override
   Widget build(BuildContext context) {
+    if (_loadFailed) {
+      return CardLoadError(
+        title: 'Water', icon: Icons.water_drop, color: Colors.blue,
+        onRetry: widget.refreshDay,
+      );
+    }
     if (_isLoading) {
       return Container(
         height: 60,

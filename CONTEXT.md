@@ -34,7 +34,9 @@ presentation, local caching, and notifications; the backend owns persistence and
     `missing` (nothing logged), `error` (that tracker's read failed). The backend omits
     a section for `missing` and names it in `_read_errors` for `error`. Keeping these
     apart is the point — a failed read rendered as an empty day is a lie about the
-    user's data.
+    user's data. **The dashboard draws the distinction** (`CardLoadError`, since
+    2026-09-13); the today report still renders `error` as empty and should adopt the
+    same widget.
   - **Two consumers: `today_report_screen` and `dashboard_home`.** The dashboard was
     wired to it in F1 and removed again in `e918b74` (it fed a write-only map), then
     wired properly in [ADR-0007](docs/adr/0007-dashboard-reads-the-day-once.md): the
