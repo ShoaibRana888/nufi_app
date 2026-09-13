@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:user_onboarding/features/home/widgets/card_load_error.dart';
 import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/data/models/step_entry.dart';
@@ -41,6 +42,9 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
     with SingleTickerProviderStateMixin {
   StepEntry? _todayEntry;
   bool _isLoading = true;
+  // The day's steps section could not be read (and there was nothing on
+  // device either -- DailySnapshot already falls back to local storage).
+  bool _loadFailed = false;
   // True once the first load attempt has completed. Used to show the full-card
   // spinner only on the very first load — later refreshes keep the existing
   // data on screen instead of flashing a spinner/blank.
@@ -231,8 +235,11 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
     super.dispose();
   }
 
-  Future<void> _loadTodayEntry() =>
-      _apply(() async => (await widget.day).steps.value);
+  Future<void> _loadTodayEntry() => _apply(() async {
+        final section = (await widget.day).steps;
+        if (mounted) _loadFailed = section.isError;
+        return section.value;
+      });
 
   Future<void> _loadFromRepository() =>
       _apply(() => StepRepository.getTodayStepEntry(widget.userProfile.id!));
@@ -442,6 +449,12 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
 
   @override
   Widget build(BuildContext context) {
+    if (_loadFailed) {
+      return CardLoadError(
+        title: 'Steps', icon: Icons.directions_walk, color: Colors.orange,
+        onRetry: widget.refreshDay,
+      );
+    }
     if (_isLoading && !_hasLoaded) {
       return Container(
         height: 60,

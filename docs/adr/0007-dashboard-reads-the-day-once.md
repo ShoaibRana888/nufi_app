@@ -85,6 +85,12 @@ has to own the read.
 - `flutter analyze`: no errors or warnings, 1300 → 1299 infos. `flutter test`: the same
   network-dependent integration failures as before, compared by name (two of them flake
   run-to-run against the live backend and did so on the unmodified tree too).
-- **Not done:** the dashboard has no error UI, so a failed day read still renders as
-  zeros — the same lie the today report stopped telling in ADR-0006. The dashboard
-  has the `Section` states now; rendering them is the next decision.
+- ~~**Not done:** the dashboard has no error UI, so a failed day read still renders as
+  zeros.~~ **Done 2026-09-13.** `CardLoadError` (`lib/features/home/widgets/`) is what
+  a card shows when its section `isError`: the tracker's icon and colour, one line
+  ("Couldn't load. Tap to retry."), and the whole row calls `refreshDay`. Each of the
+  five cards sets `_loadFailed` from its section and returns it at the top of `build`.
+  A *missing* section is still the empty state — the distinction the contract exists
+  for. The inventory found this was the first error state anywhere: the today report
+  carries `Section.error` since ADR-0006 but renders it as empty too; adopting the
+  same widget there is the obvious follow-up.

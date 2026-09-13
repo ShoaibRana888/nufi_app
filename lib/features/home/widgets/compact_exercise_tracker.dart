@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:user_onboarding/features/home/widgets/card_load_error.dart';
 import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/models/user_profile.dart';
 import 'package:user_onboarding/features/tracking/screens/exercise_logging_page.dart';
@@ -36,6 +37,8 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
   final ExerciseApi _apiService = ExerciseApi();
   int _todayMinutes = 0;
   int _todayExercises = 0;
+  // The day's exercise section could not be read. Shown instead of a zero.
+  bool _loadFailed = false;
   int _weeklyExercises = 0;
   Set<String> _weeklyMuscleGroups = {};
   late int _dailyGoal;
@@ -87,7 +90,9 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
       // Today's exercises come from the day the dashboard already read.
       // Missing and error both read as "none today", as a failed request
       // did before.
-      final todayExercises = (await widget.day).exercise.value?.entries;
+      final section = (await widget.day).exercise;
+      if (mounted) _loadFailed = section.isError;
+      final todayExercises = section.value?.entries;
       
       // Load this week's exercise data
       final weekExercises = await _apiService.getExerciseLogs(
@@ -223,6 +228,12 @@ class _CompactExerciseTrackerState extends State<CompactExerciseTracker> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loadFailed) {
+      return CardLoadError(
+        title: 'Exercise', icon: Icons.fitness_center, color: Colors.green,
+        onRetry: widget.refreshDay,
+      );
+    }
     final progress = (_todayMinutes / _dailyGoal).clamp(0.0, 1.0);
     final bool goalMet = _todayMinutes >= _dailyGoal;
 
