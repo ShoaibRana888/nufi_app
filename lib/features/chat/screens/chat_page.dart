@@ -72,13 +72,12 @@ class _ChatPageState extends State<ChatPage>
     _checkWeeklyContext();
 
     // Context housekeeping is fire-and-forget — it must never block the UI.
-    // The daily reset/rebuild warms the AI coach's context; the backend also
-    // rebuilds today's context server-side before each reply as a safety net,
-    // and _loadChatContext re-runs on app resume, so a slightly stale cache
-    // here has no user-visible effect.
-    _apiService.checkAndResetDailyContext(widget.userProfile.id!).then((_) {
-      _apiService.rebuildContextInBackground(widget.userProfile.id!);
-    });
+    // The daily reset creates the day's row if it is missing; the read in
+    // _loadChatContext rebuilds it from the source tables (backend ADR-0008),
+    // and the backend rebuilds again before each reply, so the background
+    // rebuild that used to follow the reset here was a third copy of the
+    // same work.
+    _apiService.checkAndResetDailyContext(widget.userProfile.id!);
   }
 
   @override
