@@ -53,8 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
       await _setupNotifications(
         userProfile.id,
         {
-          'daily_meals_count': userProfile.dailyMealsCount ?? 3,
-          'wakeup_time': userProfile.wakeupTime ?? '06:00',
+          'daily_meals_count': userProfile.dailyMealsCount,
+          'wakeup_time': userProfile.wakeupTime,
         },
       );
       

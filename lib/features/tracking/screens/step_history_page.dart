@@ -36,16 +36,11 @@ class _StepHistoryPageState extends State<StepHistoryPage> {
   }
 
   Future<void> _loadHistory() async {
-    if (widget.userProfile.id == null) {
-      print('❌ User profile ID is null');
-      return;
-    }
-
     setState(() => _isLoading = true);
 
     try {
       print('📊 Loading step history for user: ${widget.userProfile.id}');
-      final entries = await StepRepository.getAllStepEntries(widget.userProfile.id!);
+      final entries = await StepRepository.getAllStepEntries(widget.userProfile.id);
       print('✅ Loaded ${entries.length} step entries');
       
       entries.sort((a, b) => b.date.compareTo(a.date)); // Sort by date descending
@@ -230,7 +225,7 @@ class _StepHistoryPageState extends State<StepHistoryPage> {
     apply(newShared);
 
     final ok = await _sharingApi.setDateSharing(
-      userId: widget.userProfile.id!,
+      userId: widget.userProfile.id,
       activityType: 'steps',
       date: entry.date,
       shared: newShared,
@@ -474,7 +469,7 @@ class _StepHistoryPageState extends State<StepHistoryPage> {
 
   double _calculateCalories(int steps) {
     // Use default weight of 70kg if user weight not available
-    final userWeight = widget.userProfile.weight ?? 70;
+    final userWeight = widget.userProfile.weight;
     return steps * 0.04 * (userWeight / 70);
   }
 

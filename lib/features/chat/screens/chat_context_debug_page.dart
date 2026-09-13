@@ -46,7 +46,7 @@ class _ChatContextDebugPageState extends State<ChatContextDebugPage> {
   Future<void> _loadAll() async {
     setState(() => _loading = true);
     try {
-      final userId = widget.userProfile.id!;
+      final userId = widget.userProfile.id;
 
       // Force a rebuild from source data before fetching, so the debug view
       // reflects the latest logs. Past weekly contexts are otherwise served
@@ -97,7 +97,7 @@ class _ChatContextDebugPageState extends State<ChatContextDebugPage> {
     setState(() => _defaults[type] = !shared ? false : true);
     // setDefaults treats `true` as "reset to implicit shared default".
     final updated = await _sharingApi.setDefaults(
-      widget.userProfile.id!,
+      widget.userProfile.id,
       {type: shared},
     );
     if (!mounted) return;

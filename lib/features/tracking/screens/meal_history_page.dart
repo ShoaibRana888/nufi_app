@@ -38,8 +38,8 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
       final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
       
       // Load both daily summary and individual meals
-      final summary = await _apiService.getDailySummary(widget.userProfile.id!, date: dateStr);
-      final meals = await _apiService.getMealHistory(widget.userProfile.id!, date: dateStr);
+      final summary = await _apiService.getDailySummary(widget.userProfile.id, date: dateStr);
+      final meals = await _apiService.getMealHistory(widget.userProfile.id, date: dateStr);
       
       print('📊 Summary loaded: $summary');
       print('📊 Meals loaded: ${meals.length} meals');
@@ -588,7 +588,7 @@ class _MealHistoryPageState extends State<MealHistoryPage> {
     setState(() => meal['shared_with_chat'] = newShared);
 
     final ok = await _sharingApi.setEntrySharing(
-      userId: widget.userProfile.id!,
+      userId: widget.userProfile.id,
       activityType: 'meal',
       itemId: meal['id'].toString(),
       shared: newShared,

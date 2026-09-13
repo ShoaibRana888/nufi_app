@@ -135,7 +135,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
   Future<void> _loadWeightHistory() async {
     try {
       final history = await _weightApi.getWeightHistory(
-        _currentUserProfile?.id ?? widget.userProfile.id ?? '',
+        _currentUserProfile?.id ?? widget.userProfile.id,
       );
       
       if (mounted) {
@@ -157,10 +157,10 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
     if (_weightHistory.isNotEmpty) {
       return _weightHistory.first.weight;
     }
-    return currentUserProfile.weight ?? 0; // Use currentUserProfile
+    return currentUserProfile.weight; // Use currentUserProfile
   }
   
-  double get targetWeight => widget.userProfile.targetWeight ?? 0;
+  double get targetWeight => widget.userProfile.targetWeight;
   
   double get startingWeight {
     // Priority 1: Use the locked starting weight from profile
@@ -174,8 +174,8 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
     }
     
     // Priority 3: Use the current profile weight
-    if (widget.userProfile.weight != null && widget.userProfile.weight! > 0) {
-      return widget.userProfile.weight!;
+    if (widget.userProfile.weight > 0) {
+      return widget.userProfile.weight;
     }
     
     // Priority 4: Fallback to current weight
@@ -543,7 +543,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
             const SizedBox(height: 12),
             if (recentEntries.isEmpty) ...[
               // Show profile weight info when no entries exist
-              if (widget.userProfile.weight != null && widget.userProfile.weight! > 0) ...[
+              if (widget.userProfile.weight > 0) ...[
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -570,7 +570,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Profile Weight: ${widget.userProfile.weight!.toStringAsFixed(2)} kg',
+                                  'Profile Weight: ${widget.userProfile.weight.toStringAsFixed(2)} kg',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -733,7 +733,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
     setState(() => _weightHistory[idx] = entry.copyWith(sharedWithChat: newShared));
 
     final ok = await _sharingApi.setEntrySharing(
-      userId: _currentUserProfile?.id ?? widget.userProfile.id!,
+      userId: _currentUserProfile?.id ?? widget.userProfile.id,
       activityType: 'weight',
       itemId: entry.id!,
       shared: newShared,
@@ -770,7 +770,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
   }
 
   double _calculateBMI() {
-    final heightInMeters = (widget.userProfile.height ?? 170) / 100;
+    final heightInMeters = (widget.userProfile.height) / 100;
     return currentWeight / (heightInMeters * heightInMeters);
   }
 
@@ -1137,7 +1137,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
       final utcDateTime = dateTime.toUtc();
       
       final entry = WeightEntry(
-        userId: _currentUserProfile?.id ?? widget.userProfile.id ?? '',
+        userId: _currentUserProfile?.id ?? widget.userProfile.id,
         weight: weight,
         date: utcDateTime,  // Send UTC time to fix timezone issue
         notes: notes.isEmpty ? null : notes,
@@ -1206,7 +1206,7 @@ class _WeightLoggingPageState extends State<WeightLoggingPage> with WidgetsBindi
           newWeight = _weightHistory.first.weight;
         } else {
           // If no entries remain, revert to starting weight
-          newWeight = widget.userProfile.startingWeight ?? widget.userProfile.weight ?? 0;
+          newWeight = widget.userProfile.startingWeight ?? widget.userProfile.weight;
         }
         
         // Update the profile

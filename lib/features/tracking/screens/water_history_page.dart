@@ -35,12 +35,10 @@ class _WaterHistoryPageState extends State<WaterHistoryPage> {
   }
 
   Future<void> _loadHistory() async {
-    if (widget.userProfile.id == null) return;
-    
     setState(() => _isLoading = true);
     
     try {
-      final entries = await _waterApi.getWaterHistory(widget.userProfile.id!, limit: 30);
+      final entries = await _waterApi.getWaterHistory(widget.userProfile.id, limit: 30);
       // Stored targets were a 2000ml constant, not a record of the goal, so
       // "achieved" here is measured against the profile goal, not the row.
       final target = widget.userProfile.waterIntakeGlasses * 250.0;
@@ -371,7 +369,7 @@ class _WaterHistoryPageState extends State<WaterHistoryPage> {
     setState(() => _entries[idx] = entry.copyWith(sharedWithChat: newShared));
 
     final ok = await _sharingApi.setDateSharing(
-      userId: widget.userProfile.id!,
+      userId: widget.userProfile.id,
       activityType: 'water',
       date: entry.date,
       shared: newShared,

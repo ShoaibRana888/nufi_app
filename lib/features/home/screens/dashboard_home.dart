@@ -156,7 +156,7 @@ class _DashboardHomeState extends State<DashboardHome>
   Future<void> _checkSupplementsSetup() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userId = _currentUserProfile.id ?? '';
+      final userId = _currentUserProfile.id;
       
       // Check if supplements are set up (not disabled and has supplements list)
       final isDisabled = prefs.getBool('supplement_setup_${userId}_disabled') ?? false;
@@ -252,7 +252,6 @@ class _DashboardHomeState extends State<DashboardHome>
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = _currentUserProfile.id;
-      if (userId == null) return;
 
       final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
       final lastScheduledDate =
@@ -322,7 +321,7 @@ class _DashboardHomeState extends State<DashboardHome>
   }
 
   Future<DaySnapshot> _readToday() =>
-      _dailySnapshot.forDay(_currentUserProfile.id ?? '', DateTime.now());
+      _dailySnapshot.forDay(_currentUserProfile.id, DateTime.now());
 
   /// A card that changed the day asks for it to be read again; the new
   /// future reaches every card through didUpdateWidget.
@@ -371,8 +370,7 @@ class _DashboardHomeState extends State<DashboardHome>
 
                   // Goal Progress
                   if (_goalProgressEnabled || 
-                    _currentUserProfile.weightGoal != null && 
-                    _currentUserProfile.weightGoal!.isNotEmpty)
+                    _currentUserProfile.weightGoal.isNotEmpty)
                   SliverToBoxAdapter(
                     child: DashboardWeightGoalCard(
                       userProfile: _currentUserProfile,
@@ -384,7 +382,7 @@ class _DashboardHomeState extends State<DashboardHome>
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: WeeklyStatsCard(
-                        userId: widget.userProfile.id!,
+                        userId: widget.userProfile.id,
                         userProfile: widget.userProfile,
                       ),
                     ),
@@ -626,7 +624,7 @@ class CompactDailyGoalsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tdee = (userProfile.tdee ?? 2000).toDouble();
-    final weightGoal = userProfile.primaryGoal ?? 'maintain_weight';
+    final weightGoal = userProfile.primaryGoal;
     
     // Calculate goals
     double dailyCalories;

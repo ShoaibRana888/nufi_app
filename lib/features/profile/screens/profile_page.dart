@@ -70,10 +70,7 @@ class _ProfilePageState extends State<ProfilePage>
 
   Future<void> _loadWeightData() async {
     try {
-      if (currentProfile.id == null) return;
-      
-      // Get weight history from weight_entries table
-      final history = await _weightApi.getWeightHistory(currentProfile.id!);
+      final history = await _weightApi.getWeightHistory(currentProfile.id);
       
       if (history.isNotEmpty) {
         // Sort by date to get most recent
@@ -96,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage>
   Future<void> _refreshProfile() async {
     setState(() => isLoading = true);
     try {
-      final updatedProfile = await _apiService.getUserProfileById(currentProfile.id!);
+      final updatedProfile = await _apiService.getUserProfileById(currentProfile.id);
       if (mounted) {
         setState(() {
           currentProfile = updatedProfile;
@@ -315,10 +312,10 @@ class _ProfilePageState extends State<ProfilePage>
             children: [
               _buildInfoRow('Name', currentProfile.name),
               _buildInfoRow('Email', currentProfile.email),
-              _buildInfoRow('Age', '${currentProfile.age ?? 0} years'),
-              _buildInfoRow('Gender', currentProfile.gender ?? 'Not specified'),
-              _buildInfoRow('Height', '${currentProfile.height?.toStringAsFixed(1) ?? 0} cm'),
-              _buildInfoRow('Current Weight', '${currentWeight?.toStringAsFixed(2) ?? currentProfile.weight?.toStringAsFixed(2) ?? 0} kg'),
+              _buildInfoRow('Age', '${currentProfile.age} years'),
+              _buildInfoRow('Gender', currentProfile.gender),
+              _buildInfoRow('Height', '${currentProfile.height.toStringAsFixed(1)} cm'),
+              _buildInfoRow('Current Weight', '${currentWeight?.toStringAsFixed(2) ?? currentProfile.weight.toStringAsFixed(2)} kg'),
               if (lastWeightUpdate != null)
                 _buildInfoRow('Last Weight Update', DateFormat('MMM d, yyyy').format(lastWeightUpdate!)),
             ],
@@ -348,9 +345,9 @@ class _ProfilePageState extends State<ProfilePage>
 
   Widget _buildGoalsTab() {
     // Use weight from weight_entries for calculations
-    final latestWeight = currentWeight ?? currentProfile.weight ?? 0;
-    final targetWeight = currentProfile.targetWeight ?? latestWeight;
-    final initialWeight = startingWeight ?? currentProfile.weight ?? latestWeight;
+    final latestWeight = currentWeight ?? currentProfile.weight;
+    final targetWeight = currentProfile.targetWeight;
+    final initialWeight = startingWeight ?? currentProfile.weight;
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -376,7 +373,7 @@ class _ProfilePageState extends State<ProfilePage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            currentProfile.primaryGoal ?? 'Not Set',
+                            currentProfile.primaryGoal,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -384,7 +381,7 @@ class _ProfilePageState extends State<ProfilePage>
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _getGoalDescription(currentProfile.primaryGoal ?? ''),
+                            _getGoalDescription(currentProfile.primaryGoal),
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
@@ -404,24 +401,24 @@ class _ProfilePageState extends State<ProfilePage>
           // Weight Management Card - Using data from weight_entries
           _buildCard(
             title: 'Weight Management',
-            icon: _getWeightGoalIcon(currentProfile.weightGoal ?? ''),
+            icon: _getWeightGoalIcon(currentProfile.weightGoal),
             children: [
               // Goal-specific header
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: _getWeightGoalColor(currentProfile.weightGoal ?? '').withOpacity(0.1),
+                  color: _getWeightGoalColor(currentProfile.weightGoal).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: _getWeightGoalColor(currentProfile.weightGoal ?? '').withOpacity(0.3),
+                    color: _getWeightGoalColor(currentProfile.weightGoal).withOpacity(0.3),
                   ),
                 ),
                 child: Row(
                   children: [
                     Icon(
-                      _getWeightGoalIcon(currentProfile.weightGoal ?? ''),
-                      color: _getWeightGoalColor(currentProfile.weightGoal ?? ''),
+                      _getWeightGoalIcon(currentProfile.weightGoal),
+                      color: _getWeightGoalColor(currentProfile.weightGoal),
                       size: 30,
                     ),
                     const SizedBox(width: 12),
@@ -430,7 +427,7 @@ class _ProfilePageState extends State<ProfilePage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _formatWeightGoal(currentProfile.weightGoal ?? ''),
+                            _formatWeightGoal(currentProfile.weightGoal),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -438,7 +435,7 @@ class _ProfilePageState extends State<ProfilePage>
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _getWeightGoalDescription(currentProfile.weightGoal ?? ''),
+                            _getWeightGoalDescription(currentProfile.weightGoal),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -465,7 +462,7 @@ class _ProfilePageState extends State<ProfilePage>
                   latestWeight, 
                   targetWeight, 
                   initialWeight, 
-                  currentProfile.weightGoal ?? ''
+                  currentProfile.weightGoal
                 ),
               ] else ...[
                 const Divider(),
@@ -475,7 +472,7 @@ class _ProfilePageState extends State<ProfilePage>
               // Weight trend for all goals
               if (weightHistory.length > 1) ...[
                 const SizedBox(height: 16),
-                _buildWeightTrendForGoal(currentProfile.weightGoal ?? ''),
+                _buildWeightTrendForGoal(currentProfile.weightGoal),
               ],
             ],
           ),
@@ -487,10 +484,10 @@ class _ProfilePageState extends State<ProfilePage>
             title: 'Fitness Goals',
             icon: Icons.sports_score,
             children: [
-              _buildInfoRow('Fitness Level', currentProfile.fitnessLevel ?? 'Beginner'),
-              _buildInfoRow('Workout Frequency', '${currentProfile.workoutFrequency ?? 0} days/week'),
-              _buildInfoRow('Session Duration', '${currentProfile.workoutDuration ?? 0} minutes'),
-              _buildInfoRow('Daily Steps', '${currentProfile.dailyStepGoal ?? 10000} steps'),
+              _buildInfoRow('Fitness Level', currentProfile.fitnessLevel),
+              _buildInfoRow('Workout Frequency', '${currentProfile.workoutFrequency} days/week'),
+              _buildInfoRow('Session Duration', '${currentProfile.workoutDuration} minutes'),
+              _buildInfoRow('Daily Steps', '${currentProfile.dailyStepGoal} steps'),
             ],
           ),
         ],
@@ -509,19 +506,19 @@ class _ProfilePageState extends State<ProfilePage>
             title: 'Medical Conditions',
             icon: Icons.medical_services,
             children: [
-              if (currentProfile.medicalConditions?.isEmpty ?? true)
+              if (currentProfile.medicalConditions.isEmpty)
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text('No medical conditions reported'),
                 )
               else
-                ...currentProfile.medicalConditions!.map((condition) => 
+                ...currentProfile.medicalConditions.map((condition) => 
                   _buildChip(condition, Colors.red.withOpacity(0.1), Colors.red)
                 ),
-              if (currentProfile.otherMedicalCondition?.isNotEmpty ?? false)
+              if (currentProfile.otherMedicalCondition.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child: _buildInfoRow('Other', currentProfile.otherMedicalCondition!),
+                  child: _buildInfoRow('Other', currentProfile.otherMedicalCondition),
                 ),
             ],
           ),
@@ -533,19 +530,19 @@ class _ProfilePageState extends State<ProfilePage>
             title: 'Sleep Health',
             icon: Icons.bedtime,
             children: [
-              _buildInfoRow('Sleep Target', '${currentProfile.sleepHours ?? 8} hours'),
-              _buildInfoRow('Bedtime', currentProfile.bedtime ?? 'Not set'),
-              _buildInfoRow('Wake Time', currentProfile.wakeupTime ?? 'Not set'),
+              _buildInfoRow('Sleep Target', '${currentProfile.sleepHours} hours'),
+              _buildInfoRow('Bedtime', currentProfile.bedtime),
+              _buildInfoRow('Wake Time', currentProfile.wakeupTime),
               const Divider(),
               const Text('Sleep Issues:', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              if (currentProfile.sleepIssues?.isEmpty ?? true)
+              if (currentProfile.sleepIssues.isEmpty)
                 const Text('No sleep issues reported')
               else
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: currentProfile.sleepIssues!.map((issue) => 
+                  children: currentProfile.sleepIssues.map((issue) => 
                     _buildChip(issue, Colors.purple.withOpacity(0.1), Colors.purple)
                   ).toList(),
                 ),
@@ -559,18 +556,18 @@ class _ProfilePageState extends State<ProfilePage>
             title: 'Nutrition',
             icon: Icons.restaurant,
             children: [
-              _buildInfoRow('Water Goal', '${currentProfile.waterIntake ?? 2} L (${currentProfile.waterIntakeGlasses ?? 8} glasses)'),
-              _buildInfoRow('Daily Meals Target', '${currentProfile.dailyMealsCount ?? 3} meals'),
+              _buildInfoRow('Water Goal', '${currentProfile.waterIntake} L (${currentProfile.waterIntakeGlasses} glasses)'),
+              _buildInfoRow('Daily Meals Target', '${currentProfile.dailyMealsCount} meals'),
               const Divider(),
               const Text('Dietary Preferences:', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              if (currentProfile.dietaryPreferences?.isEmpty ?? true)
+              if (currentProfile.dietaryPreferences.isEmpty)
                 const Text('No dietary preferences set')
               else
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: currentProfile.dietaryPreferences!.map((pref) => 
+                  children: currentProfile.dietaryPreferences.map((pref) => 
                     _buildChip(pref, Colors.green.withOpacity(0.1), Colors.green)
                   ).toList(),
                 ),
@@ -579,7 +576,7 @@ class _ProfilePageState extends State<ProfilePage>
           const SizedBox(height: 16),
           
           // Women's Health Card (conditional)
-          if (currentProfile.gender?.toLowerCase() == 'female') ...[
+          if (currentProfile.gender.toLowerCase() == 'female') ...[
             const SizedBox(height: 16),
             _buildCard(
               title: "Women's Health",
@@ -614,10 +611,10 @@ class _ProfilePageState extends State<ProfilePage>
             title: 'Workout Preferences',
             icon: Icons.fitness_center,
             children: [
-              _buildInfoRow('Fitness Level', currentProfile.fitnessLevel ?? 'Beginner'),
-              _buildInfoRow('Frequency', '${currentProfile.workoutFrequency ?? 0} days/week'),
-              _buildInfoRow('Duration', '${currentProfile.workoutDuration ?? 0} minutes/session'),
-              _buildInfoRow('Workout Location', currentProfile.workoutLocation ?? 'Not specified'),
+              _buildInfoRow('Fitness Level', currentProfile.fitnessLevel),
+              _buildInfoRow('Frequency', '${currentProfile.workoutFrequency} days/week'),
+              _buildInfoRow('Duration', '${currentProfile.workoutDuration} minutes/session'),
+              _buildInfoRow('Workout Location', currentProfile.workoutLocation),
               _buildInfoRow('Personal Trainer', currentProfile.hasTrainer == true ? 'Yes' : 'No'),
             ],
           ),
@@ -629,13 +626,13 @@ class _ProfilePageState extends State<ProfilePage>
             title: 'Preferred Workout Types',
             icon: Icons.sports_martial_arts,
             children: [
-              if (currentProfile.preferredWorkouts?.isEmpty ?? true)
+              if (currentProfile.preferredWorkouts.isEmpty)
                 const Text('No workout preferences set')
               else
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: currentProfile.preferredWorkouts!.map((workout) => 
+                  children: currentProfile.preferredWorkouts.map((workout) => 
                     _buildChip(workout, Colors.orange.withOpacity(0.1), Colors.orange)
                   ).toList(),
                 ),
@@ -649,13 +646,13 @@ class _ProfilePageState extends State<ProfilePage>
             title: 'Available Equipment',
             icon: Icons.sports,
             children: [
-              if (currentProfile.availableEquipment?.isEmpty ?? true)
+              if (currentProfile.availableEquipment.isEmpty)
                 const Text('No equipment specified')
               else
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: currentProfile.availableEquipment!.map((equipment) => 
+                  children: currentProfile.availableEquipment.map((equipment) => 
                     Chip(
                       label: Text(
                         equipment,
@@ -1208,7 +1205,7 @@ class _ProfilePageState extends State<ProfilePage>
 
   // Add this new method specifically for activity level
   Widget _buildActivityLevelDisplay(bool isSmallScreen) {
-    final activityLevel = currentProfile.activityLevel ?? '';
+    final activityLevel = currentProfile.activityLevel;
     final formattedLevel = _formatActivityLevel(activityLevel);
     final description = _getShortActivityDescription(activityLevel);
     final icon = _getActivityIcon(activityLevel);
@@ -1519,47 +1516,26 @@ class _ProfilePageState extends State<ProfilePage>
 
 
   int _calculateProfileCompletion() {
-    int filledFields = 0;
-    int totalFields = 30; // Adjusted for actual fields
-    
-    // Basic info (6 fields)
+    // 18 of the 30 scored fields are non-nullable on UserProfile (age, gender,
+    // height, weight, primaryGoal, weightGoal, targetWeight, activityLevel,
+    // the 6 daily targets and the 4 lifestyle fields), so they always count
+    // as filled. Only the fields below can move the score.
+    int filledFields = 18;
+    int totalFields = 30;
+
     if (currentProfile.name.isNotEmpty) filledFields++;
     if (currentProfile.email.isNotEmpty) filledFields++;
-    if (currentProfile.age != null) filledFields++;
-    if (currentProfile.gender != null) filledFields++;
-    if (currentProfile.height != null) filledFields++;
-    if (currentWeight != null || currentProfile.weight != null) filledFields++;
-    
-    // Goals (5 fields)
-    if (currentProfile.primaryGoal != null) filledFields++;
-    if (currentProfile.weightGoal != null) filledFields++;
-    if (currentProfile.targetWeight != null) filledFields++;
     if (currentProfile.goalTimeline != null) filledFields++;
-    if (currentProfile.activityLevel != null) filledFields++;
-    
-    // Daily targets (6 fields)
-    if (currentProfile.dailyStepGoal != null) filledFields++;
-    if (currentProfile.sleepHours != null) filledFields++;
-    if (currentProfile.waterIntake != null) filledFields++;
-    if (currentProfile.workoutFrequency != null) filledFields++;
-    if (currentProfile.workoutDuration != null) filledFields++;
-    if (currentProfile.fitnessLevel != null) filledFields++;
-    
-    // Lifestyle (4 fields)
-    if (currentProfile.bedtime != null) filledFields++;
-    if (currentProfile.wakeupTime != null) filledFields++;
-    if (currentProfile.workoutLocation != null) filledFields++;
-    if (currentProfile.hasTrainer != null) filledFields++;
-    
+
     // Lists (5 fields)
-    if (currentProfile.sleepIssues?.isNotEmpty ?? false) filledFields++;
-    if (currentProfile.dietaryPreferences?.isNotEmpty ?? false) filledFields++;
-    if (currentProfile.preferredWorkouts?.isNotEmpty ?? false) filledFields++;
-    if (currentProfile.medicalConditions?.isNotEmpty ?? false) filledFields++;
-    if (currentProfile.availableEquipment?.isNotEmpty ?? false) filledFields++;
+    if (currentProfile.sleepIssues.isNotEmpty) filledFields++;
+    if (currentProfile.dietaryPreferences.isNotEmpty) filledFields++;
+    if (currentProfile.preferredWorkouts.isNotEmpty) filledFields++;
+    if (currentProfile.medicalConditions.isNotEmpty) filledFields++;
+    if (currentProfile.availableEquipment.isNotEmpty) filledFields++;
     
     // Women's health (if applicable)
-    if (currentProfile.gender?.toLowerCase() == 'female') {
+    if (currentProfile.gender.toLowerCase() == 'female') {
       totalFields += 4;
       if (currentProfile.hasPeriods != null) filledFields++;
       if (currentProfile.pregnancyStatus != null) filledFields++;

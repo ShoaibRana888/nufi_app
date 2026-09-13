@@ -86,7 +86,7 @@ class _SupplementHistoryPageState extends State<SupplementHistoryPage> {
     try {
       final days = endDate.difference(startDate).inDays + 1;
       final results = await SupplementApi().getSupplementHistory(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         days: days,
       );
       
@@ -431,7 +431,7 @@ class _SupplementHistoryPageState extends State<SupplementHistoryPage> {
     });
 
     final ok = await _sharingApi.setSupplementSharing(
-      userId: widget.userProfile.id!,
+      userId: widget.userProfile.id,
       date: DateTime.parse(date),
       shared: newShared,
     );

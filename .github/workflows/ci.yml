@@ -13,11 +13,11 @@
 #    backend and flake on its cold starts. Add a file here when it runs
 #    without a network; do not add the live-backend suites.
 #
-# 2. `flutter analyze` is gated on errors only. As of 2026-09-13 master
-#    carries 0 errors, 273 warnings (null-safety hygiene) and ~1500 infos;
-#    the flutter tool treats warnings and infos as fatal by default, so the
-#    flags below keep the check green until those are cleaned up. Tighten
-#    to --fatal-warnings once the warning count is zero.
+# 2. `flutter analyze` is gated on errors AND warnings, not infos. The
+#    flutter tool treats infos as fatal by default too, but master carries
+#    ~1200 pre-existing info-level lints (avoid_print alone is most of them),
+#    so --no-fatal-infos keeps the check honest about what it enforces.
+#    Warnings were cleaned to zero on 2026-09-14; keep them there.
 #
 # FLUTTER_VERSION mirrors the SDK used locally (~/flutter). Bump both together.
 
@@ -60,8 +60,8 @@ jobs:
       - name: Create empty .env asset placeholder
         run: 'echo "# CI placeholder; see workflow" > .env'
 
-      - name: Analyze (errors only; see header)
-        run: flutter analyze --no-fatal-warnings --no-fatal-infos
+      - name: Analyze (errors + warnings fatal; see header)
+        run: flutter analyze --no-fatal-infos
 
       - name: Architecture tests (fakes only, no network)
         run: |

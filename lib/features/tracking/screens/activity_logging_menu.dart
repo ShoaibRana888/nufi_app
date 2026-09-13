@@ -128,7 +128,7 @@ class ActivityLoggingMenu extends StatelessWidget {
     ];
 
     // Add period tracking for female users
-    if (userProfile.gender?.toLowerCase() == 'female') {
+    if (userProfile.gender.toLowerCase() == 'female') {
       baseActivities.add({
         'title': 'Period',
         'subtitle': 'Menstrual cycle',

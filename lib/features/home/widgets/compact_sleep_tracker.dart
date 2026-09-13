@@ -71,7 +71,7 @@ class _CompactSleepTrackerState extends State<CompactSleepTracker>
   }
 
   void _initializeSleepGoal() {
-    _sleepGoal = widget.userProfile.sleepHours?.toDouble() ?? 8.0;
+    _sleepGoal = widget.userProfile.sleepHours.toDouble();
     _sleepGoal = _sleepGoal.clamp(4.0, 12.0);
   }
 

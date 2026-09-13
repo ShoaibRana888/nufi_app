@@ -54,7 +54,7 @@ class _EnhancedExerciseHistoryPageState extends State<EnhancedExerciseHistoryPag
     try {
       // Load exercises with current filters
       final exercises = await _apiService.getExerciseLogs(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         exerciseType: _selectedExerciseType,
         startDate: _selectedDateRange?.start.toIso8601String(),
         endDate: _selectedDateRange?.end.toIso8601String(),
@@ -745,7 +745,7 @@ class _EnhancedExerciseHistoryPageState extends State<EnhancedExerciseHistoryPag
     setState(() => exercise['shared_with_chat'] = newShared);
 
     final ok = await _sharingApi.setEntrySharing(
-      userId: widget.userProfile.id!,
+      userId: widget.userProfile.id,
       activityType: 'exercise',
       itemId: exercise['id'].toString(),
       shared: newShared,
@@ -792,7 +792,7 @@ class _EnhancedExerciseHistoryPageState extends State<EnhancedExerciseHistoryPag
 
     if (confirmed == true) {
       try {
-        await _apiService.deleteExerciseLog(exercise['id'], widget.userProfile.id!);
+        await _apiService.deleteExerciseLog(exercise['id'], widget.userProfile.id);
         _loadData();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Exercise deleted successfully')),

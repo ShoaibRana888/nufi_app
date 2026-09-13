@@ -92,7 +92,7 @@ class _ChatPageState extends State<ChatPage>
   Future<void> _primeFromCache() async {
     if (_messages.isNotEmpty) return;
     try {
-      final cached = await ChatCache.getMessages(widget.userProfile.id!);
+      final cached = await ChatCache.getMessages(widget.userProfile.id);
       if (!mounted || cached.isEmpty || _messages.isNotEmpty) return;
       setState(() {
         _messages = cached;
@@ -141,7 +141,7 @@ class _ChatPageState extends State<ChatPage>
         });
 
         // Write-through to the local cache so the next open is instant.
-        unawaited(ChatCache.saveMessages(widget.userProfile.id!, mapped));
+        unawaited(ChatCache.saveMessages(widget.userProfile.id, mapped));
 
         // Jump to the newest message once the list has laid out. One
         // post-frame callback is enough — the previous extra delayed jumps just
@@ -164,7 +164,7 @@ class _ChatPageState extends State<ChatPage>
     
     try {
       // Get cached context - much faster!
-      final context = await ChatService.getUserContext(widget.userProfile.id!);
+      final context = await ChatService.getUserContext(widget.userProfile.id);
       if (!mounted) return;
 
       setState(() {
@@ -202,7 +202,7 @@ class _ChatPageState extends State<ChatPage>
   Future<void> _checkWeeklyContext() async {
     try {
       final recentWeeks = await _apiService.getRecentWeeks(
-        widget.userProfile.id!,
+        widget.userProfile.id,
         weeks: 4,
       );
       
@@ -219,7 +219,7 @@ class _ChatPageState extends State<ChatPage>
 
   Future<void> _loadFramework() async {
     try {
-      final framework = await ChatService.getUserFramework(widget.userProfile.id!);
+      final framework = await ChatService.getUserFramework(widget.userProfile.id);
       if (mounted) {
         setState(() {
           _userFramework = framework;
@@ -233,7 +233,7 @@ class _ChatPageState extends State<ChatPage>
   // Add rebuild context method
   Future<void> _rebuildContext() async {
     try {
-      final success = await ChatService.rebuildContext(widget.userProfile.id!);
+      final success = await ChatService.rebuildContext(widget.userProfile.id);
       if (success) {
         await _loadChatContext();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -312,7 +312,7 @@ class _ChatPageState extends State<ChatPage>
     try {
       // Send with context version
       final response = await ChatService.sendMessage(
-        widget.userProfile.id!, 
+        widget.userProfile.id, 
         text,
         context: _userContext,
         contextVersion: _contextVersion,
@@ -330,7 +330,7 @@ class _ChatPageState extends State<ChatPage>
       });
 
       // Persist the updated transcript so the next open is instant.
-      unawaited(ChatCache.saveMessages(widget.userProfile.id!, _messages));
+      unawaited(ChatCache.saveMessages(widget.userProfile.id, _messages));
 
     } catch (e) {
       print('[ChatPage] Error sending message: $e');
@@ -933,7 +933,7 @@ class _ChatPageState extends State<ChatPage>
     });
     // Drop the cached transcript too, otherwise the next open would repaint the
     // messages the user just cleared.
-    unawaited(ChatCache.clear(widget.userProfile.id!));
+    unawaited(ChatCache.clear(widget.userProfile.id));
     _addWelcomeMessage();
   }
 

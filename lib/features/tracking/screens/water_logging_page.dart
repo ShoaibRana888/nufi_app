@@ -52,13 +52,11 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
   }
 
   Future<void> _loadWaterForDate(DateTime date) async {
-    if (widget.userProfile.id == null) return;
-    
     setState(() => _isLoading = true);
     
     try {
       final entry = await _waterApi.getWaterEntryByDate(
-        widget.userProfile.id!, 
+        widget.userProfile.id, 
         date
       );
       
@@ -66,7 +64,7 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
         _selectedDate = date;
         _todayEntry = entry?.copyWith(targetMl: _targetMl) ??
             WaterEntry(
-              userId: widget.userProfile.id!,
+              userId: widget.userProfile.id,
               date: date,
               glassesConsumed: 0,
               totalMl: 0.0,
@@ -111,7 +109,7 @@ class _WaterLoggingPageState extends State<WaterLoggingPage> {
       setState(() {
         _selectedDate = date;
         _todayEntry = WaterEntry(
-          userId: widget.userProfile.id!,
+          userId: widget.userProfile.id,
           date: date,
           glassesConsumed: 0,
           totalMl: 0.0,

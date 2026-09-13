@@ -40,13 +40,11 @@ class _CompactSupplementsTrackerState extends State<CompactSupplementsTracker> {
   }
 
   Future<void> _loadSupplementsData() async {
-    if (widget.userProfile.id == null) return;
-    
     setState(() => _isLoading = true);
     
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userId = widget.userProfile.id!;
+      final userId = widget.userProfile.id;
       
       // Load supplements list
       final supplementsJson = prefs.getString('supplement_setup_${userId}_list');

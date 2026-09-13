@@ -77,13 +77,13 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
     _userTdee = widget.userProfile.tdee ?? 2000.0;
     
     // Get user's actual weight goal
-    _weightGoal = widget.userProfile.primaryGoal ?? 'maintain_weight';
+    _weightGoal = widget.userProfile.primaryGoal;
     
     // Get user's current weight
-    _currentWeight = widget.userProfile.weight ?? 70.0;
+    _currentWeight = widget.userProfile.weight;
     
     // Get activity level
-    _activityLevel = widget.userProfile.activityLevel ?? 'moderately_active';
+    _activityLevel = widget.userProfile.activityLevel;
   }
   
   void _calculateDailyGoals() {
@@ -176,8 +176,6 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
   }
   
   Future<void> _loadTodayProgress() async {
-    if (widget.userProfile.id == null) return;
-    
     setState(() => _isLoadingProgress = true);
     
     try {

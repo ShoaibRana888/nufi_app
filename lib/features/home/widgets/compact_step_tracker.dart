@@ -105,18 +105,18 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
       _hasPedometerPermission = status.isGranted;
     });
 
-    if (_hasPedometerPermission && widget.userProfile.id != null) {
-      await _stepCounterService.initialize(widget.userProfile.id!);
+    if (_hasPedometerPermission) {
+      await _stepCounterService.initialize(widget.userProfile.id);
     }
 
     await _loadTodayEntry();
   }
 
   Future<void> _requestPedometerPermission() async {
-    if (kIsWeb || widget.userProfile.id == null) return;
+    if (kIsWeb) return;
     
     final granted = await _stepCounterService.requestPermissionAndStart(
-      widget.userProfile.id!
+      widget.userProfile.id
     );
     if (!mounted) return;
 
@@ -242,23 +242,19 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
       });
 
   Future<void> _loadFromRepository() =>
-      _apply(() => StepRepository.getTodayStepEntry(widget.userProfile.id!));
+      _apply(() => StepRepository.getTodayStepEntry(widget.userProfile.id));
 
   Future<void> _apply(Future<StepEntry?> Function() read) async {
-    if (widget.userProfile.id == null) return;
-    
     setState(() => _isLoading = true);
     
     try {
       final entry = await read();
       if (!mounted) return;
-      final stepGoal = widget.userProfile.dailyStepGoal ??
-                      (widget.userProfile.dailyStepGoal as int?) ??
-                      10000;
+      final stepGoal = widget.userProfile.dailyStepGoal;
 
       setState(() {
         _todayEntry = entry ?? StepEntry(
-          userId: widget.userProfile.id!,
+          userId: widget.userProfile.id,
           date: DateTime.now(),
           steps: 0,
           goal: stepGoal,
@@ -402,8 +398,6 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
   }
 
   Future<void> _checkStepMilestones(int previousSteps, int currentSteps, int goalSteps) async {
-    if (widget.userProfile.id == null) return;
-    
     final previousProgress = (previousSteps / goalSteps * 100).round();
     final currentProgress = (currentSteps / goalSteps * 100).round();
     
@@ -422,7 +416,7 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
           id: NotificationService.stepMilestone50Id,
           title: '🎯 Halfway There!',
           body: 'You\'ve reached 50% of your step goal! Keep going!',
-          userId: widget.userProfile.id!,
+          userId: widget.userProfile.id,
           milestoneType: 'steps_50',
         );
         await prefs.setBool(notified50Key, true);
@@ -439,7 +433,7 @@ class _CompactStepTrackerState extends State<CompactStepTracker>
           id: NotificationService.stepMilestone100Id,
           title: '🎉 Goal Achieved!',
           body: 'Congratulations! You\'ve reached your daily step goal of ${_formatSteps(goalSteps)} steps!',
-          userId: widget.userProfile.id!,
+          userId: widget.userProfile.id,
           milestoneType: 'steps_100',
         );
         await prefs.setBool(notified100Key, true);

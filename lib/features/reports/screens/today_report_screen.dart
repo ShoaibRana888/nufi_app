@@ -53,7 +53,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
   
   Future<void> _loadTodayData() async {
-    final userId = widget.userProfile.id ?? '';
+    final userId = widget.userProfile.id;
 
     // Cache-first: render an already-loaded day instantly (no spinner), then
     // revalidate behind it. Only show the loader when there's nothing to show.
@@ -113,7 +113,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
 
     final mealCount = meals.count;
     final calories = meals.calories;
-    final mealGoal = widget.userProfile.dailyMealsCount ?? 3;
+    final mealGoal = widget.userProfile.dailyMealsCount;
 
     return TrackingStatus(
       category: 'Meals',
@@ -132,7 +132,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
   
   TrackingStatus _waterStatusFrom(WaterEntry? water) {
-    final targetGlasses = widget.userProfile.waterIntakeGlasses ?? 8;
+    final targetGlasses = widget.userProfile.waterIntakeGlasses;
     if (water == null) return _getEmptyWaterStatus();
 
     final glasses = water.glassesConsumed;
@@ -159,7 +159,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
   
   TrackingStatus _sleepStatusFrom(SleepEntry? sleepEntry) {
-    final goalHours = widget.userProfile.sleepHours ?? 8.0;
+    final goalHours = widget.userProfile.sleepHours;
     if (sleepEntry == null) return _getEmptySleepStatus();
 
     return TrackingStatus(
@@ -181,7 +181,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
   
   TrackingStatus _exerciseStatusFrom(ExerciseDay? exercise) {
-    final goalMinutes = widget.userProfile.workoutDuration ?? 30;
+    final goalMinutes = widget.userProfile.workoutDuration;
     final entries = exercise?.entries ?? const [];
     if (entries.isEmpty) return _getEmptyExerciseStatus();
 
@@ -216,7 +216,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
   
   TrackingStatus _stepsStatusFrom(StepEntry? todayEntry) {
-    final userGoal = widget.userProfile.dailyStepGoal ?? 10000;
+    final userGoal = widget.userProfile.dailyStepGoal;
     if (todayEntry == null) return _getEmptyStepsStatus();
 
     final distance = (todayEntry.steps * 0.0008).toStringAsFixed(1);
@@ -302,7 +302,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
 
   TrackingStatus _getEmptyMealStatus() {
-    final mealGoal = widget.userProfile.dailyMealsCount ?? 3;
+    final mealGoal = widget.userProfile.dailyMealsCount;
     return TrackingStatus(
       category: 'Meals',
       icon: Icons.restaurant,
@@ -331,7 +331,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
 
   TrackingStatus _getEmptyWaterStatus() {
-    final waterGoal = widget.userProfile.waterIntakeGlasses ?? 8;
+    final waterGoal = widget.userProfile.waterIntakeGlasses;
     return TrackingStatus(
       category: 'Water',
       icon: Icons.water_drop,
@@ -351,7 +351,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
 
   TrackingStatus _getEmptySleepStatus() {
-    final sleepGoal = widget.userProfile.sleepHours ?? 8.0;
+    final sleepGoal = widget.userProfile.sleepHours;
     return TrackingStatus(
       category: 'Sleep',
       icon: Icons.bedtime,
@@ -369,7 +369,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
 
   TrackingStatus _getEmptyExerciseStatus() {
-    final exerciseGoal = widget.userProfile.workoutDuration ?? 30;
+    final exerciseGoal = widget.userProfile.workoutDuration;
     return TrackingStatus(
       category: 'Exercise',
       icon: Icons.fitness_center,
@@ -390,7 +390,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
 
   TrackingStatus _getEmptyStepsStatus() {
-    final stepGoal = widget.userProfile.dailyStepGoal ?? 10000;
+    final stepGoal = widget.userProfile.dailyStepGoal;
     return TrackingStatus(
       category: 'Steps',
       icon: Icons.directions_walk,
@@ -428,7 +428,7 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
 
   // Helper method to calculate BMI
   String _calculateBMI(double weight) {
-    final height = widget.userProfile.height ?? 170; // Default height
+    final height = widget.userProfile.height; // Default height
     final heightInMeters = height / 100;
     final bmi = weight / (heightInMeters * heightInMeters);
     return 'BMI: ${bmi.toStringAsFixed(1)}';

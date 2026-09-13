@@ -87,7 +87,7 @@ class SessionRepository {
 
   /// [profile] with [userId] filled in when the server omitted it.
   UserProfile _withId(UserProfile profile, String userId) =>
-      (profile.id == null || profile.id!.isEmpty)
+      (profile.id.isEmpty)
           ? profile.copyWith(id: userId)
           : profile;
 
@@ -95,7 +95,7 @@ class SessionRepository {
   /// Used when an already-signed-in user's profile changes.
   Future<void> cacheProfile(UserProfile profile) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(userIdKey, profile.id ?? '');
+    await prefs.setString(userIdKey, profile.id);
     await prefs.setString(userProfileKey, jsonEncode(profile.toMap()));
   }
 
@@ -203,7 +203,7 @@ class SessionRepository {
       try {
         var profile = await _fetchProfile(userId);
         if (profile != null) {
-          if (profile.id == null || profile.id!.isEmpty) {
+          if (profile.id.isEmpty) {
             profile = profile.copyWith(id: userId);
           }
           await cacheProfile(profile);

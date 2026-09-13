@@ -200,7 +200,7 @@ class _SleepHistoryPageState extends State<SleepHistoryPage> {
     setState(() => _sleepEntries[idx] = entry.copyWith(sharedWithChat: newShared));
 
     final ok = await _sharingApi.setEntrySharing(
-      userId: widget.userProfile.id!,
+      userId: widget.userProfile.id,
       activityType: 'sleep',
       itemId: entry.id!,
       shared: newShared,

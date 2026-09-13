@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:flutter/material.dart';
 
 // Note: You'll need to import your actual app files
 // import 'package:user_onboarding/main.dart' as app;

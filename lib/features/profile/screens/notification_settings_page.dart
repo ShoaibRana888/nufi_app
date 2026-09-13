@@ -283,13 +283,13 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     
     final List<String> info = [];
     
-    final mealCount = _userProfile!.dailyMealsCount ?? 3;
+    final mealCount = _userProfile!.dailyMealsCount;
     info.add('$mealCount meals/day');
     
-    final waterGoal = _userProfile!.waterIntakeGlasses ?? 8;
+    final waterGoal = _userProfile!.waterIntakeGlasses;
     info.add('$waterGoal glasses water');
     
-    if (_userProfile!.wakeupTime != null && _userProfile!.wakeupTime!.isNotEmpty) {
+    if (_userProfile!.wakeupTime.isNotEmpty) {
       info.add('Wake: ${_userProfile!.wakeupTime}');
     }
     
@@ -301,15 +301,15 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     
     switch (feature) {
       case 'exercise':
-        final workouts = _userProfile!.preferredWorkouts ?? [];
+        final workouts = _userProfile!.preferredWorkouts;
         return workouts.isNotEmpty;
       
       case 'supplement':
-        final conditions = _userProfile!.medicalConditions ?? [];
+        final conditions = _userProfile!.medicalConditions;
         return conditions.isNotEmpty;
       
       case 'weight':
-        final goal = _userProfile!.weightGoal ?? '';
+        final goal = _userProfile!.weightGoal;
         return goal.isNotEmpty && goal != 'maintain';
       
       default:
@@ -548,7 +548,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 '💧 Water Reminders',
                 'Stay hydrated throughout the day',
                 _userProfile != null
-                  ? 'Goal: ${_userProfile!.waterIntakeGlasses ?? 8} glasses/day'
+                  ? 'Goal: ${_userProfile!.waterIntakeGlasses} glasses/day'
                   : null,
                 _prefs.waterReminders,
                 _prefs.enabled,
@@ -558,7 +558,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
               _buildSwitchTileWithContext(
                 '😴 Sleep Reminders',
                 'Track your sleep quality',
-                _userProfile != null && _userProfile!.wakeupTime != null
+                _userProfile != null
                   ? 'Reminder at ${_userProfile!.wakeupTime}'
                   : null,
                 _prefs.sleepReminders,
