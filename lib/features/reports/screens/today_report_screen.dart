@@ -9,6 +9,7 @@ import 'package:user_onboarding/data/models/step_entry.dart';
 import 'package:user_onboarding/data/models/sleep_entry.dart';
 import 'package:user_onboarding/data/models/day_snapshot.dart';
 import 'package:user_onboarding/data/services/daily_snapshot.dart';
+import 'package:user_onboarding/features/home/widgets/card_load_error.dart';
 import 'package:user_onboarding/features/tracking/screens/meal_logging_page.dart';
 import 'package:user_onboarding/features/tracking/screens/water_logging_page.dart';
 import 'package:user_onboarding/features/tracking/screens/sleep_logging_page.dart';
@@ -85,15 +86,24 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
 
   /// Build every tracker card from a single DaySnapshot.
+  ///
+  /// A section the backend could not read is the card's error state, not
+  /// its empty one. `Section.error` has carried that distinction since
+  /// ADR-0006; until now this screen read only `.value`, so a failed read
+  /// drew "0/8 glasses" -- the lie the model stopped telling and the screen
+  /// kept on. Same widget as the dashboard's cards.
   void _applyStatuses(DaySnapshot snap) {
+    TrackingStatus status<T>(Section<T> section, TrackingStatus Function(T?) from) =>
+        section.isError ? from(null).failed() : from(section.value);
+
     trackingStatus = {
-      'meals': _mealStatusFrom(snap.meals.value),
-      'water': _waterStatusFrom(snap.water.value),
-      'sleep': _sleepStatusFrom(snap.sleep.value),
-      'exercise': _exerciseStatusFrom(snap.exercise.value),
-      'steps': _stepsStatusFrom(snap.steps.value),
-      'weight': _weightStatusFrom(snap.weight.value),
-      'supplements': _supplementStatusFrom(snap.supplements.value),
+      'meals': status(snap.meals, _mealStatusFrom),
+      'water': status(snap.water, _waterStatusFrom),
+      'sleep': status(snap.sleep, _sleepStatusFrom),
+      'exercise': status(snap.exercise, _exerciseStatusFrom),
+      'steps': status(snap.steps, _stepsStatusFrom),
+      'weight': status(snap.weight, _weightStatusFrom),
+      'supplements': status(snap.supplements, _supplementStatusFrom),
     };
     if (mounted) setState(() {});
   }
@@ -496,8 +506,11 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
   
   Widget _buildOverallProgress() {
-    final completed = trackingStatus.values.where((s) => s.isComplete).length;
-    final total = trackingStatus.length;
+    // A section that could not be read is neither done nor missing; it is
+    // not counted either way.
+    final read = trackingStatus.values.where((s) => !s.loadFailed);
+    final completed = read.where((s) => s.isComplete).length;
+    final total = read.length;
     final percentage = total > 0 ? (completed / total) : 0.0;
     
     return Container(
@@ -577,6 +590,15 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
         itemBuilder: (context, index) {
           final key = trackingStatus.keys.elementAt(index);
           final status = trackingStatus[key]!;
+          if (status.loadFailed) {
+            return CardLoadError(
+              title: status.category,
+              icon: status.icon,
+              color: status.color,
+              onRetry: _loadTodayData,
+              compact: true,
+            );
+          }
           return _buildTrackingCard(status);
         },
       ),
@@ -717,8 +739,11 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   
   Widget _buildMissingActivities() {
     // Get items that are incomplete and should be tracked
+    // "Not logged" is a claim about the user's data; a failed read cannot
+    // make it, so an unread section is not listed as missing.
     final missing = trackingStatus.entries
-        .where((e) => !e.value.isComplete && !e.value.excludeFromProgress)
+        .where((e) => !e.value.isComplete && !e.value.excludeFromProgress &&
+            !e.value.loadFailed)
         .toList();
     
     // Check supplements status
@@ -727,7 +752,12 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
         supplementsEntry.total == 0 && 
         supplementsEntry.details['Status'] == 'Not configured';
     
-    if (missing.isEmpty && !supplementsNotConfigured) {
+    // "Perfect Day" is a claim about every tracker; a section that could
+    // not be read cannot support it, so an unread section blocks the
+    // celebration even when everything that was read is complete.
+    final anyUnread = trackingStatus.values.any((s) => s.loadFailed);
+
+    if (missing.isEmpty && !supplementsNotConfigured && !anyUnread) {
       // Success state - everything complete
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1013,9 +1043,16 @@ class _TodayReportScreenState extends State<TodayReportScreen> {
   }
   
   String _getCompletionMessage() {
-    final completed = trackingStatus.values.where((s) => s.isComplete).length;
-    final total = trackingStatus.length;
-    
+    final read = trackingStatus.values.where((s) => !s.loadFailed);
+    final completed = read.where((s) => s.isComplete).length;
+    final total = read.length;
+    final anyUnread = read.length != trackingStatus.length;
+
+    // The numeric progress excludes unread sections; the words do not get
+    // to. With every section unread, 0 == 0 is not a completed day.
+    if (anyUnread) {
+      return '⚠️ Some trackers could not be loaded';
+    }
     if (completed == total) {
       return '🎉 All activities completed!';
     } else if (completed >= total * 0.7) {
@@ -1046,7 +1083,11 @@ class TrackingStatus {
   final Map<String, dynamic> details;
   final String unit;
   final bool isComplete;
-  final bool excludeFromProgress; 
+  final bool excludeFromProgress;
+
+  /// The section could not be read. The numbers above are the empty
+  /// state's placeholders and must not be shown or counted.
+  final bool loadFailed;
 
   TrackingStatus({
     required this.category,
@@ -1058,5 +1099,19 @@ class TrackingStatus {
     this.unit = '',
     required this.isComplete,
     this.excludeFromProgress = false,
+    this.loadFailed = false,
   });
+
+  /// This tracker's card, marked unreadable: the icon and colour survive
+  /// so the cell is still recognisable; nothing else is trusted.
+  TrackingStatus failed() => TrackingStatus(
+        category: category,
+        icon: icon,
+        color: color,
+        completed: 0,
+        total: 0,
+        isComplete: false,
+        excludeFromProgress: true,
+        loadFailed: true,
+      );
 }
