@@ -1,0 +1,81 @@
+# Analyze + the network-free test suite, on every PR and on master.
+#
+# The repo has no other gate: Codex reviews PRs after the fact (it posted on
+# #9 thirty-eight seconds after the merge), so this is the only check that
+# runs BEFORE merge.
+#
+# Two deliberate choices:
+#
+# 1. Only the architecture tests run. They exercise the code on fakes
+#    (canned readers, mocked SharedPreferences, in-memory Apis). The other
+#    files in test/ -- auth_test, chat_test, existing_user_test,
+#    master_test_suite and the *_tracking_test files -- hit the live Render
+#    backend and flake on its cold starts. Add a file here when it runs
+#    without a network; do not add the live-backend suites.
+#
+# 2. `flutter analyze` is gated on errors only. As of 2026-09-13 master
+#    carries 0 errors, 273 warnings (null-safety hygiene) and ~1500 infos;
+#    the flutter tool treats warnings and infos as fatal by default, so the
+#    flags below keep the check green until those are cleaned up. Tighten
+#    to --fatal-warnings once the warning count is zero.
+#
+# FLUTTER_VERSION mirrors the SDK used locally (~/flutter). Bump both together.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+env:
+  FLUTTER_VERSION: 3.44.1
+
+jobs:
+  check:
+    name: analyze + architecture tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter --version
+
+      - run: flutter pub get
+
+      # pubspec.yaml bundles .env as a Flutter asset, and .env is gitignored
+      # (it holds the Supabase keys). `flutter test` builds the asset bundle
+      # before running anything, so a clean checkout fails with "No file or
+      # variants found for asset: .env". None of the tests below call
+      # dotenv.load -- only lib/main.dart does -- so an empty file satisfies
+      # the bundler. scripts/vercel_build.sh does the same for the web build.
+      - name: Create empty .env asset placeholder
+        run: 'echo "# CI placeholder; see workflow" > .env'
+
+      - name: Analyze (errors only; see header)
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
+
+      - name: Architecture tests (fakes only, no network)
+        run: |
+          flutter test \
+            test/connectivity_service_test.dart \
+            test/daily_snapshot_test.dart \
+            test/dashboard_cards_read_the_day_test.dart \
+            test/day_status_test.dart \
+            test/onboarding_layout_test.dart \
+            test/required_label_test.dart \
+            test/session_repository_test.dart \
+            test/step_entry_parsing_test.dart \
+            test/step_repository_offline_test.dart \
+            test/today_report_screen_test.dart \
+            test/user_provider_test.dart \
+            test/water_logging_page_test.dart \
+            test/water_target_normalization_test.dart
