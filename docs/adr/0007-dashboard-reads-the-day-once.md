@@ -94,3 +94,16 @@ has to own the read.
   for. The inventory found this was the first error state anywhere: the today report
   carries `Section.error` since ADR-0006 but renders it as empty too; adopting the
   same widget there is the obvious follow-up.
+  > **Done 2026-09-13.** `today_report_screen` renders an errored section as
+  > `CardLoadError` too. Its cards are cells in a three-column grid, too narrow for
+  > the dashboard's 60px row, so the widget gained a `compact` layout in the
+  > report card's own shape (icon row, title, one line, bar) with the status line
+  > shortened to "Couldn't load" and the refresh icon carrying the retry; the tap
+  > is the whole cell and reads the day again. An unread section is not counted in
+  > Daily Progress (six of six, not six of seven) and is not listed under "not
+  > logged" — a failed read cannot make either claim. `TrackingStatus.loadFailed`
+  > carries the state; `test/today_report_screen_test.dart` pins it, and replaces
+  > the assertion that used to pin the empty card ("still shown, in its empty
+  > state"). The cell's fit at a 360dp phone's grid size is pinned on the widget
+  > alone: the test font draws every glyph as a full square, so the screen's
+  > existing cards overflow under it at that width while fitting on every device.

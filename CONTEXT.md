@@ -34,7 +34,13 @@ presentation, local caching, and notifications; the backend owns persistence and
     `missing` (nothing logged), `error` (that tracker's read failed). The backend omits
     a section for `missing` and names it in `_read_errors` for `error`. Keeping these
     apart is the point — a failed read rendered as an empty day is a lie about the
-    user's data. **The dashboard draws the distinction** (`CardLoadError`, since
+    user's data.
+    - **Both consumers draw `error` now.** `CardLoadError`
+      (`lib/features/home/widgets/`) is the one error state: a 60px row on the
+      dashboard, a `compact` grid cell on the today report. Tapping either reads
+      the day again. The model carried the state from ADR-0006; the dashboard drew
+      it first (ADR-0007, 2026-09-13) and the report the same day. An errored
+      section is not counted as done, missing, or "not logged". **The dashboard draws the distinction** (`CardLoadError`, since
     2026-09-13); the today report still renders `error` as empty and should adopt the
     same widget.
   - **Two consumers: `today_report_screen` and `dashboard_home`.** The dashboard was
@@ -79,6 +85,12 @@ presentation, local caching, and notifications; the backend owns persistence and
     wholesale, and that is deliberate.
 
 ## Conventions
+
+- **`flutter test` needs a `.env` file present** (an empty one is enough); the app
+  loads it at startup and the suite fails to boot without it. The eight tests in
+  `auth_test`, `chat_test`, `existing_user_test`, `meal_tracking_test` and
+  `water_tracking_test` reach the live backend and fail offline; compare failures
+  by name against the unmodified tree, not by count.
 
 - **Emerging vs. established terms.** Terms marked *(emerging term)* name a concept the
   code re-derives in several places but hasn't yet given a module. Once the architecture
