@@ -23,12 +23,6 @@ class ChatApi {
 
   final ApiClient _client = ApiClient();
 
-  /// Fire-and-forget context rebuild (used after edits/deletes). Non-blocking;
-  /// the authoritative rebuild happens on Chat open + server-side per reply.
-  void rebuildContextInBackground(String userId, {DateTime? date}) {
-    unawaited(rebuildChatContext(userId, date: date));
-  }
-
   Future<bool> rebuildChatContext(String userId, {DateTime? date}) async {
     try {
       final dateStr = date != null
@@ -101,23 +95,6 @@ class ChatApi {
     } catch (e) {
       print('[ChatApi] Error getting context: $e');
       throw e;
-    }
-  }
-
-  Future<Map<String, dynamic>> getCachedChatContext(String userId, DateTime date) async {
-    try {
-      final dateStr = DateFormat('yyyy-MM-dd').format(date);
-      final response = await _client.get('/chat/context/cached/$userId?date=$dateStr');
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Failed to get cached context');
-      }
-    } catch (e) {
-      print('[ChatApi] Error getting cached context: $e');
-      // Fallback to regular context
-      return getChatContext(userId);
     }
   }
 

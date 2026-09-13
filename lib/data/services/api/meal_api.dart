@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:user_onboarding/data/services/api/api_client.dart';
-import 'package:user_onboarding/data/services/api/chat_api.dart';
 
 /// Meal logging + nutrition API.
 class MealApi {
@@ -13,7 +12,6 @@ class MealApi {
   MealApi._internal();
 
   final ApiClient _client = ApiClient();
-  final ChatApi _chat = ChatApi();
 
   Future<Map<String, dynamic>> analyzeMeal(Map<String, dynamic> mealData) async {
     try {
@@ -341,8 +339,6 @@ class MealApi {
       final response = await _client.delete('/meals/$mealId');
 
       if (response.statusCode == 200) {
-        _chat.rebuildContextInBackground(userId);
-
         return true;
       }
       return false;
@@ -362,12 +358,6 @@ class MealApi {
 
       if (response.statusCode == 200) {
         final updatedMeal = json.decode(response.body);
-
-        // ✅ UPDATE CHAT CONTEXT AFTER MEAL UPDATE (fire-and-forget, non-blocking)
-        if (mealData['user_id'] != null) {
-          _chat.rebuildContextInBackground(mealData['user_id']);
-        }
-
         return updatedMeal;
       }
 
